@@ -1,0 +1,117 @@
+@import "tailwindcss";
+
+@theme {
+  /* Amazon-style palette, used by the marketplace home page */
+  --color-amazon-navy: #131921;
+  --color-amazon-lightNavy: #232f3e;
+  --color-amazon-yellow: #febd69;
+  --color-amazon-orange: #f3a847;
+  --color-amazon-amber: #e67a00;
+  --color-amazon-blue: #007185;
+
+  --color-brand-50: #f0fdf4;
+  --color-brand-100: #dcfce7;
+  --color-brand-500: #22c55e;
+  --color-brand-600: #16a34a;
+  --color-brand-700: #15803d;
+  --color-brand-800: #166534;
+  --color-brand-900: #14532d;
+
+  --color-caribbean-50: #f0f9ff;
+  --color-caribbean-500: #0ea5e9;
+  --color-caribbean-600: #0284c7;
+  --color-caribbean-800: #075985;
+}
+
+:root {
+  --text: #6b6375;
+  --text-h: #08060d;
+  --bg: #fff;
+  --border: #e5e4e7;
+  --accent: #aa3bff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text: #9ca3af;
+    --text-h: #f3f4f6;
+    --bg: #16171d;
+    --border: #2e303a;
+    --accent: #c084fc;
+  }
+}
+
+body {
+  margin: 0;
+  color: var(--text);
+  background: var(--bg);
+  font: 16px/145% system-ui, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* --- Simple pages (login/register/dashboard/storefront) --- */
+/* The marketplace home page is Tailwind-only and doesn't use these. */
+
+.simple-page header {
+  border-bottom: 1px solid var(--border);
+  padding: 16px 24px;
+}
+
+.simple-page header nav {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.simple-page header nav a:first-child {
+  margin-right: auto;
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--text-h);
+}
+
+.simple-page main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
+.simple-page h1, .simple-page h2 {
+  color: var(--text-h);
+  font-weight: 600;
+}
+
+.simple-page a {
+  color: var(--accent);
+}
+
+.simple-page form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 360px;
+}
+
+.simple-page input, .simple-page select, .simple-page button {
+  font: inherit;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text-h);
+}
+
+.simple-page button {
+  cursor: pointer;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+}
+
+.simple-page button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.simple-page [role='alert'] {
+  color: #d64545;
+}
