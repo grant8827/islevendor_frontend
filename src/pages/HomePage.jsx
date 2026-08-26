@@ -8,6 +8,26 @@ import ProductCard from '../components/marketplace/ProductCard.jsx';
 import Navbar from '../components/marketplace/Navbar.jsx';
 import islevendorIcon from '../assets/islevendor-icon.png';
 
+function ProductSection({ title, subtitle, listings, onAddToCart }) {
+  if (listings.length === 0) return null;
+  return (
+    <section className="space-y-5">
+      <div className="flex items-end justify-between border-b border-slate-200 pb-3">
+        <div>
+          <h2 className="text-xl font-bold text-navy">{title}</h2>
+          <p className="text-xs text-ink/70 mt-1">{subtitle}</p>
+        </div>
+        <span className="text-xs text-ink/60 font-mono">{listings.length} items</span>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5">
+        {listings.map((listing) => (
+          <ProductCard key={listing.id} listing={listing} onAddToCart={onAddToCart} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export default function HomePage() {
   const { addItem } = useCart();
   const { notify } = useToast();
@@ -40,6 +60,19 @@ export default function HomePage() {
       }),
     [listings, selectedCategory, searchQuery],
   );
+
+  const sections = useMemo(() => {
+    const newest = [...filtered].sort((a, b) => {
+      const aDate = new Date(a.masterProduct.createdAt || 0).getTime();
+      const bDate = new Date(b.masterProduct.createdAt || 0).getTime();
+      return bDate - aDate;
+    });
+    return {
+      sales: filtered.filter((listing) => listing.discountPercent > 0).slice(0, 8),
+      newItems: newest.slice(0, 8),
+      featured: filtered.slice(0, 8),
+    };
+  }, [filtered]);
 
   function handleAddToCart(listing) {
     addItem(listing);
@@ -96,27 +129,36 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* PRODUCT GRID */}
-      <main className="max-w-7xl mx-auto px-4 py-8 space-y-8">
-        <div className="flex items-center justify-between border-b border-slate-200 pb-4">
-          <div>
-            <h2 className="text-xl font-bold text-navy">Featured Marketplace Items</h2>
-            <p className="text-xs text-ink/70">Showing items available for delivery across Kingston &amp; St. Andrew</p>
-          </div>
-          <span className="text-xs text-ink/60 font-mono">{filtered.length} Results</span>
-        </div>
-
+      {/* PRODUCT SECTIONS */}
+      <main className="max-w-7xl mx-auto px-4 py-8 space-y-12">
         {loading && <p className="text-sm text-ink/70">Loading products…</p>}
         {error && <p className="text-sm text-red-600" role="alert">{error}</p>}
         {!loading && !error && filtered.length === 0 && (
           <p className="text-sm text-ink/70">No products match your search yet.</p>
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {filtered.map((listing) => (
-            <ProductCard key={listing.id} listing={listing} onAddToCart={handleAddToCart} />
-          ))}
-        </div>
+        {!loading && !error && (
+          <>
+            <ProductSection
+              title="Sales"
+              subtitle="Limited-time discounts from local stores"
+              listings={sections.sales}
+              onAddToCart={handleAddToCart}
+            />
+            <ProductSection
+              title="New Items"
+              subtitle="The latest products added to IsleVendor"
+              listings={sections.newItems}
+              onAddToCart={handleAddToCart}
+            />
+            <ProductSection
+              title="Featured Marketplace Items"
+              subtitle="Popular items available from Jamaican businesses"
+              listings={sections.featured}
+              onAddToCart={handleAddToCart}
+            />
+          </>
+        )}
       </main>
 
       {/* FOOTER */}

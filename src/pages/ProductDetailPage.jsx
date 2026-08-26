@@ -102,7 +102,7 @@ export default function ProductDetailPage() {
     );
   }
 
-  const { masterProduct, store, retailPriceJmd, shipFromParish, rating, moreFromSeller, recommended } = listing;
+  const { masterProduct, store, retailPriceJmd, originalPriceJmd, discountPercent = 0, shipFromParish, rating, moreFromSeller, recommended } = listing;
   const images = masterProduct.images?.length ? masterProduct.images : masterProduct.imageUrl ? [masterProduct.imageUrl] : [];
   const inStock = masterProduct.stockQuantity > 0;
 
@@ -200,8 +200,14 @@ export default function ProductDetailPage() {
             <h1 className="text-2xl font-black text-slate-900">{masterProduct.title}</h1>
 
             <div>
+              {discountPercent > 0 && (
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-base text-slate-400 line-through">J${Number(originalPriceJmd).toLocaleString()}</span>
+                  <span className="bg-red-600 text-white text-xs font-black px-2 py-1 rounded-full">-{discountPercent}%</span>
+                </div>
+              )}
               <span className="text-sm text-slate-500 align-top">J$</span>
-              <span className="text-4xl font-black text-slate-900">{Number(retailPriceJmd).toLocaleString()}</span>
+              <span className={`text-4xl font-black ${discountPercent > 0 ? 'text-red-600' : 'text-slate-900'}`}>{Number(retailPriceJmd).toLocaleString()}</span>
             </div>
 
             <div className="flex items-center gap-1 text-xs">

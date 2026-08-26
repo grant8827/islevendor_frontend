@@ -4,7 +4,7 @@ import { apiRequest } from '../../api/client.js';
 import { useToast } from '../../context/ToastContext.jsx';
 import MultiImageInput from '../../components/dashboard/MultiImageInput.jsx';
 
-const EMPTY_FORM = { title: '', category: '', description: '', priceJmd: '', stockQuantity: '', images: [''] };
+const EMPTY_FORM = { title: '', category: '', description: '', priceJmd: '', discountPercent: '0', stockQuantity: '', images: [''] };
 
 export default function ProductsPanel({ shopId }) {
   const [products, setProducts] = useState([]);
@@ -43,6 +43,7 @@ export default function ProductsPanel({ shopId }) {
       category: product.category,
       description: product.description || '',
       priceJmd: String(product.priceJmd),
+      discountPercent: String(product.discountPercent || 0),
       stockQuantity: String(product.stockQuantity),
       images: product.images?.length ? product.images : product.imageUrl ? [product.imageUrl] : [''],
     });
@@ -76,6 +77,7 @@ export default function ProductsPanel({ shopId }) {
             category: form.category,
             description: form.description || null,
             priceJmd: Number(form.priceJmd),
+            discountPercent: Number(form.discountPercent) || 0,
             stockQuantity: Number(form.stockQuantity) || 0,
             images,
           },
@@ -90,6 +92,7 @@ export default function ProductsPanel({ shopId }) {
             category: form.category,
             description: form.description || undefined,
             priceJmd: Number(form.priceJmd),
+            discountPercent: Number(form.discountPercent) || 0,
             stockQuantity: Number(form.stockQuantity) || 0,
             images,
           },
@@ -161,6 +164,11 @@ export default function ProductsPanel({ shopId }) {
             <label className="block text-xs text-slate-500 mb-1">Stock quantity</label>
             <input type="number" min="0" value={form.stockQuantity} onChange={update('stockQuantity')} className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-secondary" />
           </div>
+          <div>
+            <label className="block text-xs text-slate-500 mb-1">Discount (%)</label>
+            <input type="number" min="0" max="90" value={form.discountPercent} onChange={update('discountPercent')} className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-secondary" />
+            <p className="text-[10px] text-slate-400 mt-1">Enter 0 for no sale, up to 90% off.</p>
+          </div>
           <div className="col-span-2">
             <label className="block text-xs text-slate-500 mb-1">Description</label>
             <textarea
@@ -205,6 +213,7 @@ export default function ProductsPanel({ shopId }) {
                 <th className="px-5 py-3">SKU</th>
                 <th className="px-5 py-3">Category</th>
                 <th className="px-5 py-3">Price</th>
+                <th className="px-5 py-3">Discount</th>
                 <th className="px-5 py-3">Stock</th>
                 <th className="px-5 py-3 text-right">Actions</th>
               </tr>
@@ -235,6 +244,7 @@ export default function ProductsPanel({ shopId }) {
                   <td className="px-5 py-3 text-slate-500">{p.sku}</td>
                   <td className="px-5 py-3">{p.category}</td>
                   <td className="px-5 py-3 text-primary font-bold">J${Number(p.priceJmd).toLocaleString()}</td>
+                  <td className="px-5 py-3">{p.discountPercent > 0 ? `${p.discountPercent}% off` : '—'}</td>
                   <td className="px-5 py-3">{p.stockQuantity} units</td>
                   <td className="px-5 py-3">
                     <div className="flex items-center justify-end gap-1.5">

@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { ShoppingCart, ImageOff } from 'lucide-react';
 
 export default function ProductCard({ listing, onAddToCart }) {
-  const { masterProduct, store, retailPriceJmd, shipFromParish } = listing;
+  const { masterProduct, store, retailPriceJmd, originalPriceJmd, discountPercent = 0, shipFromParish } = listing;
   const inStock = masterProduct.stockQuantity > 0;
 
   return (
@@ -20,6 +20,11 @@ export default function ProductCard({ listing, onAddToCart }) {
           <span className="absolute top-2 left-2 bg-navy text-white text-[10px] font-bold px-2 py-0.5 rounded">
             {masterProduct.category}
           </span>
+          {discountPercent > 0 && (
+            <span className="absolute top-2 right-2 bg-red-600 text-white text-[10px] font-black px-2 py-1 rounded-full">
+              -{discountPercent}%
+            </span>
+          )}
         </Link>
 
         <div className="p-4 space-y-2">
@@ -28,8 +33,11 @@ export default function ProductCard({ listing, onAddToCart }) {
           </Link>
 
           <div className="pt-1">
+            {discountPercent > 0 && (
+              <div className="text-xs text-slate-400 line-through">J${Number(originalPriceJmd).toLocaleString()}</div>
+            )}
             <span className="text-xs text-slate-500 align-top">J$</span>
-            <span className="text-2xl font-black text-slate-900">{Number(retailPriceJmd).toLocaleString()}</span>
+            <span className={`text-2xl font-black ${discountPercent > 0 ? 'text-red-600' : 'text-slate-900'}`}>{Number(retailPriceJmd).toLocaleString()}</span>
           </div>
 
           <div className="flex items-center gap-1 text-xs text-slate-600">
