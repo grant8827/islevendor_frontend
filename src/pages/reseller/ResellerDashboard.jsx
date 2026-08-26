@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { LayoutDashboard, Store, Warehouse as WarehouseIcon, Package } from 'lucide-react';
+import { LayoutDashboard, Store, Warehouse as WarehouseIcon, Package, UserRound } from 'lucide-react';
 import { apiRequest } from '../../api/client.js';
 import DashboardTopBar from '../../components/dashboard/DashboardTopBar.jsx';
 import DashboardSidebar from '../../components/dashboard/DashboardSidebar.jsx';
@@ -8,6 +8,7 @@ import StoreSetupForm from './StoreSetupForm.jsx';
 import WarehousesPanel from './WarehousesPanel.jsx';
 import ProductsPanel from './ProductsPanel.jsx';
 import MyStorePanel from './MyStorePanel.jsx';
+import ProfilePanel from '../../components/dashboard/ProfilePanel.jsx';
 
 export default function ResellerDashboard() {
   const [store, setStore] = useState(undefined); // undefined = loading, null = none yet
@@ -60,6 +61,7 @@ export default function ResellerDashboard() {
     { key: 'products', label: 'Products', icon: Package },
     { key: 'store', label: 'My Store', icon: Store },
     { key: 'warehouses', label: 'Applications', icon: WarehouseIcon, badge: pendingCount },
+    { key: 'profile', label: 'Profile', icon: UserRound, bottom: true },
   ];
 
   return (
@@ -87,6 +89,12 @@ export default function ResellerDashboard() {
           {activeTab === 'products' && <ProductsPanel store={store} />}
           {activeTab === 'store' && <MyStorePanel store={store} />}
           {activeTab === 'warehouses' && <WarehousesPanel />}
+          {activeTab === 'profile' && (
+            <ProfilePanel
+              business={{ name: store.storeName, parish: store.parish, slug: store.slug }}
+              businessType="Reseller business"
+            />
+          )}
         </main>
       </div>
     </div>

@@ -1,12 +1,12 @@
 export default function DashboardSidebar({ items, active, onSelect }) {
   return (
-    <nav className="w-56 shrink-0 bg-navy border-r border-white/10 py-4">
+    <nav className="w-56 shrink-0 bg-navy border-r border-white/10 py-4 flex flex-col">
       {items.map((item) => (
         <button
           key={item.key}
           type="button"
           onClick={() => onSelect(item.key)}
-          className={`w-full flex items-center gap-3 px-5 py-2.5 text-sm text-left transition ${
+          className={`w-full flex items-center gap-3 px-5 py-2.5 text-sm text-left transition ${item.bottom ? 'mt-auto border-t border-white/10 pt-4' : ''} ${
             active === item.key
               ? 'bg-white/10 text-primary font-bold border-r-2 border-primary'
               : 'text-slate-300 hover:text-white hover:bg-white/5'

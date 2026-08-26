@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { LayoutDashboard, Truck } from 'lucide-react';
+import { LayoutDashboard, Truck, UserRound } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { apiRequest } from '../../api/client.js';
 import DashboardTopBar from '../../components/dashboard/DashboardTopBar.jsx';
 import DashboardSidebar from '../../components/dashboard/DashboardSidebar.jsx';
 import ApplyToDeliverPanel from './ApplyToDeliverPanel.jsx';
+import ProfilePanel from '../../components/dashboard/ProfilePanel.jsx';
 
 export default function DriverDashboard() {
   const { user } = useAuth();
@@ -46,6 +47,7 @@ export default function DriverDashboard() {
   const items = [
     { key: 'overview', label: 'Overview', icon: LayoutDashboard },
     { key: 'apply', label: 'Apply to Deliver', icon: Truck, badge: applications.filter((a) => a.status === 'PENDING').length },
+    { key: 'profile', label: 'Profile', icon: UserRound, bottom: true },
   ];
 
   const approvedCount = applications.filter((a) => a.status === 'APPROVED').length;
@@ -72,6 +74,7 @@ export default function DriverDashboard() {
             </div>
           )}
           {activeTab === 'apply' && <ApplyToDeliverPanel onDecision={loadApplications} />}
+          {activeTab === 'profile' && <ProfilePanel businessType="Driver profile" />}
         </main>
       </div>
     </div>

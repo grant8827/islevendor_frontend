@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { LayoutDashboard, Building2, Package, ClipboardList, Truck, X } from 'lucide-react';
+import { LayoutDashboard, Building2, Package, ClipboardList, Truck, UserRound, X } from 'lucide-react';
 import { apiRequest } from '../../api/client.js';
 import DashboardTopBar from '../../components/dashboard/DashboardTopBar.jsx';
 import DashboardSidebar from '../../components/dashboard/DashboardSidebar.jsx';
@@ -9,6 +9,7 @@ import ShopSetupForm from './ShopSetupForm.jsx';
 import OverviewPanel from './OverviewPanel.jsx';
 import ProductsPanel from './ProductsPanel.jsx';
 import PackingQueuePanel from './PackingQueuePanel.jsx';
+import ProfilePanel from '../../components/dashboard/ProfilePanel.jsx';
 
 export default function ShopDashboard() {
   const [shops, setShops] = useState(undefined); // undefined = loading, [] = none yet
@@ -95,6 +96,7 @@ export default function ShopDashboard() {
     { key: 'products', label: 'Products', icon: Package, badge: stats.productCount },
     { key: 'delivery-applications', label: 'Delivery Applications', icon: Truck, badge: stats.pendingDeliveryApplications },
     { key: 'packing', label: 'Packing Queue', icon: ClipboardList, badge: stats.packingCount },
+    { key: 'profile', label: 'Profile', icon: UserRound, bottom: true },
   ];
 
   return (
@@ -114,6 +116,10 @@ export default function ShopDashboard() {
                 <p><span className="text-slate-500">Parish:</span> <span className="text-slate-900">{shop.parish}</span></p>
                 <p><span className="text-slate-500">URL:</span> <span className="text-slate-900">/store/{shop.slug}</span></p>
               </div>
+              <div className="mt-8">
+                <h3 className="font-bold text-navy text-base mb-4">Items sold by {shop.shopName}</h3>
+                <ProductsPanel shopId={shop.id} />
+              </div>
             </div>
           )}
           {activeTab === 'products' && <ProductsPanel shopId={shop.id} />}
@@ -121,6 +127,12 @@ export default function ShopDashboard() {
             <DeliveryApplicationsPanel ownerType="shop" ownerId={shop.id} onDecision={loadStats} />
           )}
           {activeTab === 'packing' && <PackingQueuePanel shopId={shop.id} />}
+          {activeTab === 'profile' && (
+            <ProfilePanel
+              business={{ name: shop.shopName, address: shop.addressLine, parish: shop.parish, slug: shop.slug }}
+              businessType="Store details"
+            />
+          )}
         </main>
       </div>
     </div>

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { LayoutDashboard, Warehouse as WarehouseIcon, Package, Users, ClipboardList, Truck, X } from 'lucide-react';
+import { LayoutDashboard, Warehouse as WarehouseIcon, Package, Users, ClipboardList, Truck, UserRound, X } from 'lucide-react';
 import { apiRequest } from '../../api/client.js';
 import DashboardTopBar from '../../components/dashboard/DashboardTopBar.jsx';
 import DashboardSidebar from '../../components/dashboard/DashboardSidebar.jsx';
@@ -11,6 +11,7 @@ import ProductsPanel from './ProductsPanel.jsx';
 import ApplicationsPanel from './ApplicationsPanel.jsx';
 import PackingQueuePanel from './PackingQueuePanel.jsx';
 import ApprovedResellersSection from './ApprovedResellersSection.jsx';
+import ProfilePanel from '../../components/dashboard/ProfilePanel.jsx';
 
 export default function WarehouseDashboard() {
   const [warehouses, setWarehouses] = useState(undefined); // undefined = loading, [] = none yet
@@ -104,6 +105,7 @@ export default function WarehouseDashboard() {
     { key: 'applications', label: 'Reseller Applications', icon: Users, badge: stats.pendingApplications },
     { key: 'delivery-applications', label: 'Delivery Applications', icon: Truck, badge: stats.pendingDeliveryApplications },
     { key: 'packing', label: 'Packing Queue', icon: ClipboardList, badge: stats.packingCount },
+    { key: 'profile', label: 'Profile', icon: UserRound, bottom: true },
   ];
 
   return (
@@ -136,6 +138,12 @@ export default function WarehouseDashboard() {
             <DeliveryApplicationsPanel ownerType="warehouse" ownerId={warehouse.id} onDecision={loadStats} />
           )}
           {activeTab === 'packing' && <PackingQueuePanel warehouseId={warehouse.id} />}
+          {activeTab === 'profile' && (
+            <ProfilePanel
+              business={{ name: warehouse.name, address: warehouse.addressLine, parish: warehouse.parish }}
+              businessType="Warehouse business"
+            />
+          )}
         </main>
       </div>
     </div>
