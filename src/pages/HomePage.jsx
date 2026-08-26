@@ -69,8 +69,8 @@ export default function HomePage() {
     });
     return {
       sales: filtered.filter((listing) => listing.discountPercent > 0).slice(0, 8),
-      newItems: newest.slice(0, 8),
-      featured: filtered.slice(0, 8),
+      newItems: newest.filter((listing) => listing.discountPercent === 0 && !listing.isFeatured).slice(0, 8),
+      featured: filtered.filter((listing) => listing.discountPercent === 0 && listing.isFeatured).slice(0, 8),
     };
   }, [filtered]);
 
@@ -140,15 +140,15 @@ export default function HomePage() {
         {!loading && !error && (
           <>
             <ProductSection
-              title="Sales"
-              subtitle="Limited-time discounts from local stores"
-              listings={sections.sales}
-              onAddToCart={handleAddToCart}
-            />
-            <ProductSection
               title="New Items"
               subtitle="The latest products added to IsleVendor"
               listings={sections.newItems}
+              onAddToCart={handleAddToCart}
+            />
+            <ProductSection
+              title="Sales"
+              subtitle="Limited-time discounts from local stores"
+              listings={sections.sales}
               onAddToCart={handleAddToCart}
             />
             <ProductSection
