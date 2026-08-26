@@ -1,3 +1,9 @@
+// In local dev, '/api' is proxied to backend-node by vite.config.js — no base
+// URL needed. In production, frontend and backend-node are separate Railway
+// services on separate domains with no such proxy, so requests must go
+// straight to the backend's public URL (set via VITE_API_URL at build time).
+export const API_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+
 const TOKEN_STORAGE_KEY = 'islevendor_token';
 
 export function getToken() {
@@ -18,7 +24,7 @@ export async function apiRequest(path, { method = 'GET', body, auth = true } = {
   const token = getToken();
   if (auth && token) headers.Authorization = `Bearer ${token}`;
 
-  const res = await fetch(`/api${path}`, {
+  const res = await fetch(`${API_BASE}/api${path}`, {
     method,
     headers,
     body: body ? JSON.stringify(body) : undefined,
@@ -43,7 +49,7 @@ export async function uploadImage(file) {
   formData.append('image', file);
 
   const token = getToken();
-  const res = await fetch('/api/uploads/image', {
+  const res = await fetch(`${API_BASE}/api/uploads/image`, {
     method: 'POST',
     headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     body: formData,

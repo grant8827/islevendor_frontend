@@ -4,10 +4,10 @@ import DashboardTopBar from '../components/dashboard/DashboardTopBar.jsx';
 import WarehouseDashboard from './warehouse/WarehouseDashboard.jsx';
 import ResellerDashboard from './reseller/ResellerDashboard.jsx';
 import ShopDashboard from './shop/ShopDashboard.jsx';
+import DriverDashboard from './driver/DriverDashboard.jsx';
 
-// Driver job feed and admin ledger view are still generic placeholders below —
-// warehouse, affiliate (RESELLER), and store are the three seller roles built
-// out so far.
+// Admin ledger view is still a generic placeholder below — warehouse,
+// affiliate (RESELLER), store, and driver are the four roles built out so far.
 export default function DashboardPage() {
   const { user } = useAuth();
 
@@ -18,6 +18,7 @@ export default function DashboardPage() {
   if (user.role === 'WAREHOUSE') return <WarehouseDashboard />;
   if (user.role === 'RESELLER') return <ResellerDashboard />;
   if (user.role === 'STORE') return <ShopDashboard />;
+  if (user.role === 'DRIVER') return <DriverDashboard />;
 
   return (
     <div className="min-h-screen bg-slate-900">

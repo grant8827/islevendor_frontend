@@ -1,4 +1,4 @@
-import { setToken } from './client.js';
+import { API_BASE, setToken } from './client.js';
 
 /**
  * Submits one onboarding portal's form as multipart/form-data — text fields
@@ -28,7 +28,7 @@ async function submitOnboarding(path, fields, files = {}) {
     if (file) formData.append(key, file);
   }
 
-  const res = await fetch(`/api/v1/onboarding/${path}`, { method: 'POST', body: formData });
+  const res = await fetch(`${API_BASE}/api/v1/onboarding/${path}`, { method: 'POST', body: formData });
   const text = await res.text();
   const data = text ? JSON.parse(text) : null;
 

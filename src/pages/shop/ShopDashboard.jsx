@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { LayoutDashboard, Building2, Package, ClipboardList, X } from 'lucide-react';
+import { LayoutDashboard, Building2, Package, ClipboardList, Truck, X } from 'lucide-react';
 import { apiRequest } from '../../api/client.js';
 import DashboardTopBar from '../../components/dashboard/DashboardTopBar.jsx';
 import DashboardSidebar from '../../components/dashboard/DashboardSidebar.jsx';
+import DeliveryApplicationsPanel from '../../components/dashboard/DeliveryApplicationsPanel.jsx';
 import ShopSelector from './ShopSelector.jsx';
 import ShopSetupForm from './ShopSetupForm.jsx';
 import OverviewPanel from './OverviewPanel.jsx';
@@ -14,7 +15,7 @@ export default function ShopDashboard() {
   const [selectedId, setSelectedId] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
-  const [stats, setStats] = useState({ productCount: 0, packingCount: 0 });
+  const [stats, setStats] = useState({ productCount: 0, pendingDeliveryApplications: 0, packingCount: 0 });
 
   // Guards against out-of-order responses: React StrictMode double-invokes
   // this effect in dev, firing two concurrent requests. Without this, a
@@ -42,9 +43,10 @@ export default function ShopDashboard() {
     if (!shop) return;
     Promise.all([
       apiRequest(`/shop/products?shopId=${shop.id}`, { auth: false }),
+      apiRequest(`/shop/${shop.id}/delivery-applications?status=PENDING`),
       apiRequest(`/shop/${shop.id}/orders?status=PACKING`),
-    ]).then(([products, packing]) => {
-      setStats({ productCount: products.length, packingCount: packing.length });
+    ]).then(([products, pendingDelivery, packing]) => {
+      setStats({ productCount: products.length, pendingDeliveryApplications: pendingDelivery.length, packingCount: packing.length });
     });
   }, [shop]);
 
@@ -91,6 +93,7 @@ export default function ShopDashboard() {
     { key: 'overview', label: 'Overview', icon: LayoutDashboard },
     { key: 'store', label: 'My Store', icon: Building2 },
     { key: 'products', label: 'Products', icon: Package, badge: stats.productCount },
+    { key: 'delivery-applications', label: 'Delivery Applications', icon: Truck, badge: stats.pendingDeliveryApplications },
     { key: 'packing', label: 'Packing Queue', icon: ClipboardList, badge: stats.packingCount },
   ];
 
@@ -114,6 +117,9 @@ export default function ShopDashboard() {
             </div>
           )}
           {activeTab === 'products' && <ProductsPanel shopId={shop.id} />}
+          {activeTab === 'delivery-applications' && (
+            <DeliveryApplicationsPanel ownerType="shop" ownerId={shop.id} onDecision={loadStats} />
+          )}
           {activeTab === 'packing' && <PackingQueuePanel shopId={shop.id} />}
         </main>
       </div>

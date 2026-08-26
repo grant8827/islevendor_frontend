@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { LayoutDashboard, Warehouse as WarehouseIcon, Package, Users, ClipboardList, X } from 'lucide-react';
+import { LayoutDashboard, Warehouse as WarehouseIcon, Package, Users, ClipboardList, Truck, X } from 'lucide-react';
 import { apiRequest } from '../../api/client.js';
 import DashboardTopBar from '../../components/dashboard/DashboardTopBar.jsx';
 import DashboardSidebar from '../../components/dashboard/DashboardSidebar.jsx';
+import DeliveryApplicationsPanel from '../../components/dashboard/DeliveryApplicationsPanel.jsx';
 import WarehouseSelector from './WarehouseSelector.jsx';
 import WarehouseSetupForm from './WarehouseSetupForm.jsx';
 import OverviewPanel from './OverviewPanel.jsx';
@@ -16,7 +17,7 @@ export default function WarehouseDashboard() {
   const [selectedId, setSelectedId] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
-  const [stats, setStats] = useState({ productCount: 0, pendingApplications: 0, packingCount: 0 });
+  const [stats, setStats] = useState({ productCount: 0, pendingApplications: 0, pendingDeliveryApplications: 0, packingCount: 0 });
 
   // Guards against out-of-order responses: React StrictMode double-invokes
   // this effect in dev, firing two concurrent requests. Without this, a
@@ -45,9 +46,15 @@ export default function WarehouseDashboard() {
     Promise.all([
       apiRequest(`/warehouse/products?warehouseId=${warehouse.id}`, { auth: false }),
       apiRequest(`/warehouse/${warehouse.id}/authorizations?status=PENDING`),
+      apiRequest(`/warehouse/${warehouse.id}/delivery-applications?status=PENDING`),
       apiRequest(`/warehouse/${warehouse.id}/orders?status=PACKING`),
-    ]).then(([products, pending, packing]) => {
-      setStats({ productCount: products.length, pendingApplications: pending.length, packingCount: packing.length });
+    ]).then(([products, pending, pendingDelivery, packing]) => {
+      setStats({
+        productCount: products.length,
+        pendingApplications: pending.length,
+        pendingDeliveryApplications: pendingDelivery.length,
+        packingCount: packing.length,
+      });
     });
   }, [warehouse]);
 
@@ -95,6 +102,7 @@ export default function WarehouseDashboard() {
     { key: 'warehouse', label: 'My Warehouse', icon: WarehouseIcon },
     { key: 'products', label: 'Products', icon: Package, badge: stats.productCount },
     { key: 'applications', label: 'Affiliate Applications', icon: Users, badge: stats.pendingApplications },
+    { key: 'delivery-applications', label: 'Delivery Applications', icon: Truck, badge: stats.pendingDeliveryApplications },
     { key: 'packing', label: 'Packing Queue', icon: ClipboardList, badge: stats.packingCount },
   ];
 
@@ -124,6 +132,9 @@ export default function WarehouseDashboard() {
           )}
           {activeTab === 'products' && <ProductsPanel warehouseId={warehouse.id} />}
           {activeTab === 'applications' && <ApplicationsPanel warehouseId={warehouse.id} onDecision={loadStats} />}
+          {activeTab === 'delivery-applications' && (
+            <DeliveryApplicationsPanel ownerType="warehouse" ownerId={warehouse.id} onDecision={loadStats} />
+          )}
           {activeTab === 'packing' && <PackingQueuePanel warehouseId={warehouse.id} />}
         </main>
       </div>
