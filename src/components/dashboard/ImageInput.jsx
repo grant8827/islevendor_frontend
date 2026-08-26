@@ -24,13 +24,13 @@ export default function ImageInput({ value, onChange }) {
 
   return (
     <div>
-      <label className="block text-xs text-slate-400 mb-1">Product image</label>
+      <label className="block text-xs text-slate-500 mb-1">Product image</label>
       <div className="flex gap-1 mb-2">
         <button
           type="button"
           onClick={() => setMode('url')}
           className={`flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg border transition ${
-            mode === 'url' ? 'bg-slate-700 border-slate-600 text-white' : 'border-slate-700 text-slate-400 hover:text-white'
+            mode === 'url' ? 'bg-secondary/10 border-secondary text-secondary' : 'border-slate-200 text-slate-500 hover:text-slate-700'
           }`}
         >
           <Link2 className="w-3.5 h-3.5" /> Image URL
@@ -39,7 +39,7 @@ export default function ImageInput({ value, onChange }) {
           type="button"
           onClick={() => setMode('upload')}
           className={`flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg border transition ${
-            mode === 'upload' ? 'bg-slate-700 border-slate-600 text-white' : 'border-slate-700 text-slate-400 hover:text-white'
+            mode === 'upload' ? 'bg-secondary/10 border-secondary text-secondary' : 'border-slate-200 text-slate-500 hover:text-slate-700'
           }`}
         >
           <Upload className="w-3.5 h-3.5" /> Upload from computer
@@ -52,7 +52,7 @@ export default function ImageInput({ value, onChange }) {
           value={value || ''}
           onChange={(e) => onChange(e.target.value)}
           placeholder="https://example.com/product.jpg"
-          className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-amazon-yellow"
+          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-secondary"
         />
       )}
 
@@ -61,14 +61,14 @@ export default function ImageInput({ value, onChange }) {
           type="file"
           accept="image/jpeg,image/png,image/webp,image/gif"
           onChange={handleFile}
-          className="w-full text-xs text-slate-300 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-amazon-yellow file:text-slate-950 file:text-xs file:font-bold file:cursor-pointer"
+          className="w-full text-xs text-slate-600 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-primary file:text-white file:text-xs file:font-bold file:cursor-pointer"
         />
       )}
 
-      {uploading && <p className="text-xs text-slate-400 mt-1">Uploading…</p>}
+      {uploading && <p className="text-xs text-slate-500 mt-1">Uploading…</p>}
       {error && <p className="text-xs text-red-400 mt-1" role="alert">{error}</p>}
 
-      <div className="mt-2 h-24 w-24 bg-slate-900 border border-slate-700 rounded-lg flex items-center justify-center overflow-hidden">
+      <div className="mt-2 h-24 w-24 bg-slate-100 border border-slate-200 rounded-lg flex items-center justify-center overflow-hidden">
         {value ? (
           <img src={value} alt="Preview" className="max-h-full max-w-full object-contain" onError={(e) => (e.target.style.display = 'none')} />
         ) : (

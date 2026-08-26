@@ -17,14 +17,14 @@ export default function ProductCard({ listing, onAddToCart }) {
               <span className="text-[10px] uppercase tracking-wide">No image yet</span>
             </div>
           )}
-          <span className="absolute top-2 left-2 bg-slate-900 text-white text-[10px] font-bold px-2 py-0.5 rounded">
+          <span className="absolute top-2 left-2 bg-navy text-white text-[10px] font-bold px-2 py-0.5 rounded">
             {masterProduct.category}
           </span>
         </Link>
 
         <div className="p-4 space-y-2">
           <Link to={`/product/${listing.id}`}>
-            <h3 className="font-bold text-slate-900 text-sm line-clamp-2 hover:text-amazon-orange transition">{masterProduct.title}</h3>
+            <h3 className="font-bold text-slate-900 text-sm line-clamp-2 hover:text-secondary transition">{masterProduct.title}</h3>
           </Link>
 
           <div className="pt-1">
@@ -33,7 +33,7 @@ export default function ProductCard({ listing, onAddToCart }) {
           </div>
 
           <div className="flex items-center gap-1 text-xs text-slate-600">
-            <span className="bg-amazon-blue text-white text-[9px] font-black italic px-1 rounded">IsleDash</span>
+            <span className="bg-secondary text-white text-[9px] font-black italic px-1 rounded">IsleDash</span>
             <span className="font-semibold text-slate-800">
               {inStock ? 'Ships from Kingston' : 'Out of stock'}
             </span>
@@ -50,7 +50,7 @@ export default function ProductCard({ listing, onAddToCart }) {
           type="button"
           onClick={() => onAddToCart(listing)}
           disabled={!inStock}
-          className="w-full bg-amazon-yellow hover:bg-amazon-orange disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-amazon-yellow text-slate-950 font-bold text-xs py-2.5 rounded-lg transition shadow flex items-center justify-center gap-2"
+          className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed text-xs py-2.5 shadow flex items-center justify-center gap-2"
         >
           <ShoppingCart className="w-4 h-4" />
           <span>{inStock ? 'Add to Cart' : 'Out of stock'}</span>

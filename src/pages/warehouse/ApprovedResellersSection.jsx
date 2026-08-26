@@ -43,21 +43,21 @@ export default function ApprovedResellersSection({ warehouseId }) {
   return (
     <div className="mt-8">
       <div className="flex items-center gap-2 mb-4">
-        <Users className="w-4 h-4 text-amazon-yellow" />
-        <h3 className="font-bold text-white text-sm">Approved Affiliates</h3>
+        <Users className="w-4 h-4 text-primary" />
+        <h3 className="font-bold text-navy text-sm">Approved Resellers</h3>
       </div>
 
-      {resellers === null && <p className="text-sm text-slate-400">Loading…</p>}
+      {resellers === null && <p className="text-sm text-slate-500">Loading…</p>}
       {resellers?.length === 0 && (
         <p className="text-sm text-slate-500">
-          No approved affiliates yet — decide pending applications from the <strong>Affiliate Applications</strong> tab.
+          No approved resellers yet — decide pending applications from the <strong>Reseller Applications</strong> tab.
         </p>
       )}
 
       {resellers?.length > 0 && (
-        <div className="bg-slate-800/40 border border-slate-700 rounded-2xl overflow-hidden">
-          <table className="w-full text-left text-xs text-slate-300">
-            <thead className="bg-slate-950 text-slate-400 uppercase border-b border-slate-700">
+        <div className="bg-white border border-slate-200 shadow-sm rounded-2xl overflow-hidden">
+          <table className="w-full text-left text-xs text-slate-700">
+            <thead className="table-header-row uppercase">
               <tr>
                 <th className="px-5 py-3">Store</th>
                 <th className="px-5 py-3">Status</th>
@@ -65,12 +65,12 @@ export default function ApprovedResellersSection({ warehouseId }) {
                 <th className="px-5 py-3 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-700/50">
+            <tbody className="divide-y divide-slate-100">
               {resellers.map((r) => (
                 <tr key={r.id} className={r.status === 'SUSPENDED' ? 'opacity-50' : ''}>
-                  <td className="px-5 py-3 font-bold text-white">
+                  <td className="px-5 py-3 font-bold text-slate-900">
                     {r.store.storeName}
-                    <Link to={`/store/${r.store.slug}`} className="block text-[11px] font-normal text-amazon-yellow hover:underline">
+                    <Link to={`/store/${r.store.slug}`} className="block text-[11px] font-normal text-primary hover:underline">
                       /store/{r.store.slug}
                     </Link>
                   </td>
@@ -78,21 +78,21 @@ export default function ApprovedResellersSection({ warehouseId }) {
                     <span
                       className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded border ${
                         r.status === 'SUSPENDED'
-                          ? 'text-amazon-orange bg-amazon-orange/10 border-amazon-orange/30'
-                          : 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
+                          ? 'text-amber-700 bg-amber-100 border-amber-300'
+                          : 'text-primary-dark bg-primary/10 border-primary/30'
                       }`}
                     >
                       {r.status}
                     </span>
                   </td>
-                  <td className="px-5 py-3 text-slate-400">{r.decidedAt ? new Date(r.decidedAt).toLocaleDateString() : '—'}</td>
+                  <td className="px-5 py-3 text-slate-500">{r.decidedAt ? new Date(r.decidedAt).toLocaleDateString() : '—'}</td>
                   <td className="px-5 py-3">
                     <div className="flex items-center justify-end gap-1.5">
                       <button
                         type="button"
                         title="Add/remove items for this seller"
                         onClick={() => setEditingStore(r.store)}
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700 transition"
+                        className="p-1.5 rounded-lg text-slate-500 hover:text-navy hover:bg-slate-100 transition"
                       >
                         <Pencil className="w-3.5 h-3.5" />
                       </button>
@@ -101,7 +101,7 @@ export default function ApprovedResellersSection({ warehouseId }) {
                         title={r.status === 'APPROVED' ? 'Suspend' : 'Unsuspend'}
                         onClick={() => toggleSuspend(r)}
                         className={`p-1.5 rounded-lg transition ${
-                          r.status === 'APPROVED' ? 'text-slate-400 hover:text-amazon-yellow hover:bg-slate-700' : 'text-emerald-400 hover:bg-slate-700'
+                          r.status === 'APPROVED' ? 'text-slate-500 hover:text-primary hover:bg-slate-100' : 'text-primary hover:bg-slate-100'
                         }`}
                       >
                         {r.status === 'APPROVED' ? <PauseCircle className="w-3.5 h-3.5" /> : <PlayCircle className="w-3.5 h-3.5" />}
@@ -110,7 +110,7 @@ export default function ApprovedResellersSection({ warehouseId }) {
                         type="button"
                         title="Remove"
                         onClick={() => remove(r)}
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-red-400 hover:bg-slate-700 transition"
+                        className="p-1.5 rounded-lg text-slate-500 hover:text-red-600 hover:bg-slate-100 transition"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>

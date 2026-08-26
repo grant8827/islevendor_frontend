@@ -73,15 +73,15 @@ export default function ProductsPanel({ store }) {
     return acc;
   }, {});
 
-  if (loading) return <p className="text-sm text-slate-400">Loading…</p>;
+  if (loading) return <p className="text-sm text-slate-500">Loading…</p>;
 
   return (
     <div>
       <div className="flex items-center gap-2 mb-6">
-        <Package className="w-5 h-5 text-amazon-yellow" />
+        <Package className="w-5 h-5 text-primary" />
         <div>
-          <h2 className="font-bold text-white text-lg">Products</h2>
-          <p className="text-xs text-slate-400">
+          <h2 className="font-bold text-navy text-lg">Products</h2>
+          <p className="text-xs text-slate-500">
             Items warehouses have added to your account — only these can be listed on your storefront.
           </p>
         </div>
@@ -101,21 +101,21 @@ export default function ProductsPanel({ store }) {
             {products.map((product) => {
               const added = listedProductIds.has(product.id);
               return (
-                <div key={product.id} className="bg-slate-800/60 border border-slate-700 rounded-xl p-4 flex flex-col justify-between">
+                <div key={product.id} className="bg-white border border-slate-200 shadow-sm rounded-xl p-4 flex flex-col justify-between">
                   <div>
-                    <p className="text-sm font-bold text-white flex items-center gap-2">
+                    <p className="text-sm font-bold text-slate-900 flex items-center gap-2">
                       {product.title}
                       {!product.isActive && (
-                        <span className="text-[10px] font-bold uppercase text-amazon-orange bg-amazon-orange/10 border border-amazon-orange/30 px-1.5 py-0.5 rounded">
+                        <span className="text-[10px] font-bold uppercase text-amber-700 bg-amber-100 border border-amber-300 px-1.5 py-0.5 rounded">
                           Suspended
                         </span>
                       )}
                     </p>
                     <p className="text-xs text-slate-500">{product.category} · {product.stockQuantity} in stock</p>
-                    <p className="text-xs text-slate-400 mt-1">Wholesale: J${Number(product.wholesalePriceJmd).toLocaleString()}</p>
+                    <p className="text-xs text-slate-500 mt-1">Wholesale: J${Number(product.wholesalePriceJmd).toLocaleString()}</p>
                   </div>
                   <div className="mt-3 flex items-center gap-2">
-                    <div className="flex items-center text-xs text-slate-400">
+                    <div className="flex items-center text-xs text-slate-500">
                       <span className="mr-1">J$</span>
                       <input
                         type="number"
@@ -123,14 +123,14 @@ export default function ProductsPanel({ store }) {
                         disabled={added}
                         value={priceFor(product)}
                         onChange={(e) => setPrices((p) => ({ ...p, [product.id]: e.target.value }))}
-                        className="w-24 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-white disabled:opacity-50"
+                        className="w-24 bg-white border border-slate-300 rounded-lg px-2 py-1.5 text-slate-900 focus:outline-none focus:border-secondary disabled:opacity-50 disabled:bg-slate-50"
                       />
                     </div>
                     {added ? (
                       <button
                         type="button"
                         onClick={() => removeFromStore(product)}
-                        className="flex-1 flex items-center justify-center gap-1 bg-emerald-500/10 hover:bg-red-500/10 text-emerald-400 hover:text-red-400 border border-emerald-500/20 hover:border-red-500/20 text-xs font-bold py-1.5 rounded-lg transition"
+                        className="flex-1 flex items-center justify-center gap-1 bg-primary/10 hover:bg-red-50 text-primary-dark hover:text-red-600 border border-primary/20 hover:border-red-300 text-xs font-bold py-1.5 rounded-lg transition"
                       >
                         <Check className="w-3.5 h-3.5" /> Added — remove
                       </button>
@@ -139,7 +139,7 @@ export default function ProductsPanel({ store }) {
                         type="button"
                         onClick={() => addToStore(product)}
                         disabled={!product.isActive}
-                        className="flex-1 flex items-center justify-center gap-1 bg-amazon-yellow hover:bg-amazon-orange disabled:opacity-50 disabled:hover:bg-amazon-yellow text-slate-950 text-xs font-bold py-1.5 rounded-lg transition"
+                        className="btn-primary flex-1 flex items-center justify-center gap-1 disabled:opacity-50 text-xs py-1.5"
                       >
                         <Plus className="w-3.5 h-3.5" /> {product.isActive ? 'Add to My Store' : 'Unavailable'}
                       </button>

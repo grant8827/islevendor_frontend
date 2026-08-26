@@ -4,16 +4,16 @@ const ADD_NEW = '__add_new__';
 
 export default function WarehouseSelector({ warehouses, selectedId, onSelect, onAddNew }) {
   return (
-    <div className="bg-slate-950 border-b border-slate-800 px-6 py-2.5 flex items-center gap-2">
-      <WarehouseIcon className="w-4 h-4 text-amazon-yellow shrink-0" />
-      <label htmlFor="warehouse-select" className="text-xs text-slate-400 shrink-0">
+    <div className="bg-white border-b border-slate-200 px-6 py-2.5 flex items-center gap-2">
+      <WarehouseIcon className="w-4 h-4 text-primary shrink-0" />
+      <label htmlFor="warehouse-select" className="text-xs text-slate-500 shrink-0">
         Warehouse:
       </label>
       <select
         id="warehouse-select"
         value={selectedId}
         onChange={(e) => (e.target.value === ADD_NEW ? onAddNew() : onSelect(e.target.value))}
-        className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-amazon-yellow max-w-xs"
+        className="bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-sm text-slate-900 focus:outline-none focus:border-secondary max-w-xs"
       >
         {warehouses.map((wh) => (
           <option key={wh.id} value={wh.id}>
@@ -25,7 +25,7 @@ export default function WarehouseSelector({ warehouses, selectedId, onSelect, on
       <button
         type="button"
         onClick={onAddNew}
-        className="ml-auto flex items-center gap-1 text-xs text-amazon-yellow hover:underline"
+        className="ml-auto flex items-center gap-1 text-xs text-primary hover:underline"
       >
         <Plus className="w-3.5 h-3.5" />
         Add warehouse

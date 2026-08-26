@@ -27,17 +27,17 @@ export default function MyStorePanel({ store }) {
   return (
     <div>
       <div className="flex items-center gap-2 mb-2">
-        <Store className="w-5 h-5 text-amazon-yellow" />
-        <h2 className="font-bold text-white text-lg">My Store</h2>
+        <Store className="w-5 h-5 text-primary" />
+        <h2 className="font-bold text-navy text-lg">My Store</h2>
       </div>
-      <p className="text-xs text-slate-400 mb-6">
+      <p className="text-xs text-slate-500 mb-6">
         <span className="text-slate-500">Name:</span> {store.storeName} ·{' '}
-        <Link to={`/store/${store.slug}`} className="text-amazon-yellow hover:underline">
+        <Link to={`/store/${store.slug}`} className="text-primary hover:underline">
           /store/{store.slug} →
         </Link>
       </p>
 
-      {listings === null && <p className="text-sm text-slate-400">Loading…</p>}
+      {listings === null && <p className="text-sm text-slate-500">Loading…</p>}
       {listings?.length === 0 && (
         <p className="text-sm text-slate-500">
           Nothing listed yet — add items from the <strong>Products</strong> tab.
@@ -46,8 +46,8 @@ export default function MyStorePanel({ store }) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {listings?.map((listing) => (
-          <div key={listing.id} className="bg-slate-800/60 border border-slate-700 rounded-xl overflow-hidden">
-            <div className="h-28 bg-slate-900 flex items-center justify-center">
+          <div key={listing.id} className="bg-white border border-slate-200 shadow-sm rounded-xl overflow-hidden">
+            <div className="h-28 bg-slate-100 flex items-center justify-center">
               {listing.masterProduct.imageUrl ? (
                 <img src={listing.masterProduct.imageUrl} alt="" className="max-h-full object-contain" />
               ) : (
@@ -55,12 +55,12 @@ export default function MyStorePanel({ store }) {
               )}
             </div>
             <div className="p-4">
-              <p className="text-sm font-bold text-white">{listing.masterProduct.title}</p>
-              <p className="text-xs text-emerald-400 font-bold mt-1">J${Number(listing.retailPriceJmd).toLocaleString()}</p>
+              <p className="text-sm font-bold text-slate-900">{listing.masterProduct.title}</p>
+              <p className="text-xs text-primary font-bold mt-1">J${Number(listing.retailPriceJmd).toLocaleString()}</p>
               <button
                 type="button"
                 onClick={() => remove(listing)}
-                className="mt-3 w-full flex items-center justify-center gap-1 bg-slate-900 hover:bg-red-500/10 text-slate-400 hover:text-red-400 border border-slate-700 hover:border-red-500/30 text-xs font-bold py-1.5 rounded-lg transition"
+                className="mt-3 w-full flex items-center justify-center gap-1 bg-slate-50 hover:bg-red-50 text-slate-500 hover:text-red-600 border border-slate-200 hover:border-red-300 text-xs font-bold py-1.5 rounded-lg transition"
               >
                 <Trash2 className="w-3.5 h-3.5" /> Remove
               </button>

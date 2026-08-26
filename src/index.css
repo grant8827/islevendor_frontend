@@ -1,7 +1,31 @@
 @import "tailwindcss";
 
+/*
+ * IsleVendor brand theme (Jira: "Implement IsleVendor Brand Theme Across the
+ * Website"). Centralized here per that ticket's technical requirement — new
+ * components should reach for these tokens/utility classes instead of raw
+ * hex or one-off Tailwind color classes.
+ *
+ * Rollout is incremental: this pass covers the tokens themselves plus the
+ * global shell (Navbar, DashboardTopBar, DashboardSidebar, the login,
+ * register and storefront chrome). The "amazon" and "brand"/"caribbean"
+ * tokens below are the pre-rebrand palette, kept only because most page
+ * bodies (product cards, dashboard panels, tables, forms — the bulk of the
+ * app) still reference them directly; they're being phased out page-by-page
+ * rather than deleted out from under still-dark-themed screens in one shot.
+ */
 @theme {
-  /* Amazon-style palette, used by the marketplace home page */
+  /* ── IsleVendor brand palette ── */
+  --color-primary: #6bbf2a;
+  --color-primary-dark: #4e9f1f;
+  --color-secondary: #11a8b5;
+  --color-secondary-dark: #0a6d83;
+  --color-navy: #083a59;
+  --color-ink: #334155;
+  --color-surface: #f8fafc;
+
+  /* ── Legacy Amazon-style palette — pre-rebrand, still used by most
+     page bodies until they're converted (see comment above) ── */
   --color-amazon-navy: #131921;
   --color-amazon-lightNavy: #232f3e;
   --color-amazon-yellow: #febd69;
@@ -23,36 +47,85 @@
   --color-caribbean-800: #075985;
 }
 
+/* Plain CSS custom properties mirroring the ticket's own `:root` snippet
+   1:1 (Tailwind's utilities above are generated from the --color-* names,
+   but these bare names are what the rest of this file — and any future
+   non-Tailwind CSS — reads from). */
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --accent: #aa3bff;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --accent: #c084fc;
-  }
+  --primary: #6bbf2a;
+  --primary-dark: #4e9f1f;
+  --secondary: #11a8b5;
+  --secondary-dark: #0a6d83;
+  --navy: #083a59;
+  --text: #334155;
+  --background: #f8fafc;
+  --white: #ffffff;
 }
 
 body {
   margin: 0;
   color: var(--text);
-  background: var(--bg);
+  background: var(--background);
   font: 16px/145% system-ui, 'Segoe UI', Roboto, sans-serif;
 }
 
-/* --- Simple pages (login/register/dashboard/storefront) --- */
+/* ── Reusable brand primitives (Card/Button/Table requirements from the
+   ticket) — reach for these first in new or converted components rather
+   than repeating the raw color combinations. ── */
+
+.btn-primary {
+  background: var(--primary);
+  color: var(--white);
+  font-weight: 700;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+.btn-primary:hover:not(:disabled) {
+  background: var(--primary-dark);
+}
+
+.btn-secondary {
+  background: var(--secondary);
+  color: var(--white);
+  font-weight: 700;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+.btn-secondary:hover:not(:disabled) {
+  background: var(--secondary-dark);
+}
+
+.btn-primary:disabled, .btn-secondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.card {
+  background: var(--white);
+  border: 1px solid #e2e8f0; /* light gray */
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(8, 58, 89, 0.06);
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+.card:hover {
+  box-shadow: 0 8px 20px rgba(8, 58, 89, 0.1);
+  transform: translateY(-1px);
+}
+
+.table-header-row {
+  background: var(--navy);
+  color: var(--white);
+}
+
+/* --- Simple pages (login/register/storefront) --- */
 /* The marketplace home page is Tailwind-only and doesn't use these. */
 
 .simple-page header {
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid #e2e8f0;
   padding: 16px 24px;
 }
 
@@ -66,45 +139,70 @@ body {
   margin-right: auto;
   font-weight: 700;
   text-decoration: none;
-  color: var(--text-h);
+  color: var(--navy);
 }
 
 .simple-page main {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 32px 24px;
+  max-width: 420px;
+  margin: 48px auto;
+  padding: 32px 28px;
+}
+
+.simple-page section {
+  background: var(--white);
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(8, 58, 89, 0.08), 0 1px 2px rgba(8, 58, 89, 0.06);
+  padding: 28px;
 }
 
 .simple-page h1, .simple-page h2 {
-  color: var(--text-h);
-  font-weight: 600;
+  color: var(--navy);
+  font-weight: 700;
+  margin-top: 0;
 }
 
 .simple-page a {
-  color: var(--accent);
+  color: var(--secondary);
+}
+.simple-page a:hover {
+  color: var(--secondary-dark);
 }
 
 .simple-page form {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  max-width: 360px;
 }
 
-.simple-page input, .simple-page select, .simple-page button {
+.simple-page input, .simple-page select {
   font: inherit;
-  padding: 8px 12px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--bg);
-  color: var(--text-h);
+  padding: 9px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: var(--white);
+  color: var(--text);
+}
+
+.simple-page input:focus, .simple-page select:focus {
+  outline: none;
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 3px rgba(17, 168, 181, 0.15);
 }
 
 .simple-page button {
-  cursor: pointer;
-  background: var(--accent);
-  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  padding: 10px 12px;
   border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background: var(--primary);
+  color: var(--white);
+  transition: background-color 0.15s ease;
+}
+.simple-page button:hover:not(:disabled) {
+  background: var(--primary-dark);
 }
 
 .simple-page button:disabled {
@@ -112,6 +210,9 @@ body {
   cursor: not-allowed;
 }
 
+/* Validation errors stay red per the ticket ("Validation errors remain
+   red") — success messages should use the brand primary green instead;
+   see [role="status"] usage once success messaging is added. */
 .simple-page [role='alert'] {
-  color: #d64545;
+  color: #dc2626;
 }

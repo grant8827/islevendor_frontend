@@ -1,7 +1,7 @@
 // Labeled input/select/textarea for the onboarding wizards' light theme —
 // counterpart to the dashboard's dark inputs (see WarehouseSetupForm.jsx).
 const baseClass =
-  'w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-amazon-yellow focus:border-amazon-yellow';
+  'w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-secondary/20 focus:border-secondary';
 
 export default function FormField({ label, hint, required, as = 'input', options, children, className = '', ...props }) {
   return (
@@ -23,7 +23,7 @@ export default function FormField({ label, hint, required, as = 'input', options
       ) : (
         <input className={baseClass} required={required} {...props} />
       )}
-      {hint && <span className="block text-[11px] text-slate-400 mt-1">{hint}</span>}
+      {hint && <span className="block text-[11px] text-slate-500 mt-1">{hint}</span>}
       {children}
     </label>
   );

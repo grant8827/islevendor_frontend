@@ -55,7 +55,7 @@ export default function CartPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-200">
+    <div className="min-h-screen bg-surface">
       <Navbar />
 
       <main className="max-w-5xl mx-auto px-4 py-8">
@@ -75,7 +75,7 @@ export default function CartPage() {
             <p className="text-sm text-slate-600 mb-4">Your cart is empty.</p>
             <Link
               to="/"
-              className="inline-flex items-center gap-2 bg-amazon-yellow hover:bg-amazon-orange text-slate-950 font-bold text-sm px-5 py-2.5 rounded-lg transition"
+              className="btn-primary inline-flex items-center gap-2 text-sm px-5 py-2.5"
             >
               Browse the marketplace
             </Link>
@@ -95,7 +95,7 @@ export default function CartPage() {
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <Link to={`/product/${item.listingId}`} className="text-sm font-bold text-slate-900 hover:text-amazon-orange transition line-clamp-2">
+                    <Link to={`/product/${item.listingId}`} className="text-sm font-bold text-slate-900 hover:text-secondary transition line-clamp-2">
                       {item.title}
                     </Link>
                     <p className="text-xs text-slate-500 mt-0.5">Sold by {item.storeName}</p>
@@ -158,7 +158,7 @@ export default function CartPage() {
                 type="button"
                 onClick={handleCheckout}
                 disabled={placing}
-                className="w-full bg-amazon-yellow hover:bg-amazon-orange disabled:opacity-60 text-slate-950 font-bold text-sm py-3 rounded-lg transition"
+                className="btn-primary w-full disabled:opacity-60 text-sm py-3"
               >
                 {placing ? 'Placing order…' : user ? 'Proceed to Checkout' : 'Log in to Checkout'}
               </button>

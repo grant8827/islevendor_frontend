@@ -19,7 +19,7 @@ export const opportunities = {
       { icon: Package, title: 'Zero inventory', body: "No warehousing, no upfront stock purchase — the warehouse fulfills orders." },
       { icon: ShieldCheck, title: 'Verified warehouses', body: 'Every warehouse on the platform is a registered account you can review before applying.' },
     ],
-    applyLabel: 'Apply as an Affiliate',
+    applyLabel: 'Apply as a Reseller',
   },
   store: {
     role: 'STORE',
@@ -27,7 +27,7 @@ export const opportunities = {
     eyebrow: 'For Small Businesses',
     headline: 'Sell what you already stock — no warehouse, no approval needed.',
     subtext:
-      "Got a small shop with your own limited catalog? List your items directly and sell straight to customers — unlike an affiliate or a warehouse, a Store sells its own stock with no approval step.",
+      "Got a small shop with your own limited catalog? List your items directly and sell straight to customers — unlike a reseller or a warehouse, a Store sells its own stock with no approval step.",
     steps: [
       { title: 'Set up your store', body: 'Add your shop name, address, and parish.' },
       { title: 'Add your items', body: 'List what you sell — title, price, stock, and a photo.' },
@@ -36,7 +36,7 @@ export const opportunities = {
     ],
     highlights: [
       { icon: Package, title: 'Your own catalog', body: "Small and limited is fine — list only what you actually stock." },
-      { icon: Users, title: 'No approval layer', body: "Unlike an affiliate, you're not selling someone else's stock — nobody has to approve what you list." },
+      { icon: Users, title: 'No approval layer', body: "Unlike a reseller, you're not selling someone else's stock — nobody has to approve what you list." },
       { icon: Wallet, title: 'Automatic settlement', body: 'A 3-way split (store / driver / platform) is calculated and tracked per order.' },
     ],
     applyLabel: 'Add Your Store',
@@ -45,19 +45,19 @@ export const opportunities = {
     role: 'WAREHOUSE',
     icon: Warehouse,
     eyebrow: 'For Warehouses & Wholesalers',
-    headline: 'List your stock. Let vetted affiliates move it for you.',
+    headline: 'List your stock. Let vetted resellers move it for you.',
     subtext:
-      'Register your depot, add your catalog, and approve affiliates to sell specific items on your behalf. Orders get packed by you and dispatched to a nearby courier automatically.',
+      'Register your depot, add your catalog, and approve resellers to sell specific items on your behalf. Orders get packed by you and dispatched to a nearby courier automatically.',
     steps: [
       { title: 'Register your warehouse', body: 'Add your depot name, address, and parish.' },
       { title: 'Add your product catalog', body: 'List SKUs with wholesale pricing, stock, images, and descriptions.' },
-      { title: 'Approve affiliates', body: 'Review applications and decide exactly which items each affiliate can sell.' },
+      { title: 'Approve resellers', body: 'Review applications and decide exactly which items each reseller can sell.' },
       { title: 'Pack and get paid', body: 'Mark orders ready for pickup — a nearby driver is dispatched, and your share is settled automatically.' },
     ],
     highlights: [
-      { icon: Package, title: 'You control the catalog', body: 'Suspend, edit, or remove any SKU at any time — affiliates only ever see what you allow.' },
+      { icon: Package, title: 'You control the catalog', body: 'Suspend, edit, or remove any SKU at any time — resellers only ever see what you allow.' },
       { icon: MapPin, title: 'Automatic dispatch', body: "Mark an order ready and the nearest available driver is offered the job." },
-      { icon: Wallet, title: 'Automatic settlement', body: 'The 4-way split (warehouse / affiliate / driver / platform) is calculated and tracked per order.' },
+      { icon: Wallet, title: 'Automatic settlement', body: 'The 4-way split (warehouse / reseller / driver / platform) is calculated and tracked per order.' },
     ],
     applyLabel: 'Register Your Warehouse',
   },

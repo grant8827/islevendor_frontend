@@ -39,14 +39,14 @@ export default function DocUploadField({ label, hint, required, value, onChange 
       </span>
       <label
         className={`flex items-center gap-3 border-2 border-dashed rounded-lg px-3 py-3 cursor-pointer transition ${
-          value ? 'border-emerald-400 bg-emerald-50' : 'border-slate-300 hover:border-amazon-navy bg-slate-50'
+          value ? 'border-emerald-400 bg-emerald-50' : 'border-slate-300 hover:border-navy bg-slate-50'
         }`}
       >
-        {value ? <FileCheck2 className="w-5 h-5 text-emerald-600 shrink-0" /> : <Upload className="w-5 h-5 text-slate-400 shrink-0" />}
+        {value ? <FileCheck2 className="w-5 h-5 text-emerald-600 shrink-0" /> : <Upload className="w-5 h-5 text-slate-500 shrink-0" />}
         <span className="text-xs text-slate-600 truncate">{value ? value.name : 'Tap to choose a file (JPG, PNG, or PDF)'}</span>
         <input type="file" accept={ALLOWED_TYPES.join(',')} onChange={handleFile} className="sr-only" />
       </label>
-      {hint && <span className="block text-[11px] text-slate-400 mt-1">{hint}</span>}
+      {hint && <span className="block text-[11px] text-slate-500 mt-1">{hint}</span>}
       {error && <span className="block text-[11px] text-red-600 mt-1">{error}</span>}
     </div>
   );

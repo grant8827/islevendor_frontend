@@ -20,7 +20,7 @@ export default function StepFooter({ step, lastStep, submitting, onBack, onNext,
         <button
           type="button"
           onClick={onNext}
-          className="inline-flex items-center gap-1.5 bg-amazon-yellow hover:bg-amazon-orange text-slate-950 font-bold text-sm px-5 py-2.5 rounded-lg transition"
+          className="inline-flex items-center gap-1.5 btn-primary font-bold text-sm px-5 py-2.5 rounded-lg transition"
         >
           Continue <ArrowRight className="w-4 h-4" />
         </button>
@@ -29,7 +29,7 @@ export default function StepFooter({ step, lastStep, submitting, onBack, onNext,
           type="button"
           onClick={onSubmit}
           disabled={submitting}
-          className="inline-flex items-center gap-1.5 bg-amazon-yellow hover:bg-amazon-orange disabled:opacity-60 text-slate-950 font-bold text-sm px-5 py-2.5 rounded-lg transition"
+          className="inline-flex items-center gap-1.5 bg-primary hover:bg-secondary disabled:opacity-60 text-slate-950 font-bold text-sm px-5 py-2.5 rounded-lg transition"
         >
           {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
           {submitting ? 'Submitting…' : 'Submit application'}

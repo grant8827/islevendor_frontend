@@ -59,9 +59,9 @@ export default function ShopDashboard() {
 
   if (shops === undefined) {
     return (
-      <div className="min-h-screen bg-slate-900">
+      <div className="min-h-screen bg-surface">
         <DashboardTopBar title="Store Portal" />
-        <p className="text-slate-400 text-sm p-6">Loading…</p>
+        <p className="text-slate-500 text-sm p-6">Loading…</p>
       </div>
     );
   }
@@ -71,14 +71,14 @@ export default function ShopDashboard() {
   // already have at least one.
   if (shops.length === 0 || showAddForm) {
     return (
-      <div className="min-h-screen bg-slate-900">
+      <div className="min-h-screen bg-surface">
         <DashboardTopBar title="Store Portal" />
         <div className="p-8">
           {shops.length > 0 && (
             <button
               type="button"
               onClick={() => setShowAddForm(false)}
-              className="flex items-center gap-1 text-xs text-slate-400 hover:text-white mb-4"
+              className="flex items-center gap-1 text-xs text-slate-500 hover:text-navy mb-4"
             >
               <X className="w-3.5 h-3.5" /> Cancel
             </button>
@@ -98,7 +98,7 @@ export default function ShopDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-900 flex flex-col">
+    <div className="min-h-screen bg-surface flex flex-col">
       <DashboardTopBar title="Store Portal" />
       <ShopSelector shops={shops} selectedId={selectedId} onSelect={setSelectedId} onAddNew={() => setShowAddForm(true)} />
       <div className="flex flex-1">
@@ -107,12 +107,12 @@ export default function ShopDashboard() {
           {activeTab === 'overview' && <OverviewPanel shop={shop} stats={stats} />}
           {activeTab === 'store' && (
             <div>
-              <h2 className="font-bold text-white text-lg mb-4">My Store</h2>
-              <div className="bg-slate-800/60 border border-slate-700 rounded-xl p-5 max-w-md space-y-2 text-sm">
-                <p><span className="text-slate-400">Name:</span> <span className="text-white">{shop.shopName}</span></p>
-                <p><span className="text-slate-400">Address:</span> <span className="text-white">{shop.addressLine}</span></p>
-                <p><span className="text-slate-400">Parish:</span> <span className="text-white">{shop.parish}</span></p>
-                <p><span className="text-slate-400">URL:</span> <span className="text-white">/store/{shop.slug}</span></p>
+              <h2 className="font-bold text-navy text-lg mb-4">My Store</h2>
+              <div className="bg-white border border-slate-200 shadow-sm rounded-xl p-5 max-w-md space-y-2 text-sm">
+                <p><span className="text-slate-500">Name:</span> <span className="text-slate-900">{shop.shopName}</span></p>
+                <p><span className="text-slate-500">Address:</span> <span className="text-slate-900">{shop.addressLine}</span></p>
+                <p><span className="text-slate-500">Parish:</span> <span className="text-slate-900">{shop.parish}</span></p>
+                <p><span className="text-slate-500">URL:</span> <span className="text-slate-900">/store/{shop.slug}</span></p>
               </div>
             </div>
           )}

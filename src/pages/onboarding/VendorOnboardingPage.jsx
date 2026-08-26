@@ -33,7 +33,7 @@ export default function VendorOnboardingPage() {
       payoutMethod: 'BANK', bankName: JM_BANKS[0], accountHolderName: '', accountNumber: '', branchCode: '', lynkWalletId: '',
       slaAccepted: false,
     },
-    validateStep(i, f) {
+    validateStep(i, f, fl) {
       if (i === 0 && (!f.email || !f.password || f.password.length < 8 || !f.fullName || !f.phoneNumber)) {
         return 'Fill in your email, a password (min 8 characters), name, and phone number.';
       }
@@ -48,6 +48,10 @@ export default function VendorOnboardingPage() {
         return 'Fill in your bank account details.';
       }
       if (i === 3 && f.payoutMethod === 'LYNK_WALLET' && !f.lynkWalletId) return 'Enter your Lynk wallet ID.';
+      if (i === 4) {
+        if (!fl.govId) return 'Upload your government ID photo.';
+        if (!f.slaAccepted) return 'You must agree to the Vendor SLA to continue.';
+      }
       return null;
     },
     submit: (f, fl) => submitVendorApplication(f, { govId: fl.govId }),

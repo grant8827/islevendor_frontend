@@ -130,13 +130,13 @@ export default function ProductsPanel({ shopId }) {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="font-bold text-white text-lg">Items For Sale</h2>
-          <p className="text-xs text-slate-400">What you sell directly to customers — no approval needed.</p>
+          <h2 className="font-bold text-navy text-lg">Items For Sale</h2>
+          <p className="text-xs text-slate-500">What you sell directly to customers — no approval needed.</p>
         </div>
         <button
           type="button"
           onClick={() => (showForm ? closeForm() : openAddForm())}
-          className="bg-amazon-yellow hover:bg-amazon-orange text-slate-950 font-bold text-xs px-4 py-2.5 rounded-lg flex items-center gap-2 transition"
+          className="btn-primary font-bold text-xs px-4 py-2.5 rounded-lg flex items-center gap-2 transition"
         >
           {showForm ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
           {showForm ? 'Cancel' : 'Add Item'}
@@ -144,31 +144,31 @@ export default function ProductsPanel({ shopId }) {
       </div>
 
       {showForm && (
-        <form onSubmit={handleSubmit} className="bg-slate-800/60 border border-slate-700 rounded-xl p-5 mb-6 grid grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit} className="bg-white border border-slate-200 shadow-sm rounded-xl p-5 mb-6 grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs text-slate-400 mb-1">Title</label>
-            <input value={form.title} onChange={update('title')} required className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white" />
+            <label className="block text-xs text-slate-500 mb-1">Title</label>
+            <input value={form.title} onChange={update('title')} required className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-secondary" />
           </div>
           <div>
-            <label className="block text-xs text-slate-400 mb-1">Category</label>
-            <input value={form.category} onChange={update('category')} required className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white" />
+            <label className="block text-xs text-slate-500 mb-1">Category</label>
+            <input value={form.category} onChange={update('category')} required className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-secondary" />
           </div>
           <div>
-            <label className="block text-xs text-slate-400 mb-1">Price (JMD)</label>
-            <input type="number" min="0" step="0.01" value={form.priceJmd} onChange={update('priceJmd')} required className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white" />
+            <label className="block text-xs text-slate-500 mb-1">Price (JMD)</label>
+            <input type="number" min="0" step="0.01" value={form.priceJmd} onChange={update('priceJmd')} required className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-secondary" />
           </div>
           <div>
-            <label className="block text-xs text-slate-400 mb-1">Stock quantity</label>
-            <input type="number" min="0" value={form.stockQuantity} onChange={update('stockQuantity')} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white" />
+            <label className="block text-xs text-slate-500 mb-1">Stock quantity</label>
+            <input type="number" min="0" value={form.stockQuantity} onChange={update('stockQuantity')} className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-secondary" />
           </div>
           <div className="col-span-2">
-            <label className="block text-xs text-slate-400 mb-1">Description</label>
+            <label className="block text-xs text-slate-500 mb-1">Description</label>
             <textarea
               value={form.description}
               onChange={update('description')}
               rows={3}
               placeholder="What customers should know about this item…"
-              className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white resize-y"
+              className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-secondary resize-y"
             />
           </div>
           <div className="col-span-2">
@@ -176,17 +176,17 @@ export default function ProductsPanel({ shopId }) {
           </div>
           {error && <p className="col-span-2 text-xs text-red-400" role="alert">{error}</p>}
           <div className="col-span-2 flex gap-2">
-            <button type="submit" disabled={submitting} className="bg-brand-600 hover:bg-brand-500 disabled:opacity-60 text-white text-xs font-bold px-4 py-2.5 rounded-lg transition">
+            <button type="submit" disabled={submitting} className="btn-primary disabled:opacity-60 text-xs font-bold px-4 py-2.5 rounded-lg transition">
               {submitting ? 'Saving…' : editingId ? 'Save Changes' : 'Save Item'}
             </button>
-            <button type="button" onClick={closeForm} className="bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold px-4 py-2.5 rounded-lg transition">
+            <button type="button" onClick={closeForm} className="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-4 py-2.5 rounded-lg transition">
               Cancel
             </button>
           </div>
         </form>
       )}
 
-      {loading && <p className="text-sm text-slate-400">Loading…</p>}
+      {loading && <p className="text-sm text-slate-500">Loading…</p>}
 
       {!loading && products.length === 0 && (
         <div className="text-center py-16 text-slate-500">
@@ -196,9 +196,9 @@ export default function ProductsPanel({ shopId }) {
       )}
 
       {products.length > 0 && (
-        <div className="bg-slate-800/40 border border-slate-700 rounded-2xl overflow-hidden">
-          <table className="w-full text-left text-xs text-slate-300">
-            <thead className="bg-slate-950 text-slate-400 uppercase border-b border-slate-700">
+        <div className="bg-white border border-slate-200 shadow-sm rounded-2xl overflow-hidden">
+          <table className="w-full text-left text-xs text-slate-700">
+            <thead className="table-header-row uppercase">
               <tr>
                 <th className="px-5 py-3">Image</th>
                 <th className="px-5 py-3">Title</th>
@@ -209,11 +209,11 @@ export default function ProductsPanel({ shopId }) {
                 <th className="px-5 py-3 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-700/50">
+            <tbody className="divide-y divide-slate-100">
               {products.map((p) => (
-                <tr key={p.id} className={p.isActive ? '' : 'opacity-50'}>
+                <tr key={p.id} className={`hover:bg-surface transition ${p.isActive ? '' : 'opacity-50'}`}>
                   <td className="px-5 py-3">
-                    <div className="h-10 w-10 bg-slate-900 border border-slate-700 rounded-lg flex items-center justify-center overflow-hidden">
+                    <div className="h-10 w-10 bg-slate-100 border border-slate-200 rounded-lg flex items-center justify-center overflow-hidden">
                       {p.imageUrl ? (
                         <img src={p.imageUrl} alt="" className="max-h-full max-w-full object-contain" />
                       ) : (
@@ -221,20 +221,20 @@ export default function ProductsPanel({ shopId }) {
                       )}
                     </div>
                   </td>
-                  <td className="px-5 py-3 font-bold text-white">
+                  <td className="px-5 py-3 font-bold text-slate-900">
                     <span className="flex items-center gap-2">
                       {p.title}
                       {!p.isActive && (
-                        <span className="text-[10px] font-bold uppercase tracking-wide text-amazon-orange bg-amazon-orange/10 border border-amazon-orange/30 px-1.5 py-0.5 rounded">
+                        <span className="text-[10px] font-bold uppercase tracking-wide text-amber-700 bg-amber-100 border border-amber-300 px-1.5 py-0.5 rounded">
                           Suspended
                         </span>
                       )}
                     </span>
                     {p.description && <p className="text-[11px] font-normal text-slate-500 mt-0.5 line-clamp-1">{p.description}</p>}
                   </td>
-                  <td className="px-5 py-3 text-slate-400">{p.sku}</td>
+                  <td className="px-5 py-3 text-slate-500">{p.sku}</td>
                   <td className="px-5 py-3">{p.category}</td>
-                  <td className="px-5 py-3 text-emerald-400 font-bold">J${Number(p.priceJmd).toLocaleString()}</td>
+                  <td className="px-5 py-3 text-primary font-bold">J${Number(p.priceJmd).toLocaleString()}</td>
                   <td className="px-5 py-3">{p.stockQuantity} units</td>
                   <td className="px-5 py-3">
                     <div className="flex items-center justify-end gap-1.5">
@@ -242,7 +242,7 @@ export default function ProductsPanel({ shopId }) {
                         type="button"
                         title="Edit"
                         onClick={() => openEditForm(p)}
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700 transition"
+                        className="p-1.5 rounded-lg text-slate-500 hover:text-navy hover:bg-slate-100 transition"
                       >
                         <Pencil className="w-3.5 h-3.5" />
                       </button>
@@ -251,7 +251,7 @@ export default function ProductsPanel({ shopId }) {
                         title={p.isActive ? 'Suspend' : 'Unsuspend'}
                         onClick={() => toggleSuspend(p)}
                         className={`p-1.5 rounded-lg transition ${
-                          p.isActive ? 'text-slate-400 hover:text-amazon-yellow hover:bg-slate-700' : 'text-emerald-400 hover:bg-slate-700'
+                          p.isActive ? 'text-slate-500 hover:text-primary hover:bg-slate-100' : 'text-primary hover:bg-slate-100'
                         }`}
                       >
                         {p.isActive ? <PauseCircle className="w-3.5 h-3.5" /> : <PlayCircle className="w-3.5 h-3.5" />}
@@ -260,7 +260,7 @@ export default function ProductsPanel({ shopId }) {
                         type="button"
                         title="Remove"
                         onClick={() => removeProduct(p)}
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-red-400 hover:bg-slate-700 transition"
+                        className="p-1.5 rounded-lg text-slate-500 hover:text-red-600 hover:bg-slate-100 transition"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>

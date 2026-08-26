@@ -9,7 +9,7 @@ import Navbar from './components/marketplace/Navbar.jsx';
 // `<header>` so its header-specific rules don't bleed onto Navbar's markup.
 export default function Layout() {
   return (
-    <div className="min-h-screen bg-slate-200">
+    <div className="min-h-screen bg-surface">
       <Navbar />
       <div className="simple-page">
         <main>

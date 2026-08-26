@@ -56,38 +56,38 @@ export default function WarehouseSetupForm({ onCreated }) {
   return (
     <div className="max-w-lg">
       <div className="flex items-center gap-2 mb-4">
-        <Warehouse className="w-5 h-5 text-amazon-yellow" />
-        <h2 className="font-bold text-white text-lg">Set up your warehouse</h2>
+        <Warehouse className="w-5 h-5 text-primary" />
+        <h2 className="font-bold text-navy text-lg">Set up your warehouse</h2>
       </div>
-      <p className="text-sm text-slate-400 mb-6">
-        Register your depot before you can add stock or approve affiliates. This creates the
+      <p className="text-sm text-slate-500 mb-6">
+        Register your depot before you can add stock or approve resellers. This creates the
         spatial point drivers get dispatched against.
       </p>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-xs text-slate-400 mb-1">Warehouse name</label>
+          <label className="block text-xs text-slate-500 mb-1">Warehouse name</label>
           <input
             value={form.name}
             onChange={update('name')}
             required
-            className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-amazon-yellow"
+            className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-secondary focus:ring-2 focus:ring-secondary/20"
           />
         </div>
         <div>
-          <label className="block text-xs text-slate-400 mb-1">Address</label>
+          <label className="block text-xs text-slate-500 mb-1">Address</label>
           <input
             value={form.addressLine}
             onChange={update('addressLine')}
             required
-            className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-amazon-yellow"
+            className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-secondary focus:ring-2 focus:ring-secondary/20"
           />
         </div>
         <div>
-          <label className="block text-xs text-slate-400 mb-1">Parish</label>
+          <label className="block text-xs text-slate-500 mb-1">Parish</label>
           <select
             value={form.parish}
             onChange={update('parish')}
-            className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-amazon-yellow"
+            className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-secondary focus:ring-2 focus:ring-secondary/20"
           >
             {PARISHES.map((p) => (
               <option key={p} value={p}>
@@ -100,7 +100,7 @@ export default function WarehouseSetupForm({ onCreated }) {
         <button
           type="submit"
           disabled={submitting}
-          className="bg-amazon-yellow hover:bg-amazon-orange disabled:opacity-60 text-slate-950 font-bold text-sm px-5 py-2.5 rounded-lg transition"
+          className="btn-primary disabled:opacity-60 text-sm px-5 py-2.5"
         >
           {submitting ? 'Creating…' : 'Create Warehouse'}
         </button>

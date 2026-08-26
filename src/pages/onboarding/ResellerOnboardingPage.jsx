@@ -20,7 +20,7 @@ function MarkupPreview({ markupPercent }) {
   const total = wholesale + profit;
   return (
     <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 text-xs space-y-1.5">
-      <p className="text-slate-400 font-semibold uppercase tracking-wider text-[10px]">Live preview (example on a J$1,000 wholesale item)</p>
+      <p className="text-slate-500 font-semibold uppercase tracking-wider text-[10px]">Live preview (example on a J$1,000 wholesale item)</p>
       <div className="flex justify-between"><span className="text-slate-500">Supplier cost</span><span className="font-mono">J${wholesale.toLocaleString()}</span></div>
       <div className="flex justify-between"><span className="text-slate-500">Your profit ({markupPercent}%)</span><span className="font-mono text-emerald-600">+J${profit.toLocaleString()}</span></div>
       <div className="flex justify-between border-t border-slate-200 pt-1.5 font-bold"><span className="text-slate-700">Customer pays</span><span className="font-mono">J${total.toLocaleString()}</span></div>
@@ -108,7 +108,7 @@ export default function ResellerOnboardingPage() {
               setSlugPreview(e.target.value.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''));
             }}
           />
-          {slugPreview && <p className="text-[11px] text-slate-400 -mt-2">islevendor.com/store/{slugPreview}</p>}
+          {slugPreview && <p className="text-[11px] text-slate-500 -mt-2">islevendor.com/store/{slugPreview}</p>}
           <FormField label="Legal name" required value={form.legalName} onChange={update('legalName')} />
           <FormField label="TRN" required placeholder="123-456-789" hint="9 digits, with or without dashes" value={form.trn} onChange={update('trn')} />
           <FormField label="Contact phone" required value={form.contactPhone} onChange={update('contactPhone')} />
@@ -143,7 +143,7 @@ export default function ResellerOnboardingPage() {
           <label className="block">
             <span className="flex items-center justify-between text-xs font-semibold text-slate-600 mb-2">
               <span>Markup percentage</span>
-              <span className="text-amazon-navy font-black text-sm">{form.defaultMarkupPercent}%</span>
+              <span className="text-navy font-black text-sm">{form.defaultMarkupPercent}%</span>
             </span>
             <input
               type="range"
@@ -152,9 +152,9 @@ export default function ResellerOnboardingPage() {
               step={1}
               value={form.defaultMarkupPercent}
               onChange={(e) => updateValue('defaultMarkupPercent', Number(e.target.value))}
-              className="w-full accent-amazon-navy"
+              className="w-full accent-navy"
             />
-            <span className="flex justify-between text-[10px] text-slate-400 mt-1"><span>5%</span><span>50%</span></span>
+            <span className="flex justify-between text-[10px] text-slate-500 mt-1"><span>5%</span><span>50%</span></span>
           </label>
           <MarkupPreview markupPercent={form.defaultMarkupPercent} />
         </>

@@ -21,7 +21,9 @@ export default function StarRating({ value = 0, count, interactive = false, onCh
               className={interactive ? 'cursor-pointer' : 'cursor-default'}
               aria-label={interactive ? `Rate ${n} star${n === 1 ? '' : 's'}` : undefined}
             >
-              <Star className={`${size} ${filled ? 'fill-amazon-yellow text-amazon-yellow' : 'fill-none text-slate-300'}`} />
+              {/* Stars stay a conventional gold, not the brand green — a green
+                  star reads as "selected/active", not "highly rated". */}
+              <Star className={`${size} ${filled ? 'fill-amber-400 text-amber-400' : 'fill-none text-slate-300'}`} />
             </button>
           );
         })}

@@ -79,12 +79,12 @@ export default function ProductDetailPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-slate-200">
+      <div className="min-h-screen bg-surface">
         <Navbar />
         <div className="flex items-center justify-center py-24">
           <div className="text-center">
             <p className="text-sm text-red-600 mb-3" role="alert">{error}</p>
-            <Link to="/" className="text-sm text-amazon-blue hover:underline">Back to marketplace</Link>
+            <Link to="/" className="text-sm text-secondary hover:underline">Back to marketplace</Link>
           </div>
         </div>
       </div>
@@ -93,7 +93,7 @@ export default function ProductDetailPage() {
 
   if (!listing) {
     return (
-      <div className="min-h-screen bg-slate-200">
+      <div className="min-h-screen bg-surface">
         <Navbar />
         <div className="flex items-center justify-center py-24">
           <p className="text-sm text-slate-600">Loading…</p>
@@ -152,7 +152,7 @@ export default function ProductDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-200">
+    <div className="min-h-screen bg-surface">
       <Navbar />
 
       <main className="max-w-7xl mx-auto px-4 py-8">
@@ -182,7 +182,7 @@ export default function ProductDetailPage() {
                     type="button"
                     onClick={() => setActiveImage(i)}
                     className={`h-16 w-16 rounded-lg overflow-hidden border-2 flex items-center justify-center bg-slate-100 shrink-0 transition ${
-                      i === activeImage ? 'border-amazon-orange' : 'border-transparent hover:border-slate-300'
+                      i === activeImage ? 'border-primary' : 'border-transparent hover:border-slate-300'
                     }`}
                   >
                     <img src={url} alt="" className="max-h-full max-w-full object-contain" />
@@ -194,7 +194,7 @@ export default function ProductDetailPage() {
 
           {/* DETAILS */}
           <div className="space-y-4">
-            <span className="inline-block bg-slate-900 text-white text-[10px] font-bold px-2 py-0.5 rounded">
+            <span className="inline-block bg-navy text-white text-[10px] font-bold px-2 py-0.5 rounded">
               {masterProduct.category}
             </span>
             <h1 className="text-2xl font-black text-slate-900">{masterProduct.title}</h1>
@@ -205,7 +205,7 @@ export default function ProductDetailPage() {
             </div>
 
             <div className="flex items-center gap-1 text-xs">
-              <span className="bg-amazon-blue text-white text-[9px] font-black italic px-1 rounded">IsleDash</span>
+              <span className="bg-secondary text-white text-[9px] font-black italic px-1 rounded">IsleDash</span>
               <span className={`font-semibold ${inStock ? 'text-slate-700' : 'text-red-600'}`}>
                 {inStock ? `In stock — ${masterProduct.stockQuantity} available` : 'Out of stock'}
               </span>
@@ -242,7 +242,7 @@ export default function ProductDetailPage() {
                 type="button"
                 onClick={openBuyNow}
                 disabled={!inStock}
-                className="w-full bg-amazon-orange hover:bg-orange-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-sm py-3 rounded-lg transition shadow flex items-center justify-center gap-2"
+                className="btn-secondary w-full disabled:opacity-50 disabled:cursor-not-allowed text-sm py-3 shadow flex items-center justify-center gap-2"
               >
                 <Zap className="w-4 h-4" />
                 {inStock ? 'Buy Now' : 'Out of stock'}
@@ -251,7 +251,7 @@ export default function ProductDetailPage() {
                 type="button"
                 onClick={() => handleAddToCart(listing)}
                 disabled={!inStock}
-                className="w-full bg-amazon-yellow hover:bg-amazon-orange disabled:opacity-50 disabled:cursor-not-allowed text-slate-950 font-bold text-sm py-3 rounded-lg transition shadow flex items-center justify-center gap-2"
+                className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed text-sm py-3 shadow flex items-center justify-center gap-2"
               >
                 <ShoppingBag className="w-4 h-4" />
                 Add to Cart
@@ -273,7 +273,7 @@ export default function ProductDetailPage() {
                   <button
                     type="submit"
                     disabled={placing}
-                    className="flex-1 bg-amazon-orange hover:bg-orange-500 disabled:opacity-60 text-white font-bold text-xs py-2.5 rounded-lg transition"
+                    className="btn-secondary flex-1 disabled:opacity-60 text-xs py-2.5"
                   >
                     {placing ? 'Placing order…' : 'Place Order'}
                   </button>
@@ -293,7 +293,7 @@ export default function ProductDetailPage() {
         {/* MORE FROM THIS SELLER */}
         {moreFromSeller?.length > 0 && (
           <div className="mt-10">
-            <h2 className="text-lg font-bold text-slate-900 mb-4 border-b border-slate-300 pb-3">
+            <h2 className="text-lg font-bold text-navy mb-4 border-b border-slate-200 pb-3">
               More from {store.storeName}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -307,7 +307,7 @@ export default function ProductDetailPage() {
         {/* SIMILAR ITEMS */}
         {recommended?.length > 0 && (
           <div className="mt-10">
-            <h2 className="text-lg font-bold text-slate-900 mb-4 border-b border-slate-300 pb-3">Similar Items</h2>
+            <h2 className="text-lg font-bold text-navy mb-4 border-b border-slate-200 pb-3">Similar Items</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {recommended.map((l) => (
                 <ProductCard key={l.id} listing={l} onAddToCart={handleAddToCart} />

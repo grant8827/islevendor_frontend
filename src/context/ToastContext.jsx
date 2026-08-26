@@ -15,11 +15,11 @@ export function ToastProvider({ children }) {
     <ToastContext.Provider value={{ notify }}>
       {children}
       {message && (
-        <div className="fixed top-20 right-5 z-[60] max-w-sm bg-slate-900 text-white border border-amazon-orange px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3">
-          <div className="p-2 bg-amazon-orange/20 text-amazon-yellow rounded-lg">
+        <div className="fixed top-20 right-5 z-[60] max-w-sm bg-white text-slate-900 border border-slate-200 px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3">
+          <div className="p-2 bg-primary/10 text-primary rounded-lg">
             <CheckCircle2 className="w-5 h-5" />
           </div>
-          <p className="text-xs text-slate-200">{message}</p>
+          <p className="text-xs text-slate-700">{message}</p>
         </div>
       )}
     </ToastContext.Provider>

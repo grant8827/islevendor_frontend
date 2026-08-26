@@ -3,10 +3,10 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 
 // value = backend UserRole enum (unchanged internally); label = what the
-// user sees. RESELLER is labeled "Affiliate" going forward.
+// user sees.
 const ROLES = [
   { value: 'CUSTOMER', label: 'Customer' },
-  { value: 'RESELLER', label: 'Affiliate' },
+  { value: 'RESELLER', label: 'Reseller' },
   { value: 'STORE', label: 'Store' },
   { value: 'DRIVER', label: 'Driver' },
   { value: 'WAREHOUSE', label: 'Warehouse' },

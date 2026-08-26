@@ -37,17 +37,17 @@ export default function ResellerDashboard() {
 
   if (store === undefined) {
     return (
-      <div className="min-h-screen bg-slate-900">
-        <DashboardTopBar title="Affiliate Portal" />
-        <p className="text-slate-400 text-sm p-6">Loading…</p>
+      <div className="min-h-screen bg-surface">
+        <DashboardTopBar title="Reseller Portal" />
+        <p className="text-slate-500 text-sm p-6">Loading…</p>
       </div>
     );
   }
 
   if (store === null) {
     return (
-      <div className="min-h-screen bg-slate-900">
-        <DashboardTopBar title="Affiliate Portal" />
+      <div className="min-h-screen bg-surface">
+        <DashboardTopBar title="Reseller Portal" />
         <div className="p-8">
           <StoreSetupForm onCreated={loadStore} />
         </div>
@@ -63,23 +63,23 @@ export default function ResellerDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-900 flex flex-col">
-      <DashboardTopBar title="Affiliate Portal" />
+    <div className="min-h-screen bg-surface flex flex-col">
+      <DashboardTopBar title="Reseller Portal" />
       <div className="flex flex-1">
         <DashboardSidebar items={items} active={activeTab} onSelect={setActiveTab} />
-        <main className="flex-1 p-8 text-slate-100">
+        <main className="flex-1 p-8 text-ink">
           {activeTab === 'overview' && (
             <div>
-              <h2 className="font-bold text-white text-lg mb-1">{store.storeName}</h2>
-              <p className="text-xs text-slate-400 mb-6">
-                <Link to={`/store/${store.slug}`} className="text-amazon-yellow hover:underline">
+              <h2 className="font-bold text-navy text-lg mb-1">{store.storeName}</h2>
+              <p className="text-xs text-slate-500 mb-6">
+                <Link to={`/store/${store.slug}`} className="text-primary hover:underline">
                   View your public storefront →
                 </Link>
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl">
-                <div className="bg-slate-800/80 border border-slate-700 p-5 rounded-2xl">
-                  <span className="text-xs text-slate-400">Pending Warehouse Applications</span>
-                  <p className="text-2xl font-bold text-amazon-orange mt-1">{pendingCount}</p>
+                <div className="bg-white border border-slate-200 shadow-sm p-5 rounded-2xl">
+                  <span className="text-xs text-slate-500">Pending Warehouse Applications</span>
+                  <p className="text-2xl font-bold text-secondary mt-1">{pendingCount}</p>
                 </div>
               </div>
             </div>

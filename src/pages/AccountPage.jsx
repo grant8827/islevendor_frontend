@@ -103,7 +103,7 @@ function OrderRow({ order, onRated }) {
 
       <div className="flex-1 min-w-0">
         {order.listingId ? (
-          <Link to={`/product/${order.listingId}`} className="text-sm font-bold text-slate-900 hover:text-amazon-orange transition">
+          <Link to={`/product/${order.listingId}`} className="text-sm font-bold text-slate-900 hover:text-secondary transition">
             {order.itemTitle}
           </Link>
         ) : (
@@ -148,7 +148,7 @@ function OrdersPanel() {
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-12 text-center">
         <Package className="w-10 h-10 mx-auto text-slate-300 mb-3" />
         <p className="text-sm text-slate-600 mb-4">You haven't placed any orders yet.</p>
-        <Link to="/" className="inline-flex items-center gap-2 bg-amazon-yellow hover:bg-amazon-orange text-slate-950 font-bold text-sm px-5 py-2.5 rounded-lg transition">
+        <Link to="/" className="btn-primary inline-flex items-center gap-2 text-sm px-5 py-2.5">
           Browse the marketplace
         </Link>
       </div>
@@ -174,20 +174,20 @@ export default function AccountPage() {
   const activeTab = TABS.some((t) => t.key === searchParams.get('tab')) ? searchParams.get('tab') : 'account';
 
   return (
-    <div className="min-h-screen bg-slate-200">
+    <div className="min-h-screen bg-surface">
       <Navbar />
 
       <main className="max-w-4xl mx-auto px-4 py-8">
         <h1 className="text-2xl font-black text-slate-900 mb-6">My Account</h1>
 
-        <div className="flex gap-1 border-b border-slate-300 mb-6">
+        <div className="flex gap-1 border-b border-slate-200 mb-6">
           {TABS.map(({ key, label, icon: Icon }) => (
             <button
               key={key}
               type="button"
               onClick={() => setSearchParams(key === 'account' ? {} : { tab: key })}
               className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-bold border-b-2 transition ${
-                activeTab === key ? 'border-amazon-orange text-slate-900' : 'border-transparent text-slate-500 hover:text-slate-800'
+                activeTab === key ? 'border-primary text-navy' : 'border-transparent text-slate-500 hover:text-slate-800'
               }`}
             >
               <Icon className="w-4 h-4" />

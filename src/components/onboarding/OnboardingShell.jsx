@@ -19,13 +19,13 @@ export default function OnboardingShell({
   footer,
 }) {
   return (
-    <div className="min-h-screen bg-slate-100">
+    <div className="min-h-screen bg-surface">
       <Navbar />
 
-      <div className="bg-linear-to-r from-amazon-navy via-amazon-lightNavy to-slate-900 text-white py-10 px-4">
+      <div className="bg-linear-to-r from-navy via-navy to-slate-900 text-white py-10 px-4">
         <div className="max-w-2xl mx-auto text-center space-y-3">
-          <div className="w-12 h-12 mx-auto rounded-2xl bg-amazon-yellow/15 border border-amazon-yellow/30 flex items-center justify-center">
-            <Icon className="w-6 h-6 text-amazon-yellow" />
+          <div className="w-12 h-12 mx-auto rounded-2xl bg-primary/15 border border-primary/30 flex items-center justify-center">
+            <Icon className="w-6 h-6 text-primary" />
           </div>
           <h1 className="text-2xl font-black">{title}</h1>
           {subtitle && <p className="text-slate-300 text-sm max-w-lg mx-auto">{subtitle}</p>}
@@ -44,24 +44,24 @@ export default function OnboardingShell({
                   <div
                     className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border-2 transition ${
                       done
-                        ? 'bg-amazon-navy border-amazon-navy text-amazon-yellow'
+                        ? 'bg-navy border-navy text-primary'
                         : active
-                          ? 'border-amazon-navy text-amazon-navy bg-white'
-                          : 'border-slate-300 text-slate-400 bg-white'
+                          ? 'border-navy text-navy bg-white'
+                          : 'border-slate-300 text-slate-500 bg-white'
                     }`}
                   >
                     {done ? <Check className="w-3.5 h-3.5" /> : i + 1}
                   </div>
                   <span
                     className={`text-[10px] text-center leading-tight hidden sm:block ${
-                      active ? 'text-amazon-navy font-bold' : 'text-slate-400'
+                      active ? 'text-navy font-bold' : 'text-slate-500'
                     }`}
                   >
                     {label}
                   </span>
                 </div>
                 {i < steps.length - 1 && (
-                  <div className={`h-0.5 flex-1 -mt-4 sm:-mt-5 ${done ? 'bg-amazon-navy' : 'bg-slate-300'}`} />
+                  <div className={`h-0.5 flex-1 -mt-4 sm:-mt-5 ${done ? 'bg-navy' : 'bg-slate-300'}`} />
                 )}
               </li>
             );

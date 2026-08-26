@@ -5,10 +5,10 @@ import { useToast } from '../../context/ToastContext.jsx';
 import ViewWarehouseProductsModal from './ViewWarehouseProductsModal.jsx';
 
 const STATUS_STYLES = {
-  PENDING: 'bg-amazon-orange/20 text-amazon-yellow border-amazon-orange/30',
-  APPROVED: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-  SUSPENDED: 'bg-amazon-orange/20 text-amazon-yellow border-amazon-orange/30',
-  REJECTED: 'bg-red-500/10 text-red-400 border-red-500/20',
+  PENDING: 'bg-amber-100 text-amber-700 border-amber-300',
+  APPROVED: 'bg-primary/10 text-primary-dark border-primary/30',
+  SUSPENDED: 'bg-amber-100 text-amber-700 border-amber-300',
+  REJECTED: 'bg-red-100 text-red-700 border-red-300',
 };
 
 export default function WarehousesPanel() {
@@ -43,15 +43,15 @@ export default function WarehousesPanel() {
 
   const statusFor = (warehouseId) => applications.find((a) => a.warehouseId === warehouseId)?.status;
 
-  if (loading) return <p className="text-sm text-slate-400">Loading…</p>;
+  if (loading) return <p className="text-sm text-slate-500">Loading…</p>;
 
   return (
     <div>
       <div className="flex items-center gap-2 mb-6">
-        <Warehouse className="w-5 h-5 text-amazon-yellow" />
+        <Warehouse className="w-5 h-5 text-primary" />
         <div>
-          <h2 className="font-bold text-white text-lg">Applications</h2>
-          <p className="text-xs text-slate-400">Browse warehouses and apply for permission to sell their stock.</p>
+          <h2 className="font-bold text-navy text-lg">Applications</h2>
+          <p className="text-xs text-slate-500">Browse warehouses and apply for permission to sell their stock.</p>
         </div>
       </div>
 
@@ -62,15 +62,15 @@ export default function WarehousesPanel() {
           const status = statusFor(wh.id);
           const canApply = !status || status === 'REJECTED';
           return (
-            <div key={wh.id} className="relative bg-slate-800/60 border border-slate-700 rounded-xl p-5">
+            <div key={wh.id} className="relative bg-white border border-slate-200 shadow-sm rounded-xl p-5">
               {status && (
                 <span className={`absolute top-4 right-4 text-[10px] font-bold uppercase px-2 py-0.5 rounded-full border ${STATUS_STYLES[status]}`}>
                   {status}
                 </span>
               )}
 
-              <p className="text-sm font-bold text-white pr-20">{wh.name}</p>
-              <p className="text-xs text-slate-400 mt-1">{wh.addressLine}, {wh.parish}</p>
+              <p className="text-sm font-bold text-slate-900 pr-20">{wh.name}</p>
+              <p className="text-xs text-slate-500 mt-1">{wh.addressLine}, {wh.parish}</p>
               <p className="text-xs text-slate-500 flex items-center gap-1 mt-2">
                 <Package className="w-3.5 h-3.5" /> {wh._count.products} SKUs available
               </p>
@@ -79,7 +79,7 @@ export default function WarehousesPanel() {
                 <button
                   type="button"
                   onClick={() => setViewingWarehouse(wh)}
-                  className="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-bold text-xs py-2.5 rounded-lg transition"
+                  className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-lg transition"
                 >
                   View Products
                 </button>
@@ -87,7 +87,7 @@ export default function WarehousesPanel() {
                   type="button"
                   onClick={() => apply(wh.id)}
                   disabled={!canApply}
-                  className="flex-1 bg-amazon-yellow hover:bg-amazon-orange disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-amazon-yellow text-slate-950 font-bold text-xs py-2.5 rounded-lg transition"
+                  className="btn-primary flex-1 disabled:opacity-40 disabled:cursor-not-allowed text-xs py-2.5"
                 >
                   {status === 'REJECTED' ? 'Re-apply' : 'Apply'}
                 </button>

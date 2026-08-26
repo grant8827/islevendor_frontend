@@ -6,6 +6,7 @@ import { useCart } from '../context/CartContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
 import ProductCard from '../components/marketplace/ProductCard.jsx';
 import Navbar from '../components/marketplace/Navbar.jsx';
+import islevendorIcon from '../assets/islevendor-icon.png';
 
 export default function HomePage() {
   const { addItem } = useCart();
@@ -46,14 +47,14 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-200">
+    <div className="min-h-screen bg-surface">
       <Navbar />
 
       {/* HERO */}
-      <div className="relative bg-linear-to-r from-amazon-navy via-amazon-lightNavy to-slate-900 text-white overflow-hidden py-10 px-4">
+      <div className="relative bg-linear-to-r from-navy via-navy to-slate-900 text-white overflow-hidden py-10 px-4">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
           <div className="space-y-4 max-w-xl">
-            <span className="bg-amazon-orange/20 text-amazon-yellow border border-amazon-orange/40 text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider">
+            <span className="bg-primary/20 text-primary border border-primary/40 text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider">
               Jamaica Wholesale Ecosystem
             </span>
             <h1 className="text-3xl sm:text-5xl font-black text-white leading-tight">
@@ -64,32 +65,32 @@ export default function HomePage() {
               Delivered fast by local drivers.
             </p>
 
-            <div className="flex flex-wrap gap-3 pt-2">
+            {/*<div className="flex flex-wrap gap-3 pt-2">
               <Link
                 to="/opportunities/reseller"
-                className="bg-amazon-yellow hover:bg-amazon-orange text-slate-950 font-bold text-xs px-5 py-3 rounded-lg transition shadow-lg flex items-center gap-2"
+                className="btn-primary text-xs px-5 py-3 shadow-lg flex items-center gap-2"
               >
                 <Store className="w-4 h-4" />
-                <span>Register as Affiliate (Sell Without Stock)</span>
+                <span>Register as Reseller (Sell Without Stock)</span>
               </Link>
               <Link
                 to="/opportunities/warehouse"
-                className="bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs px-5 py-3 rounded-lg border border-slate-700 transition flex items-center gap-2"
+                className="btn-secondary text-xs px-5 py-3 flex items-center gap-2"
               >
                 <Warehouse className="w-4 h-4" />
                 <span>Register Warehouse</span>
               </Link>
-            </div>
+            </div>*/}
           </div>
 
           <div className="grid grid-cols-2 gap-3 w-full md:w-auto">
-            <div className="bg-slate-800/80 backdrop-blur border border-slate-700 p-4 rounded-xl text-center">
-              <span className="text-2xl font-black text-amazon-yellow">100%</span>
+            <div className="bg-white/10 backdrop-blur border border-white/15 p-4 rounded-xl text-center">
+              <span className="text-2xl font-black text-primary">100%</span>
               <p className="text-[11px] text-slate-300">Local Bank Payouts (NCB/Scotia)</p>
             </div>
-            <div className="bg-slate-800/80 backdrop-blur border border-slate-700 p-4 rounded-xl text-center">
-              <span className="text-2xl font-black text-emerald-400">Same-Day</span>
-              <p className="text-[11px] text-slate-300">Kingston Courier Dispatch</p>
+            <div className="bg-white/10 backdrop-blur border border-white/15 p-4 rounded-xl text-center">
+              <span className="text-2xl font-black text-secondary">Same-Day</span>
+              <p className="text-[11px] text-slate-300">IsleDash Courier Dispatch</p>
             </div>
           </div>
         </div>
@@ -97,18 +98,18 @@ export default function HomePage() {
 
       {/* PRODUCT GRID */}
       <main className="max-w-7xl mx-auto px-4 py-8 space-y-8">
-        <div className="flex items-center justify-between border-b border-slate-300 pb-4">
+        <div className="flex items-center justify-between border-b border-slate-200 pb-4">
           <div>
-            <h2 className="text-xl font-bold text-slate-900">Featured Marketplace Items</h2>
-            <p className="text-xs text-slate-600">Showing items available for delivery across Kingston &amp; St. Andrew</p>
+            <h2 className="text-xl font-bold text-navy">Featured Marketplace Items</h2>
+            <p className="text-xs text-ink/70">Showing items available for delivery across Kingston &amp; St. Andrew</p>
           </div>
-          <span className="text-xs text-slate-500 font-mono">{filtered.length} Results</span>
+          <span className="text-xs text-ink/60 font-mono">{filtered.length} Results</span>
         </div>
 
-        {loading && <p className="text-sm text-slate-600">Loading products…</p>}
+        {loading && <p className="text-sm text-ink/70">Loading products…</p>}
         {error && <p className="text-sm text-red-600" role="alert">{error}</p>}
         {!loading && !error && filtered.length === 0 && (
-          <p className="text-sm text-slate-600">No products match your search yet.</p>
+          <p className="text-sm text-ink/70">No products match your search yet.</p>
         )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -119,35 +120,44 @@ export default function HomePage() {
       </main>
 
       {/* FOOTER */}
-      <footer className="bg-amazon-navy text-slate-300 text-xs mt-16">
+      <footer className="bg-navy text-slate-300 text-xs mt-16">
         <button
           type="button"
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="w-full bg-amazon-lightNavy py-3 text-center text-slate-300 hover:bg-slate-700"
+          className="w-full bg-white/5 py-3 text-center text-slate-300 hover:bg-white/10 hover:text-secondary transition"
         >
           Back to top
         </button>
 
-        <div className="max-w-7xl mx-auto px-4 py-12 grid grid-cols-1 md:grid-cols-4 gap-8 border-b border-slate-700">
+        <div className="max-w-7xl mx-auto px-4 pt-10">
+          <div className="flex items-center gap-2">
+            <img src={islevendorIcon} alt="" className="h-7 w-7" />
+            <span className="text-lg font-black tracking-tight text-white">
+              isle<span className="text-primary">vendor</span>
+            </span>
+          </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 pt-8 pb-12 grid grid-cols-1 md:grid-cols-4 gap-8 border-b border-white/10">
           <div className="space-y-2">
             <h4 className="font-bold text-white text-sm">Get to Know Us</h4>
             <p className="text-slate-400">
               IsleVendor is Jamaica's multi-tenant sales and logistics network connecting local warehouses,
-              affiliates, small stores, and gig drivers.
+              resellers, small stores, and gig drivers.
             </p>
           </div>
           <div className="space-y-2">
             <h4 className="font-bold text-white text-sm">Sell with Us</h4>
             <ul className="space-y-1 text-slate-400">
-              <li><Link to="/opportunities/reseller" className="hover:underline">Affiliate Sign Up</Link></li>
-              <li><Link to="/opportunities/store" className="hover:underline">Add Your Store</Link></li>
-              <li><Link to="/opportunities/warehouse" className="hover:underline">Register a Warehouse</Link></li>
+              <li><Link to="/opportunities/reseller" className="hover:text-secondary hover:underline">Reseller Sign Up</Link></li>
+              <li><Link to="/opportunities/store" className="hover:text-secondary hover:underline">Add Your Store</Link></li>
+              <li><Link to="/opportunities/warehouse" className="hover:text-secondary hover:underline">Register a Warehouse</Link></li>
             </ul>
           </div>
           <div className="space-y-2">
             <h4 className="font-bold text-white text-sm">Deliver with Us</h4>
             <ul className="space-y-1 text-slate-400">
-              <li><Link to="/opportunities/driver" className="hover:underline">Become a Deliver Driver</Link></li>
+              <li><Link to="/opportunities/driver" className="hover:text-secondary hover:underline">Become a Deliver Driver</Link></li>
             </ul>
           </div>
           <div className="space-y-2">

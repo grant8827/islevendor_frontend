@@ -32,8 +32,8 @@ export default function CheckboxChipGroup({ label, hint, options, value, onChang
               aria-pressed={selected}
               className={`text-xs px-3 py-2 rounded-lg border text-left transition ${
                 selected
-                  ? 'bg-amazon-navy border-amazon-navy text-amazon-yellow font-semibold'
-                  : 'bg-white border-slate-300 text-slate-600 hover:border-amazon-navy'
+                  ? 'bg-navy border-navy text-primary font-semibold'
+                  : 'bg-white border-slate-300 text-slate-600 hover:border-navy'
               }`}
             >
               {optLabel}
@@ -41,7 +41,7 @@ export default function CheckboxChipGroup({ label, hint, options, value, onChang
           );
         })}
       </div>
-      {hint && <span className="block text-[11px] text-slate-400 mt-1">{hint}</span>}
+      {hint && <span className="block text-[11px] text-slate-500 mt-1">{hint}</span>}
       {required && value.length === 0 && (
         <span className="block text-[11px] text-amber-600 mt-1">Select at least one</span>
       )}

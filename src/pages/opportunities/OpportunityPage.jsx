@@ -24,23 +24,23 @@ export default function OpportunityPage() {
   const applyPath = ONBOARDING_PATH[slug] || '/register';
 
   return (
-    <div className="min-h-screen bg-slate-200">
+    <div className="min-h-screen bg-surface">
       <Navbar />
 
       {/* HERO */}
-      <div className="bg-linear-to-r from-amazon-navy via-amazon-lightNavy to-slate-900 text-white py-16 px-4">
+      <div className="bg-linear-to-r from-navy via-navy to-slate-900 text-white py-16 px-4">
         <div className="max-w-3xl mx-auto text-center space-y-5">
-          <div className="w-14 h-14 mx-auto rounded-2xl bg-amazon-yellow/15 border border-amazon-yellow/30 flex items-center justify-center">
-            <Icon className="w-7 h-7 text-amazon-yellow" />
+          <div className="w-14 h-14 mx-auto rounded-2xl bg-primary/15 border border-primary/30 flex items-center justify-center">
+            <Icon className="w-7 h-7 text-primary" />
           </div>
-          <span className="inline-block bg-amazon-orange/20 text-amazon-yellow border border-amazon-orange/40 text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider">
+          <span className="inline-block bg-primary/20 text-primary border border-primary/40 text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider">
             {eyebrow}
           </span>
           <h1 className="text-3xl sm:text-4xl font-black leading-tight">{headline}</h1>
           <p className="text-slate-300 text-sm sm:text-base max-w-xl mx-auto">{subtext}</p>
           <Link
             to={applyPath}
-            className="inline-flex items-center gap-2 bg-amazon-yellow hover:bg-amazon-orange text-slate-950 font-bold text-sm px-6 py-3 rounded-lg transition shadow-lg"
+            className="inline-flex items-center gap-2 btn-primary font-bold text-sm px-6 py-3 rounded-lg transition shadow-lg"
           >
             {applyLabel}
             <ArrowRight className="w-4 h-4" />
@@ -54,7 +54,7 @@ export default function OpportunityPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {steps.map((step, i) => (
             <div key={step.title} className="bg-white border border-slate-200 rounded-xl p-5">
-              <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amazon-navy text-amazon-yellow font-black text-xs mb-3">
+              <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-navy text-primary font-black text-xs mb-3">
                 {i + 1}
               </span>
               <h3 className="font-bold text-slate-900 text-sm mb-1">{step.title}</h3>
@@ -69,8 +69,8 @@ export default function OpportunityPage() {
         <div className="max-w-5xl mx-auto px-4 py-14 grid grid-cols-1 sm:grid-cols-3 gap-8">
           {highlights.map((h) => (
             <div key={h.title} className="text-center sm:text-left">
-              <div className="w-10 h-10 rounded-lg bg-amazon-navy/5 flex items-center justify-center mb-3 mx-auto sm:mx-0">
-                <h.icon className="w-5 h-5 text-amazon-navy" />
+              <div className="w-10 h-10 rounded-lg bg-navy/5 flex items-center justify-center mb-3 mx-auto sm:mx-0">
+                <h.icon className="w-5 h-5 text-navy" />
               </div>
               <h3 className="font-bold text-slate-900 text-sm mb-1">{h.title}</h3>
               <p className="text-xs text-slate-600">{h.body}</p>
@@ -87,15 +87,15 @@ export default function OpportunityPage() {
         </p>
         <Link
           to={applyPath}
-          className="inline-flex items-center gap-2 bg-amazon-yellow hover:bg-amazon-orange text-slate-950 font-bold text-sm px-6 py-3 rounded-lg transition shadow-lg"
+          className="inline-flex items-center gap-2 btn-primary font-bold text-sm px-6 py-3 rounded-lg transition shadow-lg"
         >
           {applyLabel}
           <ArrowRight className="w-4 h-4" />
         </Link>
       </div>
 
-      <footer className="bg-amazon-navy text-slate-400 text-xs py-6 text-center">
-        © 2026 IsleVendor Jamaica. <Link to="/" className="text-amazon-yellow hover:underline">Back to marketplace</Link>
+      <footer className="bg-navy text-slate-400 text-xs py-6 text-center">
+        © 2026 IsleVendor Jamaica. <Link to="/" className="text-primary hover:underline">Back to marketplace</Link>
       </footer>
     </div>
   );

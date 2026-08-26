@@ -70,24 +70,24 @@ export default function ShopSetupForm({ onCreated }) {
   return (
     <div className="max-w-lg">
       <div className="flex items-center gap-2 mb-4">
-        <Building2 className="w-5 h-5 text-amazon-yellow" />
-        <h2 className="font-bold text-white text-lg">Set up your store</h2>
+        <Building2 className="w-5 h-5 text-primary" />
+        <h2 className="font-bold text-navy text-lg">Set up your store</h2>
       </div>
-      <p className="text-sm text-slate-400 mb-6">
+      <p className="text-sm text-slate-500 mb-6">
         Register your business before you can add items — no approval needed, you're selling your own stock.
       </p>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-xs text-slate-400 mb-1">Store name</label>
+          <label className="block text-xs text-slate-500 mb-1">Store name</label>
           <input
             value={form.shopName}
             onChange={handleNameChange}
             required
-            className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-amazon-yellow"
+            className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-secondary focus:ring-2 focus:ring-secondary/20"
           />
         </div>
         <div>
-          <label className="block text-xs text-slate-400 mb-1">Store URL slug</label>
+          <label className="block text-xs text-slate-500 mb-1">Store URL slug</label>
           <div className="flex items-center gap-1 text-sm">
             <span className="text-slate-500">/store/</span>
             <input
@@ -98,25 +98,25 @@ export default function ShopSetupForm({ onCreated }) {
               }}
               required
               pattern="[a-z0-9\-]+"
-              className="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-amazon-yellow"
+              className="flex-1 bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-secondary focus:ring-2 focus:ring-secondary/20"
             />
           </div>
         </div>
         <div>
-          <label className="block text-xs text-slate-400 mb-1">Address</label>
+          <label className="block text-xs text-slate-500 mb-1">Address</label>
           <input
             value={form.addressLine}
             onChange={update('addressLine')}
             required
-            className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-amazon-yellow"
+            className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-secondary focus:ring-2 focus:ring-secondary/20"
           />
         </div>
         <div>
-          <label className="block text-xs text-slate-400 mb-1">Parish</label>
+          <label className="block text-xs text-slate-500 mb-1">Parish</label>
           <select
             value={form.parish}
             onChange={update('parish')}
-            className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-amazon-yellow"
+            className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-secondary focus:ring-2 focus:ring-secondary/20"
           >
             {PARISHES.map((p) => (
               <option key={p} value={p}>
@@ -129,7 +129,7 @@ export default function ShopSetupForm({ onCreated }) {
         <button
           type="submit"
           disabled={submitting}
-          className="bg-amazon-yellow hover:bg-amazon-orange disabled:opacity-60 text-slate-950 font-bold text-sm px-5 py-2.5 rounded-lg transition"
+          className="btn-primary disabled:opacity-60 text-sm px-5 py-2.5"
         >
           {submitting ? 'Creating…' : 'Create Store'}
         </button>

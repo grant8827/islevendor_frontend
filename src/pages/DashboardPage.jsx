@@ -7,7 +7,7 @@ import ShopDashboard from './shop/ShopDashboard.jsx';
 import DriverDashboard from './driver/DriverDashboard.jsx';
 
 // Admin ledger view is still a generic placeholder below — warehouse,
-// affiliate (RESELLER), store, and driver are the four roles built out so far.
+// reseller (RESELLER), store, and driver are the four roles built out so far.
 export default function DashboardPage() {
   const { user } = useAuth();
 
@@ -21,12 +21,12 @@ export default function DashboardPage() {
   if (user.role === 'DRIVER') return <DriverDashboard />;
 
   return (
-    <div className="min-h-screen bg-slate-900">
+    <div className="min-h-screen bg-surface">
       <DashboardTopBar />
-      <div className="p-8 text-slate-100">
-        <h2 className="font-bold text-lg mb-1">Dashboard</h2>
-        <p className="text-sm text-slate-400">
-          Signed in as <strong className="text-white">{user.fullName}</strong> ({user.role})
+      <div className="p-8 text-ink">
+        <h2 className="font-bold text-navy text-lg mb-1">Dashboard</h2>
+        <p className="text-sm text-slate-500">
+          Signed in as <strong className="text-slate-900">{user.fullName}</strong> ({user.role})
         </p>
       </div>
     </div>

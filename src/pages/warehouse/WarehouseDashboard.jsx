@@ -67,9 +67,9 @@ export default function WarehouseDashboard() {
 
   if (warehouses === undefined) {
     return (
-      <div className="min-h-screen bg-slate-900">
+      <div className="min-h-screen bg-surface">
         <DashboardTopBar title="Warehouse Portal" />
-        <p className="text-slate-400 text-sm p-6">Loading…</p>
+        <p className="text-slate-500 text-sm p-6">Loading…</p>
       </div>
     );
   }
@@ -79,14 +79,14 @@ export default function WarehouseDashboard() {
   // already have at least one.
   if (warehouses.length === 0 || showAddForm) {
     return (
-      <div className="min-h-screen bg-slate-900">
+      <div className="min-h-screen bg-surface">
         <DashboardTopBar title="Warehouse Portal" />
         <div className="p-8">
           {warehouses.length > 0 && (
             <button
               type="button"
               onClick={() => setShowAddForm(false)}
-              className="flex items-center gap-1 text-xs text-slate-400 hover:text-white mb-4"
+              className="flex items-center gap-1 text-xs text-slate-500 hover:text-navy mb-4"
             >
               <X className="w-3.5 h-3.5" /> Cancel
             </button>
@@ -101,13 +101,13 @@ export default function WarehouseDashboard() {
     { key: 'overview', label: 'Overview', icon: LayoutDashboard },
     { key: 'warehouse', label: 'My Warehouse', icon: WarehouseIcon },
     { key: 'products', label: 'Products', icon: Package, badge: stats.productCount },
-    { key: 'applications', label: 'Affiliate Applications', icon: Users, badge: stats.pendingApplications },
+    { key: 'applications', label: 'Reseller Applications', icon: Users, badge: stats.pendingApplications },
     { key: 'delivery-applications', label: 'Delivery Applications', icon: Truck, badge: stats.pendingDeliveryApplications },
     { key: 'packing', label: 'Packing Queue', icon: ClipboardList, badge: stats.packingCount },
   ];
 
   return (
-    <div className="min-h-screen bg-slate-900 flex flex-col">
+    <div className="min-h-screen bg-surface flex flex-col">
       <DashboardTopBar title="Warehouse Portal" />
       <WarehouseSelector
         warehouses={warehouses}
@@ -121,11 +121,11 @@ export default function WarehouseDashboard() {
           {activeTab === 'overview' && <OverviewPanel warehouse={warehouse} stats={stats} />}
           {activeTab === 'warehouse' && (
             <div>
-              <h2 className="font-bold text-white text-lg mb-4">My Warehouse</h2>
-              <div className="bg-slate-800/60 border border-slate-700 rounded-xl p-5 max-w-md space-y-2 text-sm">
-                <p><span className="text-slate-400">Name:</span> <span className="text-white">{warehouse.name}</span></p>
-                <p><span className="text-slate-400">Address:</span> <span className="text-white">{warehouse.addressLine}</span></p>
-                <p><span className="text-slate-400">Parish:</span> <span className="text-white">{warehouse.parish}</span></p>
+              <h2 className="font-bold text-navy text-lg mb-4">My Warehouse</h2>
+              <div className="bg-white border border-slate-200 shadow-sm rounded-xl p-5 max-w-md space-y-2 text-sm">
+                <p><span className="text-slate-500">Name:</span> <span className="text-slate-900">{warehouse.name}</span></p>
+                <p><span className="text-slate-500">Address:</span> <span className="text-slate-900">{warehouse.addressLine}</span></p>
+                <p><span className="text-slate-500">Parish:</span> <span className="text-slate-900">{warehouse.parish}</span></p>
               </div>
               <ApprovedResellersSection warehouseId={warehouse.id} />
             </div>
