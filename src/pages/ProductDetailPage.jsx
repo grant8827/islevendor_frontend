@@ -102,7 +102,7 @@ export default function ProductDetailPage() {
     );
   }
 
-  const { masterProduct, store, retailPriceJmd, rating, moreFromSeller, recommended } = listing;
+  const { masterProduct, store, retailPriceJmd, shipFromParish, rating, moreFromSeller, recommended } = listing;
   const images = masterProduct.images?.length ? masterProduct.images : masterProduct.imageUrl ? [masterProduct.imageUrl] : [];
   const inStock = masterProduct.stockQuantity > 0;
 
@@ -207,7 +207,9 @@ export default function ProductDetailPage() {
             <div className="flex items-center gap-1 text-xs">
               <span className="bg-secondary text-white text-[9px] font-black italic px-1 rounded">IsleDash</span>
               <span className={`font-semibold ${inStock ? 'text-slate-700' : 'text-red-600'}`}>
-                {inStock ? `In stock — ${masterProduct.stockQuantity} available` : 'Out of stock'}
+                {inStock
+                  ? `Ships from ${shipFromParish || 'Jamaica'} — ${masterProduct.stockQuantity} available`
+                  : 'Out of stock'}
               </span>
             </div>
 

@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { ShoppingCart, ImageOff } from 'lucide-react';
 
 export default function ProductCard({ listing, onAddToCart }) {
-  const { masterProduct, store, retailPriceJmd } = listing;
+  const { masterProduct, store, retailPriceJmd, shipFromParish } = listing;
   const inStock = masterProduct.stockQuantity > 0;
 
   return (
@@ -35,7 +35,7 @@ export default function ProductCard({ listing, onAddToCart }) {
           <div className="flex items-center gap-1 text-xs text-slate-600">
             <span className="bg-secondary text-white text-[9px] font-black italic px-1 rounded">IsleDash</span>
             <span className="font-semibold text-slate-800">
-              {inStock ? 'Ships from Kingston' : 'Out of stock'}
+              {inStock ? `Ships from ${shipFromParish || 'Jamaica'}` : 'Out of stock'}
             </span>
           </div>
 
