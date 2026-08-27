@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { ShoppingCart, ImageOff } from 'lucide-react';
 
-export default function ProductCard({ listing, onAddToCart }) {
+export default function ProductCard({ listing, onAddToCart, showMetadata = true }) {
   const { masterProduct, store, retailPriceJmd, originalPriceJmd, discountPercent = 0, shipFromParish } = listing;
   const inStock = masterProduct.stockQuantity > 0;
 
@@ -17,9 +17,11 @@ export default function ProductCard({ listing, onAddToCart }) {
               <span className="text-[10px] uppercase tracking-wide">No image yet</span>
             </div>
           )}
-          <span className="absolute top-2 left-2 bg-navy text-white text-[10px] font-bold px-2 py-0.5 rounded">
-            {masterProduct.category}
-          </span>
+          {showMetadata && (
+            <span className="absolute top-2 left-2 bg-navy text-white text-[10px] font-bold px-2 py-0.5 rounded">
+              {masterProduct.category}
+            </span>
+          )}
           {discountPercent > 0 && (
             <span className="absolute top-2 right-2 bg-red-600 text-white text-[10px] font-black px-2 py-1 rounded-full">
               -{discountPercent}%
@@ -47,9 +49,11 @@ export default function ProductCard({ listing, onAddToCart }) {
             </span>
           </div>
 
-          <div className="bg-slate-50 p-2 rounded text-[11px] text-slate-600 border border-slate-100">
-            Sold by <strong className="text-slate-800">{store.storeName}</strong>
-          </div>
+          {showMetadata && (
+            <div className="bg-slate-50 p-2 rounded text-[11px] text-slate-600 border border-slate-100">
+              Sold by <strong className="text-slate-800">{store.storeName}</strong>
+            </div>
+          )}
         </div>
       </div>
 

@@ -21,7 +21,7 @@ function ProductSection({ id, title, subtitle, listings, onAddToCart }) {
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5">
         {listings.map((listing) => (
-          <ProductCard key={listing.id} listing={listing} onAddToCart={onAddToCart} />
+          <ProductCard key={listing.id} listing={listing} onAddToCart={onAddToCart} showMetadata={false} />
         ))}
       </div>
     </section>
