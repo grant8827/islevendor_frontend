@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Store, Warehouse } from 'lucide-react';
+import { ArrowRight, BadgePercent, MapPin, PackageCheck, Store, Truck, Warehouse } from 'lucide-react';
 import { apiRequest } from '../api/client.js';
 import { useCart } from '../context/CartContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
@@ -84,53 +84,82 @@ export default function HomePage() {
       <Navbar />
 
       {/* HERO */}
-      <div className="relative bg-linear-to-r from-navy via-navy to-slate-900 text-white overflow-hidden py-10 px-4">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
-          <div className="space-y-4 max-w-xl">
-            <span className="bg-primary/20 text-primary border border-primary/40 text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider">
-              Jamaica Wholesale Ecosystem
+      <section className="relative overflow-hidden bg-navy text-white">
+        <div className="absolute -right-24 -top-28 h-80 w-80 rounded-full bg-secondary/20 blur-3xl" />
+        <div className="absolute -bottom-40 left-1/3 h-80 w-80 rounded-full bg-primary/15 blur-3xl" />
+
+        <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-4 py-12 sm:py-16 lg:grid-cols-[1.12fr_0.88fr] lg:py-20">
+          <div className="max-w-2xl">
+            <span className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/15 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-green-200">
+              <MapPin className="h-3.5 w-3.5" />
+              Jamaica's local online marketplace
             </span>
-            <h1 className="text-3xl sm:text-5xl font-black text-white leading-tight">
-              Warehouse Direct. Sold by Local Marketers.
+
+            <h1 className="mt-5 text-4xl font-black leading-[1.08] tracking-tight text-white sm:text-5xl lg:text-6xl">
+              Shop local.
+              <span className="block text-primary">Delivered island-wide.</span>
             </h1>
-            <p className="text-slate-300 text-sm">
-              Browse items imported directly from Kingston warehouses by independent Jamaican resellers.
-              Delivered fast by local drivers.
+
+            <p className="mt-5 max-w-xl text-base leading-7 text-slate-200 sm:text-lg">
+              Discover new arrivals, special offers, and featured products from Jamaican stores,
+              resellers, and warehouses—all in one trusted marketplace.
             </p>
 
-            {/*<div className="flex flex-wrap gap-3 pt-2">
-              <Link
-                to="/opportunities/reseller"
-                className="btn-primary text-xs px-5 py-3 shadow-lg flex items-center gap-2"
+            <div className="mt-7 flex flex-wrap gap-3">
+              <a
+                href="#marketplace-items"
+                className="btn-primary inline-flex items-center gap-2 px-5 py-3 shadow-lg shadow-black/20"
               >
-                <Store className="w-4 h-4" />
-                <span>Register as Reseller (Sell Without Stock)</span>
-              </Link>
+                Shop marketplace
+                <ArrowRight className="h-4 w-4" />
+              </a>
               <Link
-                to="/opportunities/warehouse"
-                className="btn-secondary text-xs px-5 py-3 flex items-center gap-2"
+                to="/opportunities/store"
+                className="inline-flex items-center gap-2 rounded-lg border border-white/30 bg-white/10 px-5 py-3 font-bold text-white transition hover:bg-white/20"
               >
-                <Warehouse className="w-4 h-4" />
-                <span>Register Warehouse</span>
+                <Store className="h-4 w-4" />
+                Sell on IsleVendor
               </Link>
-            </div>*/}
+            </div>
+
+            <div className="mt-8 flex flex-wrap gap-x-6 gap-y-3 text-sm text-slate-300">
+              <span className="flex items-center gap-2"><PackageCheck className="h-4 w-4 text-primary" /> Local businesses</span>
+              <span className="flex items-center gap-2"><BadgePercent className="h-4 w-4 text-primary" /> Marketplace deals</span>
+              <span className="flex items-center gap-2"><Truck className="h-4 w-4 text-primary" /> IsleDash delivery</span>
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 w-full md:w-auto">
-            <div className="bg-white/10 backdrop-blur border border-white/15 p-4 rounded-xl text-center">
-              <span className="text-2xl font-black text-primary">100%</span>
-              <p className="text-[11px] text-slate-300">Local Bank Payouts (NCB/Scotia)</p>
-            </div>
-            <div className="bg-white/10 backdrop-blur border border-white/15 p-4 rounded-xl text-center">
-              <span className="text-2xl font-black text-secondary">Same-Day</span>
-              <p className="text-[11px] text-slate-300">IsleDash Courier Dispatch</p>
+          <div className="relative mx-auto w-full max-w-lg lg:mx-0 lg:justify-self-end">
+            <div className="rounded-3xl border border-white/15 bg-white/10 p-5 shadow-2xl shadow-black/25 backdrop-blur-sm sm:p-7">
+              <div className="mb-6 flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-widest text-secondary">One island. One network.</p>
+                  <h2 className="mt-1 text-xl font-black text-white">How IsleVendor works</h2>
+                </div>
+                <img src={islevendorIcon} alt="" className="h-12 w-12 rounded-xl bg-white p-1" />
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-center gap-4 rounded-2xl bg-white p-4 text-ink shadow-lg">
+                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary/15 text-primary-dark"><Store className="h-5 w-5" /></span>
+                  <div><p className="font-bold text-navy">Local sellers list products</p><p className="text-xs text-slate-500">Shop inventory from businesses across Jamaica</p></div>
+                </div>
+                <div className="flex items-center gap-4 rounded-2xl bg-white p-4 text-ink shadow-lg">
+                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-secondary/15 text-secondary-dark"><Warehouse className="h-5 w-5" /></span>
+                  <div><p className="font-bold text-navy">You order securely online</p><p className="text-xs text-slate-500">Find products, deals, and nearby availability</p></div>
+                </div>
+                <div className="flex items-center gap-4 rounded-2xl bg-white p-4 text-ink shadow-lg">
+                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-navy/10 text-navy"><Truck className="h-5 w-5" /></span>
+                  <div><p className="font-bold text-navy">IsleDash brings it to you</p><p className="text-xs text-slate-500">Local dispatch from the seller's parish</p></div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* PRODUCT SECTIONS */}
-      <main className="max-w-7xl mx-auto px-4 py-8 space-y-12">
+      <main id="marketplace-items" className="max-w-7xl mx-auto px-4 py-8 space-y-12 scroll-mt-4">
         {loading && <p className="text-sm text-ink/70">Loading products…</p>}
         {error && <p className="text-sm text-red-600" role="alert">{error}</p>}
         {!loading && !error && filtered.length === 0 && (

@@ -56,7 +56,7 @@ export default function Navbar() {
   }
 
   return (
-    <header className="bg-navy text-white sticky top-0 z-40">
+    <header className="bg-navy text-white z-40">
       {/* Utility bar: customer service (left), seller/driver recruitment
           (center), account access (right). */}
       <div className="bg-navy text-[11px] px-4 py-1.5 border-b border-white/10">
