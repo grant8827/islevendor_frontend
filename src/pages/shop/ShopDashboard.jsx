@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { LayoutDashboard, Building2, Package, ClipboardList, Truck, UserRound, X } from 'lucide-react';
+import { LayoutDashboard, Building2, Package, ClipboardList, Truck, UserRound, ListOrdered, MessageSquare, X } from 'lucide-react';
 import { apiRequest } from '../../api/client.js';
 import DashboardTopBar from '../../components/dashboard/DashboardTopBar.jsx';
 import DashboardSidebar from '../../components/dashboard/DashboardSidebar.jsx';
 import DeliveryApplicationsPanel from '../../components/dashboard/DeliveryApplicationsPanel.jsx';
+import OrdersPanel from '../../components/dashboard/OrdersPanel.jsx';
+import FeedbackPanel from '../../components/dashboard/FeedbackPanel.jsx';
 import ShopSelector from './ShopSelector.jsx';
 import ShopSetupForm from './ShopSetupForm.jsx';
 import OverviewPanel from './OverviewPanel.jsx';
@@ -94,6 +96,8 @@ export default function ShopDashboard() {
     { key: 'overview', label: 'Overview', icon: LayoutDashboard },
     { key: 'store', label: 'My Store', icon: Building2 },
     { key: 'products', label: 'Products', icon: Package, badge: stats.productCount },
+    { key: 'orders', label: 'Orders', icon: ListOrdered },
+    { key: 'feedback', label: 'Feedback', icon: MessageSquare },
     { key: 'delivery-applications', label: 'Delivery Applications', icon: Truck, badge: stats.pendingDeliveryApplications },
     { key: 'packing', label: 'Packing Queue', icon: ClipboardList, badge: stats.packingCount },
     { key: 'profile', label: 'Profile', icon: UserRound, bottom: true },
@@ -105,7 +109,7 @@ export default function ShopDashboard() {
       <ShopSelector shops={shops} selectedId={selectedId} onSelect={setSelectedId} onAddNew={() => setShowAddForm(true)} />
       <div className="flex flex-1">
         <DashboardSidebar items={items} active={activeTab} onSelect={setActiveTab} />
-        <main className="flex-1 p-8 text-slate-100">
+        <main className="flex-1 p-8 text-ink">
           {activeTab === 'overview' && <OverviewPanel shop={shop} stats={stats} />}
           {activeTab === 'store' && (
             <div>
@@ -123,6 +127,8 @@ export default function ShopDashboard() {
             </div>
           )}
           {activeTab === 'products' && <ProductsPanel shopId={shop.id} />}
+          {activeTab === 'orders' && <OrdersPanel endpoint={`/shop/${shop.id}/orders`} />}
+          {activeTab === 'feedback' && <FeedbackPanel endpoint={`/shop/${shop.id}/feedback`} />}
           {activeTab === 'delivery-applications' && (
             <DeliveryApplicationsPanel ownerType="shop" ownerId={shop.id} onDecision={loadStats} />
           )}

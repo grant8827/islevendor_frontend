@@ -28,6 +28,8 @@ export default function ProductDetailPage() {
   // rather than flashing in incorrectly.
   const [myRating, setMyRating] = useState(null);
   const [ratingOrderId, setRatingOrderId] = useState(null);
+  const [commentDraft, setCommentDraft] = useState('');
+  const [savingComment, setSavingComment] = useState(false);
 
   // Guards against a stale response (e.g. from a previous :id) landing after
   // a newer one when navigating from one product's detail page to another's.
@@ -40,6 +42,7 @@ export default function ProductDetailPage() {
     setBuyNowOpen(false);
     setMyRating(null);
     setRatingOrderId(null);
+    setCommentDraft('');
     apiRequest(`/commerce/listings/${id}`, { auth: false })
       .then((data) => {
         if (reqId !== requestId.current) return;
@@ -59,6 +62,7 @@ export default function ProductDetailPage() {
           if (data.eligible) {
             setRatingOrderId(data.orderId);
             setMyRating(data.myRating);
+            setCommentDraft(data.myComment || '');
           }
         })
         .catch(() => {});
@@ -74,6 +78,19 @@ export default function ProductDetailPage() {
       apiRequest(`/commerce/listings/${id}`, { auth: false }).then(setListing).catch(() => {});
     } catch (err) {
       notify(err.message);
+    }
+  }
+
+  async function submitComment(e) {
+    e.preventDefault();
+    setSavingComment(true);
+    try {
+      await apiRequest('/ratings', { method: 'POST', body: { orderId: ratingOrderId, rating: myRating, comment: commentDraft } });
+      notify('Feedback saved — thanks!');
+    } catch (err) {
+      notify(err.message);
+    } finally {
+      setSavingComment(false);
     }
   }
 
@@ -235,6 +252,21 @@ export default function ProductDetailPage() {
                   </span>
                   <StarRating value={myRating || 0} interactive onChange={submitRating} size="w-5 h-5" />
                 </div>
+              )}
+              {ratingOrderId && myRating && (
+                <form onSubmit={submitComment} className="pt-1 space-y-2">
+                  <textarea
+                    value={commentDraft}
+                    onChange={(e) => setCommentDraft(e.target.value)}
+                    placeholder="Add a comment about this item (optional)…"
+                    rows={2}
+                    maxLength={1000}
+                    className="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:border-secondary resize-y"
+                  />
+                  <button type="submit" disabled={savingComment} className="btn-secondary disabled:opacity-60 text-xs px-4 py-2">
+                    {savingComment ? 'Saving…' : 'Save Feedback'}
+                  </button>
+                </form>
               )}
             </div>
 

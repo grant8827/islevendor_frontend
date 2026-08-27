@@ -64,6 +64,8 @@ function OrderRow({ order, onRated }) {
   const { notify } = useToast();
   const [rating, setRating] = useState(null);
   const [ratingOrderId, setRatingOrderId] = useState(null);
+  const [commentDraft, setCommentDraft] = useState('');
+  const [savingComment, setSavingComment] = useState(false);
 
   useEffect(() => {
     if (order.status !== 'DELIVERED' || !order.listingId) return;
@@ -75,6 +77,7 @@ function OrderRow({ order, onRated }) {
         if (data.eligible && data.orderId === order.id) {
           setRatingOrderId(order.id);
           setRating(data.myRating);
+          setCommentDraft(data.myComment || '');
         }
       })
       .catch(() => {});
@@ -88,6 +91,20 @@ function OrderRow({ order, onRated }) {
       onRated?.();
     } catch (err) {
       notify(err.message);
+    }
+  }
+
+  async function submitComment(e) {
+    e.preventDefault();
+    setSavingComment(true);
+    try {
+      await apiRequest('/ratings', { method: 'POST', body: { orderId: order.id, rating, comment: commentDraft } });
+      notify('Feedback saved — thanks!');
+      onRated?.();
+    } catch (err) {
+      notify(err.message);
+    } finally {
+      setSavingComment(false);
     }
   }
 
@@ -115,9 +132,26 @@ function OrderRow({ order, onRated }) {
         </p>
 
         {ratingOrderId && (
-          <div className="flex items-center gap-2 mt-2">
-            <span className="text-xs text-slate-500">{rating ? 'Your rating:' : 'Rate this item:'}</span>
-            <StarRating value={rating || 0} interactive onChange={submitRating} size="w-4 h-4" />
+          <div className="mt-2">
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-500">{rating ? 'Your rating:' : 'Rate this item:'}</span>
+              <StarRating value={rating || 0} interactive onChange={submitRating} size="w-4 h-4" />
+            </div>
+            {rating && (
+              <form onSubmit={submitComment} className="mt-2 flex items-center gap-2">
+                <input
+                  type="text"
+                  value={commentDraft}
+                  onChange={(e) => setCommentDraft(e.target.value)}
+                  placeholder="Add a comment (optional)…"
+                  maxLength={1000}
+                  className="flex-1 text-xs border border-slate-300 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-secondary"
+                />
+                <button type="submit" disabled={savingComment} className="btn-secondary disabled:opacity-60 text-[11px] px-3 py-1.5 shrink-0">
+                  {savingComment ? 'Saving…' : 'Save'}
+                </button>
+              </form>
+            )}
           </div>
         )}
       </div>

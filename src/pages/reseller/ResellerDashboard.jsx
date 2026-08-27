@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { LayoutDashboard, Store, Warehouse as WarehouseIcon, Package, UserRound } from 'lucide-react';
+import { LayoutDashboard, Store, Warehouse as WarehouseIcon, Package, UserRound, ListOrdered, MessageSquare } from 'lucide-react';
 import { apiRequest } from '../../api/client.js';
 import DashboardTopBar from '../../components/dashboard/DashboardTopBar.jsx';
 import DashboardSidebar from '../../components/dashboard/DashboardSidebar.jsx';
+import OrdersPanel from '../../components/dashboard/OrdersPanel.jsx';
+import FeedbackPanel from '../../components/dashboard/FeedbackPanel.jsx';
 import StoreSetupForm from './StoreSetupForm.jsx';
 import WarehousesPanel from './WarehousesPanel.jsx';
 import ProductsPanel from './ProductsPanel.jsx';
@@ -60,6 +62,8 @@ export default function ResellerDashboard() {
     { key: 'overview', label: 'Overview', icon: LayoutDashboard },
     { key: 'products', label: 'Products', icon: Package },
     { key: 'store', label: 'My Store', icon: Store },
+    { key: 'orders', label: 'Orders', icon: ListOrdered },
+    { key: 'feedback', label: 'Feedback', icon: MessageSquare },
     { key: 'warehouses', label: 'Applications', icon: WarehouseIcon, badge: pendingCount },
     { key: 'profile', label: 'Profile', icon: UserRound, bottom: true },
   ];
@@ -88,6 +92,8 @@ export default function ResellerDashboard() {
           )}
           {activeTab === 'products' && <ProductsPanel store={store} />}
           {activeTab === 'store' && <MyStorePanel store={store} />}
+          {activeTab === 'orders' && <OrdersPanel endpoint={`/commerce/stores/${store.id}/orders`} />}
+          {activeTab === 'feedback' && <FeedbackPanel endpoint={`/commerce/stores/${store.id}/feedback`} />}
           {activeTab === 'warehouses' && <WarehousesPanel />}
           {activeTab === 'profile' && (
             <ProfilePanel

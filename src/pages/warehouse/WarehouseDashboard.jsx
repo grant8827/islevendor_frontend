@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { LayoutDashboard, Warehouse as WarehouseIcon, Package, Users, ClipboardList, Truck, UserRound, X } from 'lucide-react';
+import { LayoutDashboard, Warehouse as WarehouseIcon, Package, Users, ClipboardList, Truck, UserRound, ListOrdered, MessageSquare, X } from 'lucide-react';
 import { apiRequest } from '../../api/client.js';
 import DashboardTopBar from '../../components/dashboard/DashboardTopBar.jsx';
 import DashboardSidebar from '../../components/dashboard/DashboardSidebar.jsx';
 import DeliveryApplicationsPanel from '../../components/dashboard/DeliveryApplicationsPanel.jsx';
+import OrdersPanel from '../../components/dashboard/OrdersPanel.jsx';
+import FeedbackPanel from '../../components/dashboard/FeedbackPanel.jsx';
 import WarehouseSelector from './WarehouseSelector.jsx';
 import WarehouseSetupForm from './WarehouseSetupForm.jsx';
 import OverviewPanel from './OverviewPanel.jsx';
@@ -102,6 +104,8 @@ export default function WarehouseDashboard() {
     { key: 'overview', label: 'Overview', icon: LayoutDashboard },
     { key: 'warehouse', label: 'My Warehouse', icon: WarehouseIcon },
     { key: 'products', label: 'Products', icon: Package, badge: stats.productCount },
+    { key: 'orders', label: 'Orders', icon: ListOrdered },
+    { key: 'feedback', label: 'Feedback', icon: MessageSquare },
     { key: 'applications', label: 'Reseller Applications', icon: Users, badge: stats.pendingApplications },
     { key: 'delivery-applications', label: 'Delivery Applications', icon: Truck, badge: stats.pendingDeliveryApplications },
     { key: 'packing', label: 'Packing Queue', icon: ClipboardList, badge: stats.packingCount },
@@ -119,7 +123,7 @@ export default function WarehouseDashboard() {
       />
       <div className="flex flex-1">
         <DashboardSidebar items={items} active={activeTab} onSelect={setActiveTab} />
-        <main className="flex-1 p-8 text-slate-100">
+        <main className="flex-1 p-8 text-ink">
           {activeTab === 'overview' && <OverviewPanel warehouse={warehouse} stats={stats} />}
           {activeTab === 'warehouse' && (
             <div>
@@ -133,6 +137,8 @@ export default function WarehouseDashboard() {
             </div>
           )}
           {activeTab === 'products' && <ProductsPanel warehouseId={warehouse.id} />}
+          {activeTab === 'orders' && <OrdersPanel endpoint={`/warehouse/${warehouse.id}/orders`} showSeller />}
+          {activeTab === 'feedback' && <FeedbackPanel endpoint={`/warehouse/${warehouse.id}/feedback`} showSeller />}
           {activeTab === 'applications' && <ApplicationsPanel warehouseId={warehouse.id} onDecision={loadStats} />}
           {activeTab === 'delivery-applications' && (
             <DeliveryApplicationsPanel ownerType="warehouse" ownerId={warehouse.id} onDecision={loadStats} />
