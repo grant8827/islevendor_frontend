@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { ArrowRight, BadgePercent, MapPin, PackageCheck, ShieldCheck, ShoppingBag, Truck } from 'lucide-react';
 import { apiRequest } from '../api/client.js';
 import { useCart } from '../context/CartContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
 import ProductCard from '../components/marketplace/ProductCard.jsx';
 import Navbar from '../components/marketplace/Navbar.jsx';
 import islevendorIcon from '../assets/islevendor-icon.png';
+import islevendorHero from '../assets/islevendor_hero.png';
 
 function ProductSection({ id, title, subtitle, listings, onAddToCart }) {
   if (listings.length === 0) return null;
@@ -83,7 +83,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-surface">
       <Navbar />
 
-      {/* HERO */}
+      {/* Previous buyer hero retained for possible future reuse.
       <section className="relative overflow-hidden bg-navy text-white">
         <div className="absolute -right-24 -top-28 h-80 w-80 rounded-full bg-secondary/20 blur-3xl" />
         <div className="absolute -bottom-40 left-1/3 h-80 w-80 rounded-full bg-primary/15 blur-3xl" />
@@ -156,6 +156,17 @@ export default function HomePage() {
             </div>
           </div>
         </div>
+      </section>
+      */}
+
+      <section aria-label="IsleVendor marketplace" className="overflow-hidden bg-slate-100">
+        <img
+          src={islevendorHero}
+          alt="Shop, sell, deliver, and earn with IsleVendor, Jamaica's all-in-one marketplace"
+          className="block h-auto w-full"
+          loading="eager"
+          fetchPriority="high"
+        />
       </section>
 
       {/* PRODUCT SECTIONS */}
