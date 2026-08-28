@@ -31,7 +31,14 @@ export default function ProductCard({ listing, onAddToCart, showMetadata = true 
 
         <div className="p-4 space-y-2">
           <Link to={`/product/${listing.id}`}>
-            <h3 className="font-bold text-slate-900 text-sm line-clamp-2 hover:text-secondary transition">{masterProduct.title}</h3>
+            <h3 className="font-bold text-slate-900 text-sm line-clamp-2 hover:text-secondary transition">
+              {masterProduct.title}
+              {masterProduct.condition === 'USED' && (
+                <span className="ml-1.5 align-middle bg-slate-100 text-slate-600 border border-slate-300 text-[9px] font-bold px-1.5 py-0.5 rounded">
+                  Used
+                </span>
+              )}
+            </h3>
           </Link>
 
           <div className="pt-1">

@@ -4,13 +4,29 @@ import { apiRequest } from '../../api/client.js';
 import { useToast } from '../../context/ToastContext.jsx';
 import MultiImageInput from '../../components/dashboard/MultiImageInput.jsx';
 
-const EMPTY_FORM = { title: '', category: '', description: '', wholesalePriceJmd: '', stockQuantity: '', images: [''] };
+const EMPTY_FORM = {
+  title: '',
+  category: '',
+  description: '',
+  wholesalePriceJmd: '',
+  discountPercent: '0',
+  condition: 'NEW',
+  productDetails: '',
+  stockQuantity: '',
+  images: [''],
+};
 
-export default function ProductsPanel({ warehouseId }) {
+// `warehouses` — the owner's full list (id, name), so the add-product form
+// can target any of them, not just whichever one is currently selected in
+// the dashboard's switcher. Editing an existing product can't move it
+// between warehouses (the backend doesn't support that), so the dropdown
+// only appears while adding.
+export default function ProductsPanel({ warehouseId, warehouses = [] }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null); // null = adding, else editing this product's id
+  const [targetWarehouseId, setTargetWarehouseId] = useState(warehouseId);
   const [form, setForm] = useState(EMPTY_FORM);
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
@@ -31,6 +47,7 @@ export default function ProductsPanel({ warehouseId }) {
 
   function openAddForm() {
     setEditingId(null);
+    setTargetWarehouseId(warehouseId);
     setForm(EMPTY_FORM);
     setError(null);
     setShowForm(true);
@@ -43,6 +60,9 @@ export default function ProductsPanel({ warehouseId }) {
       category: product.category,
       description: product.description || '',
       wholesalePriceJmd: String(product.wholesalePriceJmd),
+      discountPercent: String(product.discountPercent ?? 0),
+      condition: product.condition || 'NEW',
+      productDetails: product.productDetails || '',
       stockQuantity: String(product.stockQuantity),
       images: product.images?.length ? product.images : product.imageUrl ? [product.imageUrl] : [''],
     });
@@ -76,6 +96,9 @@ export default function ProductsPanel({ warehouseId }) {
             category: form.category,
             description: form.description || null,
             wholesalePriceJmd: Number(form.wholesalePriceJmd),
+            discountPercent: Number(form.discountPercent) || 0,
+            condition: form.condition,
+            productDetails: form.productDetails || null,
             stockQuantity: Number(form.stockQuantity) || 0,
             images,
           },
@@ -85,11 +108,14 @@ export default function ProductsPanel({ warehouseId }) {
         await apiRequest('/warehouse/products', {
           method: 'POST',
           body: {
-            warehouseId,
+            warehouseId: targetWarehouseId,
             title: form.title,
             category: form.category,
             description: form.description || undefined,
             wholesalePriceJmd: Number(form.wholesalePriceJmd),
+            discountPercent: Number(form.discountPercent) || 0,
+            condition: form.condition,
+            productDetails: form.productDetails || undefined,
             stockQuantity: Number(form.stockQuantity) || 0,
             images,
           },
@@ -97,6 +123,9 @@ export default function ProductsPanel({ warehouseId }) {
         notify(`${form.title} added.`);
       }
       closeForm();
+      // Adding to a *different* warehouse than the one currently selected
+      // won't show up in this list (it's scoped to warehouseId) — the
+      // toast above still confirms it went through.
       load();
     } catch (err) {
       setError(err.message);
@@ -145,6 +174,22 @@ export default function ProductsPanel({ warehouseId }) {
 
       {showForm && (
         <form onSubmit={handleSubmit} className="bg-white border border-slate-200 shadow-sm rounded-xl p-5 mb-6 grid grid-cols-2 gap-4">
+          {!editingId && warehouses.length > 1 && (
+            <div className="col-span-2">
+              <label className="block text-xs text-slate-500 mb-1">Warehouse</label>
+              <select
+                value={targetWarehouseId}
+                onChange={(e) => setTargetWarehouseId(e.target.value)}
+                className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-secondary"
+              >
+                {warehouses.map((wh) => (
+                  <option key={wh.id} value={wh.id}>
+                    {wh.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
           <div>
             <label className="block text-xs text-slate-500 mb-1">Title</label>
             <input value={form.title} onChange={update('title')} required className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-secondary" />
@@ -158,8 +203,19 @@ export default function ProductsPanel({ warehouseId }) {
             <input type="number" min="0" step="0.01" value={form.wholesalePriceJmd} onChange={update('wholesalePriceJmd')} required className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-secondary" />
           </div>
           <div>
+            <label className="block text-xs text-slate-500 mb-1">Discount off wholesale (%)</label>
+            <input type="number" min="0" max="90" value={form.discountPercent} onChange={update('discountPercent')} className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-secondary" />
+          </div>
+          <div>
             <label className="block text-xs text-slate-500 mb-1">Stock quantity</label>
             <input type="number" min="0" value={form.stockQuantity} onChange={update('stockQuantity')} className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-secondary" />
+          </div>
+          <div>
+            <label className="block text-xs text-slate-500 mb-1">Condition</label>
+            <select value={form.condition} onChange={update('condition')} className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-secondary">
+              <option value="NEW">New</option>
+              <option value="USED">Used</option>
+            </select>
           </div>
           <div className="col-span-2">
             <label className="block text-xs text-slate-500 mb-1">Description</label>
@@ -168,6 +224,16 @@ export default function ProductsPanel({ warehouseId }) {
               onChange={update('description')}
               rows={3}
               placeholder="What resellers and customers should know about this product…"
+              className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-secondary resize-y"
+            />
+          </div>
+          <div className="col-span-2">
+            <label className="block text-xs text-slate-500 mb-1">Product details for customers (returns, warranty, etc.)</label>
+            <textarea
+              value={form.productDetails}
+              onChange={update('productDetails')}
+              rows={3}
+              placeholder="E.g. 7-day return window, 1-year warranty, hand wash only…"
               className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-secondary resize-y"
             />
           </div>
@@ -204,6 +270,7 @@ export default function ProductsPanel({ warehouseId }) {
                 <th className="px-5 py-3">Title</th>
                 <th className="px-5 py-3">SKU</th>
                 <th className="px-5 py-3">Category</th>
+                <th className="px-5 py-3">Condition</th>
                 <th className="px-5 py-3">Wholesale</th>
                 <th className="px-5 py-3">Stock</th>
                 <th className="px-5 py-3 text-right">Actions</th>
@@ -234,7 +301,21 @@ export default function ProductsPanel({ warehouseId }) {
                   </td>
                   <td className="px-5 py-3 text-slate-500">{p.sku}</td>
                   <td className="px-5 py-3">{p.category}</td>
-                  <td className="px-5 py-3 text-primary font-bold">J${Number(p.wholesalePriceJmd).toLocaleString()}</td>
+                  <td className="px-5 py-3">
+                    <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded border ${
+                      p.condition === 'USED' ? 'text-slate-600 bg-slate-100 border-slate-300' : 'text-primary-dark bg-primary/10 border-primary/30'
+                    }`}>
+                      {p.condition === 'USED' ? 'Used' : 'New'}
+                    </span>
+                  </td>
+                  <td className="px-5 py-3 text-primary font-bold">
+                    J${(Number(p.wholesalePriceJmd) * (1 - p.discountPercent / 100)).toLocaleString()}
+                    {p.discountPercent > 0 && (
+                      <span className="block text-[10px] text-slate-400 font-normal line-through">
+                        J${Number(p.wholesalePriceJmd).toLocaleString()}
+                      </span>
+                    )}
+                  </td>
                   <td className="px-5 py-3">{p.stockQuantity} units</td>
                   <td className="px-5 py-3">
                     <div className="flex items-center justify-end gap-1.5">

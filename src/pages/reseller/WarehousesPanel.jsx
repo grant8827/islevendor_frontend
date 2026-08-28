@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Warehouse, Package } from 'lucide-react';
+import { Briefcase, Package } from 'lucide-react';
 import { apiRequest } from '../../api/client.js';
 import { useToast } from '../../context/ToastContext.jsx';
 import ViewWarehouseProductsModal from './ViewWarehouseProductsModal.jsx';
@@ -11,8 +11,14 @@ const STATUS_STYLES = {
   REJECTED: 'bg-red-100 text-red-700 border-red-300',
 };
 
+// A "job board" of active reseller vacancies (see warehouse/VacanciesPanel.jsx
+// for the warehouse-side posting form) — a warehouse with no active vacancy
+// simply has no card here. Applying is still "apply to this warehouse"
+// (POST /authorizations), the same as before; a vacancy is discovery/
+// marketing, not a separate application record, so if a warehouse posted
+// more than one vacancy, each card shares the same application status.
 export default function WarehousesPanel() {
-  const [warehouses, setWarehouses] = useState([]);
+  const [vacancies, setVacancies] = useState([]);
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [viewingWarehouse, setViewingWarehouse] = useState(null);
@@ -21,10 +27,10 @@ export default function WarehousesPanel() {
   function load() {
     setLoading(true);
     Promise.all([
-      apiRequest('/warehouse', { auth: false }),
+      apiRequest('/warehouse/vacancies', { auth: false }),
       apiRequest('/authorizations/mine'),
-    ]).then(([wh, apps]) => {
-      setWarehouses(wh);
+    ]).then(([vacancyList, apps]) => {
+      setVacancies(vacancyList);
       setApplications(apps);
     }).finally(() => setLoading(false));
   }
@@ -48,32 +54,38 @@ export default function WarehousesPanel() {
   return (
     <div>
       <div className="flex items-center gap-2 mb-6">
-        <Warehouse className="w-5 h-5 text-primary" />
+        <Briefcase className="w-5 h-5 text-primary" />
         <div>
           <h2 className="font-bold text-navy text-lg">Applications</h2>
-          <p className="text-xs text-slate-500">Browse warehouses and apply for permission to sell their stock.</p>
+          <p className="text-xs text-slate-500">Open vacancies from warehouses currently recruiting resellers.</p>
         </div>
       </div>
 
-      {warehouses.length === 0 && <p className="text-sm text-slate-500">No warehouses registered yet.</p>}
+      {vacancies.length === 0 && (
+        <p className="text-sm text-slate-500">No open vacancies right now — check back later.</p>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {warehouses.map((wh) => {
+        {vacancies.map((v) => {
+          const wh = v.warehouse;
           const status = statusFor(wh.id);
           const canApply = !status || status === 'REJECTED';
           return (
-            <div key={wh.id} className="relative bg-white border border-slate-200 shadow-sm rounded-xl p-5">
+            <div key={v.id} className="relative bg-white border border-slate-200 shadow-sm rounded-xl p-5">
               {status && (
                 <span className={`absolute top-4 right-4 text-[10px] font-bold uppercase px-2 py-0.5 rounded-full border ${STATUS_STYLES[status]}`}>
                   {status}
                 </span>
               )}
 
-              <p className="text-sm font-bold text-slate-900 pr-20">{wh.name}</p>
-              <p className="text-xs text-slate-500 mt-1">{wh.addressLine}, {wh.parish}</p>
-              <p className="text-xs text-slate-500 flex items-center gap-1 mt-2">
+              <p className="text-sm font-bold text-slate-900 pr-20">{v.title}</p>
+              <p className="text-xs text-slate-500 mt-1">{wh.name} · {wh.addressLine}, {wh.parish}</p>
+              <p className="text-sm text-slate-700 mt-3 whitespace-pre-line">{v.description}</p>
+
+              <p className="text-xs text-slate-500 flex items-center gap-1 mt-3">
                 <Package className="w-3.5 h-3.5" /> {wh._count.products} SKUs available
               </p>
+              <p className="text-xs text-primary-dark font-bold mt-1">{wh.resellerCommissionPercent}% reseller commission</p>
 
               <div className="mt-4 flex gap-2">
                 <button

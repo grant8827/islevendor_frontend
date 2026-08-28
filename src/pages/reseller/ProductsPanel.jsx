@@ -3,14 +3,27 @@ import { Package, Plus, Check } from 'lucide-react';
 import { apiRequest } from '../../api/client.js';
 import { useToast } from '../../context/ToastContext.jsx';
 
-// Default markup suggested when a reseller adds an item — they can edit it
-// before confirming; the backend still enforces retail > wholesale.
-const DEFAULT_MARKUP = 1.25;
+const PLATFORM_COMMISSION_RATE = 0.05;
+
+// Mirrors backend-node/src/lib/pricing.ts's computeAffiliatePricing exactly —
+// a preview only (the actual charge is always computed server-side at
+// checkout), so a reseller can see what they'll earn before adding an item.
+// The reseller no longer sets a price: the warehouse's (post-discount)
+// wholesale price plus the warehouse's own reseller commission % plus the
+// platform's flat 5% are what the customer pays.
+function pricingFor(product) {
+  const wholesale = Number(product.wholesalePriceJmd);
+  const discountMultiplier = 1 - product.discountPercent / 100;
+  const unitWholesale = wholesale * discountMultiplier;
+  const resellerCut = unitWholesale * (product.warehouse.resellerCommissionPercent / 100);
+  const platformCut = unitWholesale * PLATFORM_COMMISSION_RATE;
+  const retail = unitWholesale + resellerCut + platformCut;
+  return { unitWholesale, resellerCut, platformCut, retail };
+}
 
 export default function ProductsPanel({ store }) {
   const [grants, setGrants] = useState([]);
   const [myListings, setMyListings] = useState([]);
-  const [prices, setPrices] = useState({});
   const [loading, setLoading] = useState(true);
   const { notify } = useToast();
 
@@ -29,21 +42,11 @@ export default function ProductsPanel({ store }) {
     load();
   }, [store.slug]);
 
-  function priceFor(product) {
-    if (prices[product.id] !== undefined) return prices[product.id];
-    return Math.round(Number(product.wholesalePriceJmd) * DEFAULT_MARKUP);
-  }
-
   async function addToStore(product) {
-    const retailPriceJmd = Number(priceFor(product));
-    if (retailPriceJmd <= Number(product.wholesalePriceJmd)) {
-      notify('Retail price must be higher than the wholesale price.');
-      return;
-    }
     try {
       await apiRequest(`/commerce/stores/${store.id}/listings`, {
         method: 'POST',
-        body: { masterProductId: product.id, retailPriceJmd },
+        body: { masterProductId: product.id },
       });
       notify(`${product.title} added to your store.`);
       load();
@@ -82,7 +85,8 @@ export default function ProductsPanel({ store }) {
         <div>
           <h2 className="font-bold text-navy text-lg">Products</h2>
           <p className="text-xs text-slate-500">
-            Items warehouses have added to your account — only these can be listed on your storefront.
+            Items warehouses have added to your account — only these can be listed on your storefront. Pricing is set
+            by each warehouse's wholesale price and reseller commission %, not by you.
           </p>
         </div>
       </div>
@@ -96,10 +100,13 @@ export default function ProductsPanel({ store }) {
 
       {Object.values(byWarehouse).map(({ warehouse, products }) => (
         <div key={warehouse.id} className="mb-8">
-          <h3 className="text-xs uppercase tracking-wide text-slate-500 mb-3">{warehouse.name}</h3>
+          <h3 className="text-xs uppercase tracking-wide text-slate-500 mb-3">
+            {warehouse.name} · {warehouse.resellerCommissionPercent}% reseller commission
+          </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {products.map((product) => {
               const added = listedProductIds.has(product.id);
+              const { unitWholesale, resellerCut, retail } = pricingFor({ ...product, warehouse });
               return (
                 <div key={product.id} className="bg-white border border-slate-200 shadow-sm rounded-xl p-4 flex flex-col justify-between">
                   <div>
@@ -110,27 +117,30 @@ export default function ProductsPanel({ store }) {
                           Suspended
                         </span>
                       )}
+                      {product.condition === 'USED' && (
+                        <span className="text-[10px] font-bold uppercase text-slate-600 bg-slate-100 border border-slate-300 px-1.5 py-0.5 rounded">
+                          Used
+                        </span>
+                      )}
                     </p>
                     <p className="text-xs text-slate-500">{product.category} · {product.stockQuantity} in stock</p>
-                    <p className="text-xs text-slate-500 mt-1">Wholesale: J${Number(product.wholesalePriceJmd).toLocaleString()}</p>
+                    <p className="text-xs text-slate-500 mt-1">
+                      Wholesale: J${unitWholesale.toLocaleString()}
+                      {product.discountPercent > 0 && (
+                        <span className="text-primary font-bold"> ({product.discountPercent}% off)</span>
+                      )}
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      You earn: <span className="font-bold text-primary-dark">J${resellerCut.toLocaleString()}</span> per unit
+                    </p>
+                    <p className="text-xs text-slate-500">Customer pays: J${retail.toLocaleString()}</p>
                   </div>
-                  <div className="mt-3 flex items-center gap-2">
-                    <div className="flex items-center text-xs text-slate-500">
-                      <span className="mr-1">J$</span>
-                      <input
-                        type="number"
-                        min={Number(product.wholesalePriceJmd) + 1}
-                        disabled={added}
-                        value={priceFor(product)}
-                        onChange={(e) => setPrices((p) => ({ ...p, [product.id]: e.target.value }))}
-                        className="w-24 bg-white border border-slate-300 rounded-lg px-2 py-1.5 text-slate-900 focus:outline-none focus:border-secondary disabled:opacity-50 disabled:bg-slate-50"
-                      />
-                    </div>
+                  <div className="mt-3">
                     {added ? (
                       <button
                         type="button"
                         onClick={() => removeFromStore(product)}
-                        className="flex-1 flex items-center justify-center gap-1 bg-primary/10 hover:bg-red-50 text-primary-dark hover:text-red-600 border border-primary/20 hover:border-red-300 text-xs font-bold py-1.5 rounded-lg transition"
+                        className="w-full flex items-center justify-center gap-1 bg-primary/10 hover:bg-red-50 text-primary-dark hover:text-red-600 border border-primary/20 hover:border-red-300 text-xs font-bold py-1.5 rounded-lg transition"
                       >
                         <Check className="w-3.5 h-3.5" /> Added — remove
                       </button>
@@ -139,7 +149,7 @@ export default function ProductsPanel({ store }) {
                         type="button"
                         onClick={() => addToStore(product)}
                         disabled={!product.isActive}
-                        className="btn-primary flex-1 flex items-center justify-center gap-1 disabled:opacity-50 text-xs py-1.5"
+                        className="btn-primary w-full flex items-center justify-center gap-1 disabled:opacity-50 text-xs py-1.5"
                       >
                         <Plus className="w-3.5 h-3.5" /> {product.isActive ? 'Add to My Store' : 'Unavailable'}
                       </button>

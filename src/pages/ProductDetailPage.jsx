@@ -211,9 +211,16 @@ export default function ProductDetailPage() {
 
           {/* DETAILS */}
           <div className="space-y-4">
-            <span className="inline-block bg-navy text-white text-[10px] font-bold px-2 py-0.5 rounded">
-              {masterProduct.category}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="inline-block bg-navy text-white text-[10px] font-bold px-2 py-0.5 rounded">
+                {masterProduct.category}
+              </span>
+              {masterProduct.condition === 'USED' && (
+                <span className="inline-block bg-slate-100 text-slate-600 border border-slate-300 text-[10px] font-bold px-2 py-0.5 rounded">
+                  Used
+                </span>
+              )}
+            </div>
             <h1 className="text-2xl font-black text-slate-900">{masterProduct.title}</h1>
 
             <div>
@@ -274,6 +281,13 @@ export default function ProductDetailPage() {
               <div>
                 <h2 className="text-sm font-bold text-slate-900 mb-1">Description</h2>
                 <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-line">{masterProduct.description}</p>
+              </div>
+            )}
+
+            {masterProduct.productDetails && (
+              <div>
+                <h2 className="text-sm font-bold text-slate-900 mb-1">Product Details</h2>
+                <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-line">{masterProduct.productDetails}</p>
               </div>
             )}
 

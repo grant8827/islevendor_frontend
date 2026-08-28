@@ -19,7 +19,10 @@ export default function ViewWarehouseProductsModal({ warehouse, onClose }) {
               <Package className="w-4 h-4 text-primary" />
               {warehouse.name}'s Products
             </h2>
-            <p className="text-xs text-slate-500 mt-0.5">What this warehouse sells — apply to request access.</p>
+            <p className="text-xs text-slate-500 mt-0.5">
+              What this warehouse sells — apply to request access. Resellers earn {warehouse.resellerCommissionPercent}%
+              of the wholesale price on every sale.
+            </p>
           </div>
           <button type="button" onClick={onClose} className="text-slate-500 hover:text-navy">
             <X className="w-5 h-5" />
@@ -39,10 +42,20 @@ export default function ViewWarehouseProductsModal({ warehouse, onClose }) {
                 )}
               </div>
               <div className="flex-1">
-                <p className="text-sm font-bold text-slate-900">{product.title}</p>
+                <p className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                  {product.title}
+                  {product.condition === 'USED' && (
+                    <span className="text-[10px] font-bold uppercase text-slate-600 bg-slate-100 border border-slate-300 px-1.5 py-0.5 rounded">
+                      Used
+                    </span>
+                  )}
+                </p>
                 <p className="text-xs text-slate-500">{product.category} · {product.stockQuantity} in stock</p>
               </div>
-              <p className="text-xs text-primary font-bold">J${Number(product.wholesalePriceJmd).toLocaleString()}</p>
+              <p className="text-xs text-primary font-bold">
+                J${(Number(product.wholesalePriceJmd) * (1 - product.discountPercent / 100)).toLocaleString()}
+                {product.discountPercent > 0 && <span className="block text-[10px] text-slate-400 font-normal">{product.discountPercent}% off</span>}
+              </p>
             </div>
           ))}
         </div>
