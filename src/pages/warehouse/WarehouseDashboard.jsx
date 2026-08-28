@@ -1,17 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { LayoutDashboard, Warehouse as WarehouseIcon, Package, Users, ClipboardList, Truck, UserRound, ListOrdered, MessageSquare, Briefcase, X } from 'lucide-react';
+import { LayoutDashboard, Warehouse as WarehouseIcon, Package, Briefcase, ClipboardList, UserRound, ListOrdered, MessageSquare, X } from 'lucide-react';
 import { apiRequest } from '../../api/client.js';
 import DashboardTopBar from '../../components/dashboard/DashboardTopBar.jsx';
 import DashboardSidebar from '../../components/dashboard/DashboardSidebar.jsx';
-import DeliveryApplicationsPanel from '../../components/dashboard/DeliveryApplicationsPanel.jsx';
 import OrdersPanel from '../../components/dashboard/OrdersPanel.jsx';
 import FeedbackPanel from '../../components/dashboard/FeedbackPanel.jsx';
 import WarehouseSelector from './WarehouseSelector.jsx';
 import WarehouseSetupForm from './WarehouseSetupForm.jsx';
 import OverviewPanel from './OverviewPanel.jsx';
 import ProductsPanel from './ProductsPanel.jsx';
-import VacanciesPanel from './VacanciesPanel.jsx';
-import ApplicationsPanel from './ApplicationsPanel.jsx';
+import ApplicationsPage from './ApplicationsPage.jsx';
 import PackingQueuePanel from './PackingQueuePanel.jsx';
 import ApprovedResellersSection from './ApprovedResellersSection.jsx';
 import ResellerCommissionCard from './ResellerCommissionCard.jsx';
@@ -108,9 +106,7 @@ export default function WarehouseDashboard() {
     { key: 'products', label: 'Products', icon: Package, badge: stats.productCount },
     { key: 'orders', label: 'Orders', icon: ListOrdered },
     { key: 'feedback', label: 'Feedback', icon: MessageSquare },
-    { key: 'vacancies', label: 'Vacancies', icon: Briefcase },
-    { key: 'applicants', label: 'Applicants', icon: Users, badge: stats.pendingApplications },
-    { key: 'delivery-applications', label: 'Delivery Applications', icon: Truck, badge: stats.pendingDeliveryApplications },
+    { key: 'applications', label: 'Applications', icon: Briefcase, badge: stats.pendingApplications + stats.pendingDeliveryApplications },
     { key: 'packing', label: 'Packing Queue', icon: ClipboardList, badge: stats.packingCount },
     { key: 'profile', label: 'Profile', icon: UserRound, bottom: true },
   ];
@@ -147,10 +143,13 @@ export default function WarehouseDashboard() {
           {activeTab === 'products' && <ProductsPanel warehouseId={warehouse.id} warehouses={warehouses} />}
           {activeTab === 'orders' && <OrdersPanel endpoint={`/warehouse/${warehouse.id}/orders`} showSeller />}
           {activeTab === 'feedback' && <FeedbackPanel endpoint={`/warehouse/${warehouse.id}/feedback`} showSeller />}
-          {activeTab === 'vacancies' && <VacanciesPanel warehouseId={warehouse.id} />}
-          {activeTab === 'applicants' && <ApplicationsPanel warehouseId={warehouse.id} onDecision={loadStats} />}
-          {activeTab === 'delivery-applications' && (
-            <DeliveryApplicationsPanel ownerType="warehouse" ownerId={warehouse.id} onDecision={loadStats} />
+          {activeTab === 'applications' && (
+            <ApplicationsPage
+              warehouseId={warehouse.id}
+              pendingApplicants={stats.pendingApplications}
+              pendingDrivers={stats.pendingDeliveryApplications}
+              onDecision={loadStats}
+            />
           )}
           {activeTab === 'packing' && <PackingQueuePanel warehouseId={warehouse.id} />}
           {activeTab === 'profile' && (
