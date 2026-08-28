@@ -14,8 +14,9 @@ const SUBTABS = [
 // warehouse — resellers (via the Vacancies you post and the Applicants who
 // respond) and drivers (Delivery Drivers) — as sub-tabs, rather than three
 // separate top-level sidebar items.
-export default function ApplicationsPage({ warehouseId, pendingApplicants, pendingDrivers, onDecision }) {
+export default function ApplicationsPage({ warehouse, pendingApplicants, pendingDrivers, onDecision, onWarehouseUpdated }) {
   const [subTab, setSubTab] = useState('vacancies');
+  const warehouseId = warehouse.id;
 
   const badgeFor = (key) => (key === 'applicants' ? pendingApplicants : key === 'drivers' ? pendingDrivers : 0);
 
@@ -47,7 +48,7 @@ export default function ApplicationsPage({ warehouseId, pendingApplicants, pendi
         })}
       </div>
 
-      {subTab === 'vacancies' && <VacanciesPanel warehouseId={warehouseId} />}
+      {subTab === 'vacancies' && <VacanciesPanel warehouse={warehouse} onWarehouseUpdated={onWarehouseUpdated} />}
       {subTab === 'applicants' && <ApplicationsPanel warehouseId={warehouseId} onDecision={onDecision} />}
       {subTab === 'drivers' && <DeliveryApplicationsPanel ownerType="warehouse" ownerId={warehouseId} onDecision={onDecision} />}
     </div>

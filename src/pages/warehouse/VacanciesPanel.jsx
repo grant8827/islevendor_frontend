@@ -3,18 +3,23 @@ import { Briefcase, Plus, Pencil, Trash2, PauseCircle, PlayCircle, X } from 'luc
 import { apiRequest } from '../../api/client.js';
 import { useToast } from '../../context/ToastContext.jsx';
 
-const EMPTY_FORM = { title: '', description: '' };
-
 // A warehouse's "we're recruiting" postings — what they're looking for in a
 // reseller. Only ACTIVE ones show up on the reseller-side Applications page
 // (see reseller/WarehousesPanel.jsx) — a warehouse with none active simply
 // isn't listed there, so posting one is how a warehouse gets found at all.
-export default function VacanciesPanel({ warehouseId }) {
+//
+// The reseller commission % isn't per-vacancy — it's the warehouse-level
+// Warehouse.resellerCommissionPercent (same field ResellerCommissionCard on
+// the My Warehouse tab edits) — but it's surfaced right here too since
+// stating it is naturally part of writing the posting; saving here updates
+// the same warehouse-wide number.
+export default function VacanciesPanel({ warehouse, onWarehouseUpdated }) {
+  const warehouseId = warehouse.id;
   const [vacancies, setVacancies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  const [form, setForm] = useState(EMPTY_FORM);
+  const [form, setForm] = useState({ title: '', description: '', resellerCommissionPercent: String(warehouse.resellerCommissionPercent) });
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const { notify } = useToast();
@@ -34,14 +39,14 @@ export default function VacanciesPanel({ warehouseId }) {
 
   function openAddForm() {
     setEditingId(null);
-    setForm(EMPTY_FORM);
+    setForm({ title: '', description: '', resellerCommissionPercent: String(warehouse.resellerCommissionPercent) });
     setError(null);
     setShowForm(true);
   }
 
   function openEditForm(vacancy) {
     setEditingId(vacancy.id);
-    setForm({ title: vacancy.title, description: vacancy.description });
+    setForm({ title: vacancy.title, description: vacancy.description, resellerCommissionPercent: String(warehouse.resellerCommissionPercent) });
     setError(null);
     setShowForm(true);
   }
@@ -49,7 +54,6 @@ export default function VacanciesPanel({ warehouseId }) {
   function closeForm() {
     setShowForm(false);
     setEditingId(null);
-    setForm(EMPTY_FORM);
   }
 
   async function handleSubmit(e) {
@@ -57,13 +61,21 @@ export default function VacanciesPanel({ warehouseId }) {
     setError(null);
     setSubmitting(true);
     try {
+      const { resellerCommissionPercent, ...vacancyFields } = form;
+
       if (editingId) {
-        await apiRequest(`/warehouse/vacancies/${editingId}`, { method: 'PATCH', body: form });
-        notify('Vacancy updated.');
+        await apiRequest(`/warehouse/vacancies/${editingId}`, { method: 'PATCH', body: vacancyFields });
       } else {
-        await apiRequest(`/warehouse/${warehouseId}/vacancies`, { method: 'POST', body: form });
-        notify('Vacancy posted — it will show up on the reseller Applications page.');
+        await apiRequest(`/warehouse/${warehouseId}/vacancies`, { method: 'POST', body: vacancyFields });
       }
+
+      const commission = Number(resellerCommissionPercent);
+      if (commission !== warehouse.resellerCommissionPercent) {
+        await apiRequest(`/warehouse/${warehouseId}`, { method: 'PATCH', body: { resellerCommissionPercent: commission } });
+        onWarehouseUpdated?.();
+      }
+
+      notify(editingId ? 'Vacancy updated.' : 'Vacancy posted — it will show up on the reseller Applications page.');
       closeForm();
       load();
     } catch (err) {
@@ -136,6 +148,23 @@ export default function VacanciesPanel({ warehouseId }) {
               className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-secondary resize-y"
             />
           </div>
+          <div>
+            <label className="block text-xs text-slate-500 mb-1">Reseller commission (%)</label>
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                min="0"
+                max="100"
+                value={form.resellerCommissionPercent}
+                onChange={update('resellerCommissionPercent')}
+                required
+                className="w-24 bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-secondary"
+              />
+              <span className="text-xs text-slate-500">
+                of your wholesale price, on top of the platform's 5% — applies warehouse-wide, not just this posting.
+              </span>
+            </div>
+          </div>
           {error && <p className="text-xs text-red-400" role="alert">{error}</p>}
           <div className="flex gap-2">
             <button type="submit" disabled={submitting} className="btn-primary disabled:opacity-60 text-xs font-bold px-4 py-2.5 rounded-lg transition">
@@ -171,6 +200,7 @@ export default function VacanciesPanel({ warehouseId }) {
                   </span>
                 </p>
                 <p className="text-sm text-slate-700 mt-1 whitespace-pre-line">{v.description}</p>
+                <p className="text-xs text-primary-dark font-bold mt-2">{warehouse.resellerCommissionPercent}% reseller commission</p>
               </div>
               <div className="flex items-center gap-1 shrink-0">
                 <button type="button" title="Edit" onClick={() => openEditForm(v)} className="p-1.5 rounded-lg text-slate-500 hover:text-navy hover:bg-slate-100 transition">

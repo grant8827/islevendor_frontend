@@ -145,10 +145,11 @@ export default function WarehouseDashboard() {
           {activeTab === 'feedback' && <FeedbackPanel endpoint={`/warehouse/${warehouse.id}/feedback`} showSeller />}
           {activeTab === 'applications' && (
             <ApplicationsPage
-              warehouseId={warehouse.id}
+              warehouse={warehouse}
               pendingApplicants={stats.pendingApplications}
               pendingDrivers={stats.pendingDeliveryApplications}
               onDecision={loadStats}
+              onWarehouseUpdated={() => loadWarehouses(warehouse.id)}
             />
           )}
           {activeTab === 'packing' && <PackingQueuePanel warehouseId={warehouse.id} />}
