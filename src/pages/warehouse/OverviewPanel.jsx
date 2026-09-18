@@ -1,3 +1,10 @@
+import RevenueAnalytics from '../../components/dashboard/analytics/RevenueAnalytics.jsx';
+
+// A warehouse is paid its wholesale total on every order (the reseller's
+// margin and the platform's cut are added on top — see ledger.service.ts).
+const earningOf = (order) => Number(order.wholesaleTotalJmd);
+const resellerBreakdown = { title: 'Top resellers', columnLabel: 'Reseller', labelOf: (order) => order.resellerStore?.storeName };
+
 export default function OverviewPanel({ warehouse, stats }) {
   return (
     <div>
@@ -20,6 +27,13 @@ export default function OverviewPanel({ warehouse, stats }) {
           <p className="text-2xl font-bold text-primary mt-1">{stats.packingCount}</p>
         </div>
       </div>
+
+      <RevenueAnalytics
+        endpoint={`/warehouse/${warehouse.id}/orders`}
+        earningOf={earningOf}
+        revenueNote="Your wholesale earnings on paid orders, excluding refunds."
+        breakdown={resellerBreakdown}
+      />
     </div>
   );
 }

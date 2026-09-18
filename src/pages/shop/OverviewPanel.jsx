@@ -1,4 +1,9 @@
 import { Link } from 'react-router-dom';
+import RevenueAnalytics from '../../components/dashboard/analytics/RevenueAnalytics.jsx';
+
+// A shop sells its own stock directly, so an order's resellerMarginJmd is the
+// shop's full item revenue (see ledger.service.ts).
+const earningOf = (order) => Number(order.resellerMarginJmd);
 
 export default function OverviewPanel({ shop, stats }) {
   return (
@@ -21,6 +26,13 @@ export default function OverviewPanel({ shop, stats }) {
           <p className="text-2xl font-bold text-primary mt-1">{stats.packingCount}</p>
         </div>
       </div>
+
+      <RevenueAnalytics
+        endpoint={`/shop/${shop.id}/orders`}
+        earningOf={earningOf}
+        revenueLabel="Sales"
+        revenueNote="Your item sales on paid orders, excluding refunds and delivery fees."
+      />
     </div>
   );
 }

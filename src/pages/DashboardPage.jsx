@@ -4,7 +4,6 @@ import DashboardTopBar from '../components/dashboard/DashboardTopBar.jsx';
 import WarehouseDashboard from './warehouse/WarehouseDashboard.jsx';
 import ResellerDashboard from './reseller/ResellerDashboard.jsx';
 import ShopDashboard from './shop/ShopDashboard.jsx';
-import DriverDashboard from './driver/DriverDashboard.jsx';
 
 // Admin ledger view is still a generic placeholder below — warehouse,
 // reseller (RESELLER), store, and driver are the four roles built out so far.
@@ -18,7 +17,10 @@ export default function DashboardPage() {
   if (user.role === 'WAREHOUSE') return <WarehouseDashboard />;
   if (user.role === 'RESELLER') return <ResellerDashboard />;
   if (user.role === 'STORE') return <ShopDashboard />;
-  if (user.role === 'DRIVER') return <DriverDashboard />;
+  // A driver's dashboard lives in its own isolated app shell now (IsleDash,
+  // no marketplace chrome) — see App.jsx's /isledash route and
+  // pages/isledash/IsleDashApp.jsx.
+  if (user.role === 'DRIVER') return <Navigate to="/isledash" replace />;
 
   return (
     <div className="min-h-screen bg-surface">

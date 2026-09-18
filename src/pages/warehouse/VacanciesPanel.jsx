@@ -13,7 +13,9 @@ import { useToast } from '../../context/ToastContext.jsx';
 // the My Warehouse tab edits) — but it's surfaced right here too since
 // stating it is naturally part of writing the posting; saving here updates
 // the same warehouse-wide number.
-export default function VacanciesPanel({ warehouse, onWarehouseUpdated }) {
+// `canEditCommission` is false for STAFF logins — the commission % applies
+// warehouse-wide, so changing it is an admin decision (see PATCH /warehouse/:id).
+export default function VacanciesPanel({ warehouse, onWarehouseUpdated, canEditCommission = true }) {
   const warehouseId = warehouse.id;
   const [vacancies, setVacancies] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -158,10 +160,12 @@ export default function VacanciesPanel({ warehouse, onWarehouseUpdated }) {
                 value={form.resellerCommissionPercent}
                 onChange={update('resellerCommissionPercent')}
                 required
-                className="w-24 bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-secondary"
+                disabled={!canEditCommission}
+                className="w-24 disabled:bg-slate-100 disabled:text-slate-500 bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-secondary"
               />
               <span className="text-xs text-slate-500">
                 of your wholesale price, on top of the platform's 5% — applies warehouse-wide, not just this posting.
+                {!canEditCommission && ' Only a warehouse admin can change it.'}
               </span>
             </div>
           </div>

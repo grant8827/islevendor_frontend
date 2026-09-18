@@ -31,7 +31,7 @@ export default function ResellerCommissionCard({ warehouse, onSaved }) {
   }
 
   return (
-    <form onSubmit={save} className="bg-white border border-slate-200 shadow-sm rounded-xl p-5 max-w-md mt-4">
+    <form onSubmit={save} className="bg-white border border-slate-200 shadow-sm rounded-xl p-5">
       <div className="flex items-center gap-2 mb-2">
         <Percent className="w-4 h-4 text-primary" />
         <h3 className="font-bold text-navy text-sm">Reseller Commission</h3>

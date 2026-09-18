@@ -1,22 +1,26 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { LayoutDashboard, Building2, Package, ClipboardList, Truck, UserRound, ListOrdered, MessageSquare, X } from 'lucide-react';
+import { LayoutDashboard, Building2, Package, ClipboardList, Truck, UserRound, ListOrdered, MessageSquare, Wallet, X } from 'lucide-react';
 import { apiRequest } from '../../api/client.js';
 import DashboardTopBar from '../../components/dashboard/DashboardTopBar.jsx';
 import DashboardSidebar from '../../components/dashboard/DashboardSidebar.jsx';
 import DeliveryApplicationsPanel from '../../components/dashboard/DeliveryApplicationsPanel.jsx';
 import OrdersPanel from '../../components/dashboard/OrdersPanel.jsx';
 import FeedbackPanel from '../../components/dashboard/FeedbackPanel.jsx';
+import PayoutsPanel from '../../components/dashboard/PayoutsPanel.jsx';
+import DeliveryNotificationListener from '../../components/dashboard/DeliveryNotificationListener.jsx';
 import ShopSelector from './ShopSelector.jsx';
 import ShopSetupForm from './ShopSetupForm.jsx';
 import OverviewPanel from './OverviewPanel.jsx';
 import ProductsPanel from './ProductsPanel.jsx';
 import PackingQueuePanel from './PackingQueuePanel.jsx';
 import ProfilePanel from '../../components/dashboard/ProfilePanel.jsx';
+import DashboardLoadError from '../../components/dashboard/DashboardLoadError.jsx';
 
 export default function ShopDashboard() {
   const [shops, setShops] = useState(undefined); // undefined = loading, [] = none yet
   const [selectedId, setSelectedId] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [loadError, setLoadError] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
   const [stats, setStats] = useState({ productCount: 0, pendingDeliveryApplications: 0, packingCount: 0 });
 
@@ -27,15 +31,20 @@ export default function ShopDashboard() {
   const requestId = useRef(0);
   const loadShops = useCallback((selectId) => {
     const id = ++requestId.current;
-    apiRequest('/shop/mine').then((data) => {
-      if (id !== requestId.current) return;
-      setShops(data);
-      setSelectedId((current) => {
-        if (selectId) return selectId;
-        if (current && data.some((s) => s.id === current)) return current;
-        return data[0]?.id ?? null;
+    apiRequest('/shop/mine')
+      .then((data) => {
+        if (id !== requestId.current) return;
+        setLoadError(null);
+        setShops(data);
+        setSelectedId((current) => {
+          if (selectId) return selectId;
+          if (current && data.some((s) => s.id === current)) return current;
+          return data[0]?.id ?? null;
+        });
+      })
+      .catch((err) => {
+        if (id === requestId.current) setLoadError(err.message);
       });
-    });
   }, []);
 
   useEffect(() => loadShops(), [loadShops]);
@@ -58,6 +67,19 @@ export default function ShopDashboard() {
   function handleCreated(newId) {
     setShowAddForm(false);
     loadShops(newId);
+  }
+
+  if (shops === undefined && loadError) {
+    return (
+      <DashboardLoadError
+        title="Store Portal"
+        message={loadError}
+        onRetry={() => {
+          setLoadError(null);
+          loadShops();
+        }}
+      />
+    );
   }
 
   if (shops === undefined) {
@@ -97,6 +119,7 @@ export default function ShopDashboard() {
     { key: 'store', label: 'My Store', icon: Building2 },
     { key: 'products', label: 'Products', icon: Package, badge: stats.productCount },
     { key: 'orders', label: 'Orders', icon: ListOrdered },
+    { key: 'payouts', label: 'Payouts', icon: Wallet },
     { key: 'feedback', label: 'Feedback', icon: MessageSquare },
     { key: 'delivery-applications', label: 'Delivery Applications', icon: Truck, badge: stats.pendingDeliveryApplications },
     { key: 'packing', label: 'Packing Queue', icon: ClipboardList, badge: stats.packingCount },
@@ -105,6 +128,7 @@ export default function ShopDashboard() {
 
   return (
     <div className="min-h-screen bg-surface flex flex-col">
+      <DeliveryNotificationListener kind="shop" id={shop.id} />
       <DashboardTopBar title="Store Portal" />
       <ShopSelector shops={shops} selectedId={selectedId} onSelect={setSelectedId} onAddNew={() => setShowAddForm(true)} />
       <div className="flex flex-1">
@@ -127,12 +151,15 @@ export default function ShopDashboard() {
             </div>
           )}
           {activeTab === 'products' && <ProductsPanel shopId={shop.id} />}
-          {activeTab === 'orders' && <OrdersPanel endpoint={`/shop/${shop.id}/orders`} />}
+          {activeTab === 'orders' && (
+            <OrdersPanel endpoint={`/shop/${shop.id}/orders`} refundEndpoint={(orderId) => `/shop/${shop.id}/orders/${orderId}/refund`} />
+          )}
+          {activeTab === 'payouts' && <PayoutsPanel />}
           {activeTab === 'feedback' && <FeedbackPanel endpoint={`/shop/${shop.id}/feedback`} />}
           {activeTab === 'delivery-applications' && (
             <DeliveryApplicationsPanel ownerType="shop" ownerId={shop.id} onDecision={loadStats} />
           )}
-          {activeTab === 'packing' && <PackingQueuePanel shopId={shop.id} />}
+          {activeTab === 'packing' && <PackingQueuePanel shopId={shop.id} shop={shop} />}
           {activeTab === 'profile' && (
             <ProfilePanel
               business={{ name: shop.shopName, address: shop.addressLine, parish: shop.parish, slug: shop.slug }}

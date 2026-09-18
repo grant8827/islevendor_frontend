@@ -1,21 +1,28 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { LayoutDashboard, Store, Warehouse as WarehouseIcon, Package, UserRound, ListOrdered, MessageSquare } from 'lucide-react';
+import { LayoutDashboard, Store, Warehouse as WarehouseIcon, Package, UserRound, ListOrdered, MessageSquare, Wallet } from 'lucide-react';
 import { apiRequest } from '../../api/client.js';
 import DashboardTopBar from '../../components/dashboard/DashboardTopBar.jsx';
 import DashboardSidebar from '../../components/dashboard/DashboardSidebar.jsx';
 import OrdersPanel from '../../components/dashboard/OrdersPanel.jsx';
 import FeedbackPanel from '../../components/dashboard/FeedbackPanel.jsx';
+import PayoutsPanel from '../../components/dashboard/PayoutsPanel.jsx';
 import StoreSetupForm from './StoreSetupForm.jsx';
 import WarehousesPanel from './WarehousesPanel.jsx';
 import ProductsPanel from './ProductsPanel.jsx';
 import MyStorePanel from './MyStorePanel.jsx';
 import ProfilePanel from '../../components/dashboard/ProfilePanel.jsx';
+import DashboardLoadError from '../../components/dashboard/DashboardLoadError.jsx';
+import RevenueAnalytics from '../../components/dashboard/analytics/RevenueAnalytics.jsx';
+
+// A reseller earns the margin above wholesale (its commission) on each order.
+const earningOf = (order) => Number(order.resellerMarginJmd);
 
 export default function ResellerDashboard() {
   const [store, setStore] = useState(undefined); // undefined = loading, null = none yet
   const [activeTab, setActiveTab] = useState('overview');
   const [pendingCount, setPendingCount] = useState(0);
+  const [loadError, setLoadError] = useState(null);
 
   // Guards against out-of-order responses: React StrictMode double-invokes
   // this effect in dev, firing two concurrent requests. Without this, a
@@ -24,9 +31,15 @@ export default function ResellerDashboard() {
   const requestId = useRef(0);
   const loadStore = useCallback(() => {
     const id = ++requestId.current;
-    apiRequest('/commerce/stores/mine').then((data) => {
-      if (id === requestId.current) setStore(data);
-    });
+    apiRequest('/commerce/stores/mine')
+      .then((data) => {
+        if (id !== requestId.current) return;
+        setStore(data);
+        setLoadError(null);
+      })
+      .catch((err) => {
+        if (id === requestId.current) setLoadError(err.message);
+      });
   }, []);
 
   useEffect(loadStore, [loadStore]);
@@ -37,6 +50,19 @@ export default function ResellerDashboard() {
       setPendingCount(apps.filter((a) => a.status === 'PENDING').length);
     });
   }, [store]);
+
+  if (store === undefined && loadError) {
+    return (
+      <DashboardLoadError
+        title="Reseller Portal"
+        message={loadError}
+        onRetry={() => {
+          setLoadError(null);
+          loadStore();
+        }}
+      />
+    );
+  }
 
   if (store === undefined) {
     return (
@@ -63,6 +89,7 @@ export default function ResellerDashboard() {
     { key: 'products', label: 'Products', icon: Package },
     { key: 'store', label: 'My Store', icon: Store },
     { key: 'orders', label: 'Orders', icon: ListOrdered },
+    { key: 'payouts', label: 'Payouts', icon: Wallet },
     { key: 'feedback', label: 'Feedback', icon: MessageSquare },
     { key: 'warehouses', label: 'Applications', icon: WarehouseIcon, badge: pendingCount },
     { key: 'profile', label: 'Profile', icon: UserRound, bottom: true },
@@ -88,11 +115,22 @@ export default function ResellerDashboard() {
                   <p className="text-2xl font-bold text-secondary mt-1">{pendingCount}</p>
                 </div>
               </div>
+              <RevenueAnalytics
+                endpoint={`/commerce/stores/${store.id}/orders`}
+                earningOf={earningOf}
+                revenueLabel="Earnings"
+                revenueNote="Your commission on paid orders, excluding refunds."
+              />
             </div>
           )}
           {activeTab === 'products' && <ProductsPanel store={store} />}
-          {activeTab === 'store' && <MyStorePanel store={store} />}
+          {activeTab === 'store' && <MyStorePanel
+              store={store}
+              onBrowseProducts={() => setActiveTab('products')}
+              onStoreUpdated={(patch) => setStore((current) => ({ ...current, ...patch }))}
+            />}
           {activeTab === 'orders' && <OrdersPanel endpoint={`/commerce/stores/${store.id}/orders`} />}
+          {activeTab === 'payouts' && <PayoutsPanel />}
           {activeTab === 'feedback' && <FeedbackPanel endpoint={`/commerce/stores/${store.id}/feedback`} />}
           {activeTab === 'warehouses' && <WarehousesPanel />}
           {activeTab === 'profile' && (

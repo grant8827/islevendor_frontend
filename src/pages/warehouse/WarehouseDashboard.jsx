@@ -1,10 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { LayoutDashboard, Warehouse as WarehouseIcon, Package, Briefcase, ClipboardList, UserRound, ListOrdered, MessageSquare, X } from 'lucide-react';
+import { LayoutDashboard, Warehouse as WarehouseIcon, Package, Briefcase, ClipboardList, UserRound, UsersRound, ListOrdered, MessageSquare, Wallet, X } from 'lucide-react';
 import { apiRequest } from '../../api/client.js';
+import { useAuth } from '../../context/AuthContext.jsx';
 import DashboardTopBar from '../../components/dashboard/DashboardTopBar.jsx';
 import DashboardSidebar from '../../components/dashboard/DashboardSidebar.jsx';
 import OrdersPanel from '../../components/dashboard/OrdersPanel.jsx';
 import FeedbackPanel from '../../components/dashboard/FeedbackPanel.jsx';
+import PayoutsPanel from '../../components/dashboard/PayoutsPanel.jsx';
+import DeliveryNotificationListener from '../../components/dashboard/DeliveryNotificationListener.jsx';
 import WarehouseSelector from './WarehouseSelector.jsx';
 import WarehouseSetupForm from './WarehouseSetupForm.jsx';
 import OverviewPanel from './OverviewPanel.jsx';
@@ -13,12 +16,19 @@ import ApplicationsPage from './ApplicationsPage.jsx';
 import PackingQueuePanel from './PackingQueuePanel.jsx';
 import ApprovedResellersSection from './ApprovedResellersSection.jsx';
 import ResellerCommissionCard from './ResellerCommissionCard.jsx';
+import StaffPanel from './StaffPanel.jsx';
+import DashboardLoadError from '../../components/dashboard/DashboardLoadError.jsx';
 import ProfilePanel from '../../components/dashboard/ProfilePanel.jsx';
 
 export default function WarehouseDashboard() {
+  const { user } = useAuth();
+  // A login a warehouse admin created via the Staff tab — it only ever works
+  // inside warehouses it was added to, and can't register its own.
+  const isStaffAccount = Boolean(user?.staffOfUserId);
   const [warehouses, setWarehouses] = useState(undefined); // undefined = loading, [] = none yet
   const [selectedId, setSelectedId] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [loadError, setLoadError] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
   const [stats, setStats] = useState({ productCount: 0, pendingApplications: 0, pendingDeliveryApplications: 0, packingCount: 0 });
 
@@ -29,15 +39,20 @@ export default function WarehouseDashboard() {
   const requestId = useRef(0);
   const loadWarehouses = useCallback((selectId) => {
     const id = ++requestId.current;
-    apiRequest('/warehouse/mine').then((data) => {
-      if (id !== requestId.current) return;
-      setWarehouses(data);
-      setSelectedId((current) => {
-        if (selectId) return selectId;
-        if (current && data.some((w) => w.id === current)) return current;
-        return data[0]?.id ?? null;
+    apiRequest('/warehouse/mine')
+      .then((data) => {
+        if (id !== requestId.current) return;
+        setLoadError(null);
+        setWarehouses(data);
+        setSelectedId((current) => {
+          if (selectId) return selectId;
+          if (current && data.some((w) => w.id === current)) return current;
+          return data[0]?.id ?? null;
+        });
+      })
+      .catch((err) => {
+        if (id === requestId.current) setLoadError(err.message);
       });
-    });
   }, []);
 
   useEffect(() => loadWarehouses(), [loadWarehouses]);
@@ -68,11 +83,41 @@ export default function WarehouseDashboard() {
     loadWarehouses(newId);
   }
 
+  if (warehouses === undefined && loadError) {
+    return (
+      <DashboardLoadError
+        title="Warehouse Portal"
+        message={loadError}
+        onRetry={() => {
+          setLoadError(null);
+          loadWarehouses();
+        }}
+      />
+    );
+  }
+
   if (warehouses === undefined) {
     return (
       <div className="min-h-screen bg-surface">
         <DashboardTopBar title="Warehouse Portal" />
         <p className="text-slate-500 text-sm p-6">Loading…</p>
+      </div>
+    );
+  }
+
+  // A staff login that hasn't been added to a warehouse (or was removed from
+  // its last one) has nothing to operate and mustn't be offered the
+  // "create your warehouse" form.
+  if (warehouses.length === 0 && isStaffAccount) {
+    return (
+      <div className="min-h-screen bg-surface">
+        <DashboardTopBar title="Warehouse Portal" />
+        <div className="p-8 max-w-md">
+          <h2 className="font-bold text-navy text-lg mb-2">No warehouse access yet</h2>
+          <p className="text-sm text-slate-500">
+            Your account hasn't been added to a warehouse. Ask your warehouse admin to add you from their Staff tab.
+          </p>
+        </div>
       </div>
     );
   }
@@ -100,39 +145,67 @@ export default function WarehouseDashboard() {
     );
   }
 
-  const items = [
-    { key: 'overview', label: 'Overview', icon: LayoutDashboard },
-    { key: 'warehouse', label: 'My Warehouse', icon: WarehouseIcon },
-    { key: 'products', label: 'Products', icon: Package, badge: stats.productCount },
-    { key: 'orders', label: 'Orders', icon: ListOrdered },
-    { key: 'feedback', label: 'Feedback', icon: MessageSquare },
-    { key: 'applications', label: 'Applications', icon: Briefcase, badge: stats.pendingApplications + stats.pendingDeliveryApplications },
-    { key: 'packing', label: 'Packing Queue', icon: ClipboardList, badge: stats.packingCount },
-    { key: 'profile', label: 'Profile', icon: UserRound, bottom: true },
-  ];
+  // What this login may see in *this* warehouse (it can differ per warehouse
+  // — staff at one, admin at another). The API enforces the same limits; this
+  // just hides what they couldn't use. See lib/warehouseAccess.ts.
+  //  - STAFF: products, orders, feedback, applications, packing queue.
+  //  - ADMIN: everything, plus Staff — but not Payouts (those are the owner's).
+  //  - OWNER: everything.
+  const accessRole = warehouse.accessRole ?? 'OWNER';
+  const isStaff = accessRole === 'STAFF';
+  const isOwner = accessRole === 'OWNER';
+
+  const items = isStaff
+    ? [
+        { key: 'products', label: 'Products', icon: Package, badge: stats.productCount },
+        { key: 'orders', label: 'Orders', icon: ListOrdered },
+        { key: 'feedback', label: 'Feedback', icon: MessageSquare },
+        { key: 'applications', label: 'Applications', icon: Briefcase, badge: stats.pendingApplications + stats.pendingDeliveryApplications },
+        { key: 'packing', label: 'Packing Queue', icon: ClipboardList, badge: stats.packingCount },
+      ]
+    : [
+        { key: 'overview', label: 'Overview', icon: LayoutDashboard },
+        { key: 'warehouse', label: 'My Warehouse', icon: WarehouseIcon },
+        { key: 'products', label: 'Products', icon: Package, badge: stats.productCount },
+        { key: 'orders', label: 'Orders', icon: ListOrdered },
+        ...(isOwner ? [{ key: 'payouts', label: 'Payouts', icon: Wallet }] : []),
+        { key: 'feedback', label: 'Feedback', icon: MessageSquare },
+        { key: 'applications', label: 'Applications', icon: Briefcase, badge: stats.pendingApplications + stats.pendingDeliveryApplications },
+        { key: 'packing', label: 'Packing Queue', icon: ClipboardList, badge: stats.packingCount },
+        { key: 'profile', label: 'Profile', icon: UserRound, bottom: true },
+        { key: 'staff', label: 'Staff', icon: UsersRound, bottom: true },
+      ];
+
+  // The remembered tab may not exist for this warehouse (switched from one
+  // where this login was an admin to one where they're staff, say).
+  const tab = items.some((item) => item.key === activeTab) ? activeTab : items[0].key;
 
   return (
     <div className="min-h-screen bg-surface flex flex-col">
+      <DeliveryNotificationListener kind="warehouse" id={warehouse.id} />
       <DashboardTopBar title="Warehouse Portal" />
       <WarehouseSelector
         warehouses={warehouses}
         selectedId={selectedId}
         onSelect={setSelectedId}
         onAddNew={() => setShowAddForm(true)}
+        canAdd={!isStaffAccount}
       />
       <div className="flex flex-1">
-        <DashboardSidebar items={items} active={activeTab} onSelect={setActiveTab} />
+        <DashboardSidebar items={items} active={tab} onSelect={setActiveTab} />
         <main className="flex-1 p-8 text-ink">
-          {activeTab === 'overview' && <OverviewPanel warehouse={warehouse} stats={stats} />}
-          {activeTab === 'warehouse' && (
+          {tab === 'overview' && <OverviewPanel warehouse={warehouse} stats={stats} />}
+          {tab === 'warehouse' && (
             <div>
               <h2 className="font-bold text-navy text-lg mb-4">My Warehouse</h2>
-              <div className="bg-white border border-slate-200 shadow-sm rounded-xl p-5 max-w-md space-y-2 text-sm">
-                <p><span className="text-slate-500">Name:</span> <span className="text-slate-900">{warehouse.name}</span></p>
-                <p><span className="text-slate-500">Address:</span> <span className="text-slate-900">{warehouse.addressLine}</span></p>
-                <p><span className="text-slate-500">Parish:</span> <span className="text-slate-900">{warehouse.parish}</span></p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl">
+                <div className="bg-white border border-slate-200 shadow-sm rounded-xl p-5 space-y-2 text-sm">
+                  <p><span className="text-slate-500">Name:</span> <span className="text-slate-900">{warehouse.name}</span></p>
+                  <p><span className="text-slate-500">Address:</span> <span className="text-slate-900">{warehouse.addressLine}</span></p>
+                  <p><span className="text-slate-500">Parish:</span> <span className="text-slate-900">{warehouse.parish}</span></p>
+                </div>
+                <ResellerCommissionCard warehouse={warehouse} onSaved={() => loadWarehouses(warehouse.id)} />
               </div>
-              <ResellerCommissionCard warehouse={warehouse} onSaved={() => loadWarehouses(warehouse.id)} />
               <ApprovedResellersSection warehouseId={warehouse.id} />
               <div className="mt-8">
                 <h3 className="font-bold text-navy text-base mb-4">Products in {warehouse.name}</h3>
@@ -140,23 +213,37 @@ export default function WarehouseDashboard() {
               </div>
             </div>
           )}
-          {activeTab === 'products' && <ProductsPanel warehouseId={warehouse.id} warehouses={warehouses} />}
-          {activeTab === 'orders' && <OrdersPanel endpoint={`/warehouse/${warehouse.id}/orders`} showSeller />}
-          {activeTab === 'feedback' && <FeedbackPanel endpoint={`/warehouse/${warehouse.id}/feedback`} showSeller />}
-          {activeTab === 'applications' && (
+          {tab === 'products' && <ProductsPanel warehouseId={warehouse.id} warehouses={warehouses} />}
+          {tab === 'orders' && (
+            <OrdersPanel
+              endpoint={`/warehouse/${warehouse.id}/orders`}
+              showSeller
+              refundEndpoint={isStaff ? undefined : (orderId) => `/warehouse/${warehouse.id}/orders/${orderId}/refund`}
+            />
+          )}
+          {tab === 'payouts' && <PayoutsPanel />}
+          {tab === 'feedback' && <FeedbackPanel endpoint={`/warehouse/${warehouse.id}/feedback`} showSeller />}
+          {tab === 'applications' && (
             <ApplicationsPage
               warehouse={warehouse}
               pendingApplicants={stats.pendingApplications}
               pendingDrivers={stats.pendingDeliveryApplications}
               onDecision={loadStats}
               onWarehouseUpdated={() => loadWarehouses(warehouse.id)}
+              canEditCommission={!isStaff}
             />
           )}
-          {activeTab === 'packing' && <PackingQueuePanel warehouseId={warehouse.id} />}
-          {activeTab === 'profile' && (
+          {tab === 'packing' && <PackingQueuePanel warehouseId={warehouse.id} warehouse={warehouse} />}
+          {tab === 'profile' && (
             <ProfilePanel
               business={{ name: warehouse.name, address: warehouse.addressLine, parish: warehouse.parish }}
               businessType="Warehouse business"
+            />
+          )}
+          {tab === 'staff' && (
+            <StaffPanel
+              warehouse={warehouse}
+              ownedWarehouses={isOwner ? warehouses.filter((w) => w.accessRole === 'OWNER') : []}
             />
           )}
         </main>

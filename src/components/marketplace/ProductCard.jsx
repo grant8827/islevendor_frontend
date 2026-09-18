@@ -1,14 +1,19 @@
 import { Link } from 'react-router-dom';
 import { ShoppingCart, ImageOff } from 'lucide-react';
 
-export default function ProductCard({ listing, onAddToCart, showMetadata = true }) {
+// The marketplace card. Three optional props let a dashboard reuse it as-is:
+//  - `action`: replaces the Add to Cart button (e.g. a reseller's Remove button)
+//  - `details`: replaces the "Sold by" box (e.g. earnings / supplier info)
+//  - `openInNewTab`: product links open beside the dashboard instead of over it
+export default function ProductCard({ listing, onAddToCart, showMetadata = true, action, details, openInNewTab = false }) {
   const { masterProduct, store, retailPriceJmd, originalPriceJmd, discountPercent = 0, shipFromParish } = listing;
   const inStock = masterProduct.stockQuantity > 0;
+  const linkProps = openInNewTab ? { target: '_blank', rel: 'noreferrer' } : {};
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition flex flex-col justify-between">
       <div>
-        <Link to={`/product/${listing.id}`} className="relative h-48 bg-slate-100 overflow-hidden p-4 flex items-center justify-center">
+        <Link to={`/product/${listing.id}`} {...linkProps} className="relative h-48 bg-slate-100 overflow-hidden p-4 flex items-center justify-center">
           {masterProduct.imageUrl ? (
             <img src={masterProduct.imageUrl} alt={masterProduct.title} className="max-h-full object-contain" />
           ) : (
@@ -30,7 +35,7 @@ export default function ProductCard({ listing, onAddToCart, showMetadata = true 
         </Link>
 
         <div className="p-4 space-y-2">
-          <Link to={`/product/${listing.id}`}>
+          <Link to={`/product/${listing.id}`} {...linkProps}>
             <h3 className="font-bold text-slate-900 text-sm line-clamp-2 hover:text-secondary transition">
               {masterProduct.title}
               {masterProduct.condition === 'USED' && (
@@ -56,24 +61,26 @@ export default function ProductCard({ listing, onAddToCart, showMetadata = true 
             </span>
           </div>
 
-          {showMetadata && (
+          {details ?? (showMetadata && (
             <div className="bg-slate-50 p-2 rounded text-[11px] text-slate-600 border border-slate-100">
               Sold by <strong className="text-slate-800">{store.storeName}</strong>
             </div>
-          )}
+          ))}
         </div>
       </div>
 
       <div className="p-4 pt-0">
-        <button
-          type="button"
-          onClick={() => onAddToCart(listing)}
-          disabled={!inStock}
-          className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed text-xs py-2.5 shadow flex items-center justify-center gap-2"
-        >
-          <ShoppingCart className="w-4 h-4" />
-          <span>{inStock ? 'Add to Cart' : 'Out of stock'}</span>
-        </button>
+        {action ?? (
+          <button
+            type="button"
+            onClick={() => onAddToCart(listing)}
+            disabled={!inStock}
+            className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed text-xs py-2.5 shadow flex items-center justify-center gap-2"
+          >
+            <ShoppingCart className="w-4 h-4" />
+            <span>{inStock ? 'Add to Cart' : 'Out of stock'}</span>
+          </button>
+        )}
       </div>
     </div>
   );

@@ -1,0 +1,75 @@
+import { useState } from 'react';
+import { X } from 'lucide-react';
+import { apiRequest } from '../../api/client.js';
+import { useToast } from '../../context/ToastContext.jsx';
+
+/**
+ * Confirms a reason and issues an internal refund for one order — see
+ * warehouse.routes.ts / shop.routes.ts's POST .../orders/:orderId/refund and
+ * ledger.service.ts's refundOrder for what actually happens: bookkeeping
+ * only (reverses the order's ledger legs, flips it to REFUNDED), no live
+ * payment-processor call since WiPay checkout itself isn't wired up yet.
+ */
+export default function RefundOrderModal({ endpoint, orderNumber, onClose, onRefunded }) {
+  const [reason, setReason] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState(null);
+  const { notify } = useToast();
+
+  async function submit() {
+    if (!reason.trim()) return;
+    setSubmitting(true);
+    setError(null);
+    try {
+      const order = await apiRequest(endpoint, { method: 'POST', body: { reason: reason.trim() } });
+      notify('Order refunded.');
+      onRefunded(order);
+    } catch (err) {
+      setError(err.message);
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/60" onClick={submitting ? undefined : onClose} />
+      <div className="relative bg-white border border-slate-200 shadow-xl rounded-2xl w-full max-w-sm">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+          <h2 className="font-bold text-navy">Refund order #{orderNumber}</h2>
+          <button type="button" onClick={onClose} disabled={submitting} className="text-slate-500 hover:text-navy disabled:opacity-40">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="px-6 py-5 space-y-3">
+          <p className="text-xs text-slate-500">
+            This reverses the order's ledger entries and marks it Refunded. This can't be undone.
+          </p>
+          <label className="block">
+            <span className="block text-xs font-semibold text-slate-600 mb-1">Reason</span>
+            <textarea
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              rows={3}
+              placeholder="Why is this order being refunded?"
+              className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-secondary/20 focus:border-secondary"
+              disabled={submitting}
+            />
+          </label>
+          {error && <p className="text-xs text-red-600">{error}</p>}
+        </div>
+
+        <div className="px-6 py-4 border-t border-slate-200">
+          <button
+            type="button"
+            onClick={submit}
+            disabled={!reason.trim() || submitting}
+            className="w-full bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-2.5 rounded-lg transition disabled:opacity-40"
+          >
+            {submitting ? 'Refunding…' : 'Confirm Refund'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

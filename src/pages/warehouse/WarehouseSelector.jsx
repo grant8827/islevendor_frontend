@@ -2,7 +2,8 @@ import { Warehouse as WarehouseIcon, Plus } from 'lucide-react';
 
 const ADD_NEW = '__add_new__';
 
-export default function WarehouseSelector({ warehouses, selectedId, onSelect, onAddNew }) {
+// `canAdd` is false for staff logins — only an owner registers new warehouses.
+export default function WarehouseSelector({ warehouses, selectedId, onSelect, onAddNew, canAdd = true }) {
   return (
     <div className="bg-white border-b border-slate-200 px-6 py-2.5 flex items-center gap-2">
       <WarehouseIcon className="w-4 h-4 text-primary shrink-0" />
@@ -20,16 +21,18 @@ export default function WarehouseSelector({ warehouses, selectedId, onSelect, on
             {wh.name} — {wh.parish}
           </option>
         ))}
-        <option value={ADD_NEW}>+ Add another warehouse…</option>
+        {canAdd && <option value={ADD_NEW}>+ Add another warehouse…</option>}
       </select>
-      <button
-        type="button"
-        onClick={onAddNew}
-        className="ml-auto flex items-center gap-1 text-xs text-primary hover:underline"
-      >
-        <Plus className="w-3.5 h-3.5" />
-        Add warehouse
-      </button>
+      {canAdd && (
+        <button
+          type="button"
+          onClick={onAddNew}
+          className="ml-auto flex items-center gap-1 text-xs text-primary hover:underline"
+        >
+          <Plus className="w-3.5 h-3.5" />
+          Add warehouse
+        </button>
+      )}
     </div>
   );
 }

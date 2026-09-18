@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Package, Plus, Check } from 'lucide-react';
+import { Package, Plus, Check, Trash2 } from 'lucide-react';
 import { apiRequest } from '../../api/client.js';
 import { useToast } from '../../context/ToastContext.jsx';
 
@@ -25,45 +25,54 @@ export default function ProductsPanel({ store }) {
   const [grants, setGrants] = useState([]);
   const [myListings, setMyListings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [busyId, setBusyId] = useState(null); // product being added/removed — blocks double-clicks
   const { notify } = useToast();
 
   async function load() {
     setLoading(true);
-    const [grantList, myStore] = await Promise.all([
+    // The owner-only listings endpoint (not the public storefront one) so an
+    // item its warehouse has since paused still counts as "in your store".
+    const [grantList, listings] = await Promise.all([
       apiRequest('/commerce/grants/mine'),
-      apiRequest(`/commerce/stores/${store.slug}`, { auth: false }),
+      apiRequest(`/commerce/stores/${store.id}/listings`),
     ]);
     setGrants(grantList);
-    setMyListings(myStore.listings);
+    setMyListings(listings);
     setLoading(false);
   }
 
   useEffect(() => {
     load();
-  }, [store.slug]);
+  }, [store.id]);
 
   async function addToStore(product) {
+    setBusyId(product.id);
     try {
       await apiRequest(`/commerce/stores/${store.id}/listings`, {
         method: 'POST',
         body: { masterProductId: product.id },
       });
       notify(`${product.title} added to your store.`);
-      load();
+      await load();
     } catch (err) {
       notify(err.message);
+    } finally {
+      setBusyId(null);
     }
   }
 
   async function removeFromStore(product) {
     const listing = myListings.find((l) => l.masterProductId === product.id);
     if (!listing) return;
+    setBusyId(product.id);
     try {
       await apiRequest(`/commerce/stores/${store.id}/listings/${listing.id}`, { method: 'DELETE' });
       notify(`${product.title} removed from your store.`);
-      load();
+      await load();
     } catch (err) {
       notify(err.message);
+    } finally {
+      setBusyId(null);
     }
   }
 
@@ -135,25 +144,30 @@ export default function ProductsPanel({ store }) {
                     </p>
                     <p className="text-xs text-slate-500">Customer pays: J${retail.toLocaleString()}</p>
                   </div>
-                  <div className="mt-3">
-                    {added ? (
-                      <button
-                        type="button"
-                        onClick={() => removeFromStore(product)}
-                        className="w-full flex items-center justify-center gap-1 bg-primary/10 hover:bg-red-50 text-primary-dark hover:text-red-600 border border-primary/20 hover:border-red-300 text-xs font-bold py-1.5 rounded-lg transition"
-                      >
-                        <Check className="w-3.5 h-3.5" /> Added — remove
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => addToStore(product)}
-                        disabled={!product.isActive}
-                        className="btn-primary w-full flex items-center justify-center gap-1 disabled:opacity-50 text-xs py-1.5"
-                      >
-                        <Plus className="w-3.5 h-3.5" /> {product.isActive ? 'Add to My Store' : 'Unavailable'}
-                      </button>
-                    )}
+                  {/* Two separate actions, each live only when it applies: Add to
+                      Store until it's listed, Remove once it is. */}
+                  <div className="mt-3 flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => addToStore(product)}
+                      disabled={added || !product.isActive || busyId === product.id}
+                      className={`flex-1 flex items-center justify-center gap-1 text-xs py-1.5 rounded-lg transition ${
+                        added
+                          ? 'bg-primary/10 text-primary-dark border border-primary/20 font-bold disabled:opacity-100'
+                          : 'btn-primary disabled:opacity-50'
+                      }`}
+                    >
+                      {added ? <Check className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
+                      {added ? 'In Your Store' : product.isActive ? 'Add to Store' : 'Unavailable'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => removeFromStore(product)}
+                      disabled={!added || busyId === product.id}
+                      className="flex-1 flex items-center justify-center gap-1 text-xs font-bold py-1.5 rounded-lg border border-red-300 text-red-600 bg-white hover:bg-red-50 disabled:opacity-40 disabled:hover:bg-white transition"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" /> Remove
+                    </button>
                   </div>
                 </div>
               );

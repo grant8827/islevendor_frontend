@@ -34,7 +34,7 @@ export default function AssignItemsModal({ warehouseId, store, onClose }) {
         granted ? next.add(product.id) : next.delete(product.id);
         return next;
       });
-      notify(granted ? `${product.title} added to ${store.storeName}'s account.` : `${product.title} removed from ${store.storeName}'s account.`);
+      notify(granted ? `${product.title} is now listed on ${store.storeName}'s storefront.` : `${product.title} removed from ${store.storeName}'s account.`);
     } catch (err) {
       notify(err.message);
     } finally {
@@ -52,7 +52,7 @@ export default function AssignItemsModal({ warehouseId, store, onClose }) {
               <Package className="w-4 h-4 text-primary" />
               Items for {store.storeName}
             </h2>
-            <p className="text-xs text-slate-500 mt-0.5">Only checked items can be sold on their storefront.</p>
+            <p className="text-xs text-slate-500 mt-0.5">Checking an item lists it on their storefront right away — they can remove it themselves if they don't want it.</p>
           </div>
           <button type="button" onClick={onClose} className="text-slate-500 hover:text-navy">
             <X className="w-5 h-5" />

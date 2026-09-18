@@ -14,6 +14,9 @@ import WarehouseOnboardingPage from './pages/onboarding/WarehouseOnboardingPage.
 import ResellerOnboardingPage from './pages/onboarding/ResellerOnboardingPage.jsx';
 import VendorOnboardingPage from './pages/onboarding/VendorOnboardingPage.jsx';
 import DriverOnboardingPage from './pages/onboarding/DriverOnboardingPage.jsx';
+import IsleDashLoginPage from './pages/isledash/IsleDashLoginPage.jsx';
+import IsleDashApp from './pages/isledash/IsleDashApp.jsx';
+import ScanPickupPage from './pages/isledash/ScanPickupPage.jsx';
 
 export default function App() {
   return (
@@ -26,6 +29,10 @@ export default function App() {
           Home — full-width Amazon-style pages, not the simple Layout. */}
       <Route path="/product/:id" element={<ProductDetailPage />} />
       <Route path="/cart" element={<CartPage />} />
+
+      {/* A seller's storefront is a full-width shopping page too — own Navbar,
+          not the simple Layout's centered column. */}
+      <Route path="/store/:slug" element={<StorefrontPage />} />
 
       {/* Explainer pages for the "join us" CTAs on the home page — each has
           its own Apply button, which now goes to a dedicated ISLE-100
@@ -52,6 +59,34 @@ export default function App() {
         }
       />
 
+      {/* IsleDash: the delivery driver app, isolated from the marketplace —
+          its own login (no marketplace Navbar/cart/search) and its own
+          protected shell, entirely separate from /login and /dashboard
+          above even though both ultimately render the same DriverDashboard
+          component. See ProtectedRoute's redirectTo and DashboardPage's
+          DRIVER branch (redirects /dashboard here) for how the two stay
+          in sync. */}
+      <Route path="/isledash/login" element={<IsleDashLoginPage />} />
+      <Route
+        path="/isledash"
+        element={
+          <ProtectedRoute redirectTo="/isledash/login">
+            <IsleDashApp />
+          </ProtectedRoute>
+        }
+      />
+      {/* Where the QR code on a printed shipping label (see printLabel.js)
+          points — a logged-out scan bounces through IsleDash's own login,
+          same as /isledash above, and returns here afterward. */}
+      <Route
+        path="/isledash/scan/:orderId"
+        element={
+          <ProtectedRoute redirectTo="/isledash/login">
+            <ScanPickupPage />
+          </ProtectedRoute>
+        }
+      />
+
       {/* Account & Orders — same "self-contained full-width page" reasoning
           as Home/Product/Cart above, plus it needs a logged-in user. */}
       <Route
@@ -66,7 +101,6 @@ export default function App() {
       <Route element={<Layout />}>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        <Route path="/store/:slug" element={<StorefrontPage />} />
       </Route>
     </Routes>
   );

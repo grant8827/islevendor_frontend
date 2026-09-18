@@ -21,6 +21,14 @@ export default defineConfig({
         target: 'http://localhost:4000',
         changeOrigin: true,
       },
+      // Dispatch's live driver/warehouse/shop notifications (socket.io) —
+      // needs ws:true for the websocket upgrade, unlike the plain HTTP
+      // proxies above.
+      '/socket.io': {
+        target: 'http://localhost:4000',
+        changeOrigin: true,
+        ws: true,
+      },
     },
   },
 })

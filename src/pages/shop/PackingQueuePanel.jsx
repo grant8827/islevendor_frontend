@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { ClipboardList, Truck } from 'lucide-react';
+import { ClipboardList, Printer, Truck } from 'lucide-react';
 import { apiRequest } from '../../api/client.js';
 import { useToast } from '../../context/ToastContext.jsx';
+import { printOrderLabel } from '../../lib/printLabel.js';
 
-export default function PackingQueuePanel({ shopId }) {
+export default function PackingQueuePanel({ shopId, shop }) {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const { notify } = useToast();
@@ -17,10 +18,17 @@ export default function PackingQueuePanel({ shopId }) {
 
   useEffect(load, [shopId]);
 
+  function printLabel(order) {
+    printOrderLabel({
+      order,
+      seller: { name: shop.shopName, addressLine: shop.addressLine, parish: shop.parish },
+    });
+  }
+
   async function markReady(orderId) {
     try {
       const result = await apiRequest(`/dispatch/orders/${orderId}/ready`, { method: 'POST' });
-      notify(result.dispatched ? 'Boxed & offered to the nearest driver!' : 'Boxed — no drivers online nearby yet.');
+      notify(result.dispatched ? 'Boxed & offered to nearby drivers!' : 'Boxed — no drivers online nearby yet.');
       load();
     } catch (err) {
       notify(err.message);
@@ -51,14 +59,24 @@ export default function PackingQueuePanel({ shopId }) {
             </div>
             <p className="text-xs text-slate-500">Deliver to: {order.deliveryAddress}</p>
             <p className="text-xs text-slate-500">Your share: J${Number(order.resellerMarginJmd).toLocaleString()}</p>
-            <button
-              type="button"
-              onClick={() => markReady(order.id)}
-              className="w-full flex items-center justify-center gap-2 btn-primary text-xs font-bold py-2.5 rounded-lg transition"
-            >
-              <Truck className="w-4 h-4" />
-              Mark Boxed & Ready for Pickup
-            </button>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => printLabel(order)}
+                className="flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold py-2.5 px-3 rounded-lg transition shrink-0"
+              >
+                <Printer className="w-4 h-4" />
+                Print Label
+              </button>
+              <button
+                type="button"
+                onClick={() => markReady(order.id)}
+                className="flex-1 flex items-center justify-center gap-2 btn-primary text-xs font-bold py-2.5 rounded-lg transition"
+              >
+                <Truck className="w-4 h-4" />
+                Mark Boxed & Ready for Pickup
+              </button>
+            </div>
           </div>
         ))}
       </div>

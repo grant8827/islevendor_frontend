@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { Link2, Upload, ImageOff } from 'lucide-react';
 import { uploadImage } from '../../api/client.js';
 
-export default function ImageInput({ value, onChange }) {
+// `label` / `variant` let other forms reuse it: 'thumb' is the small square
+// product preview, 'banner' a wide cropped one (e.g. a store's hero image).
+export default function ImageInput({ value, onChange, label = 'Product image', variant = 'thumb' }) {
   const [mode, setMode] = useState('url'); // 'url' | 'upload'
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(null);
@@ -24,7 +26,7 @@ export default function ImageInput({ value, onChange }) {
 
   return (
     <div>
-      <label className="block text-xs text-slate-500 mb-1">Product image</label>
+      <label className="block text-xs text-slate-500 mb-1">{label}</label>
       <div className="flex gap-1 mb-2">
         <button
           type="button"
@@ -68,9 +70,14 @@ export default function ImageInput({ value, onChange }) {
       {uploading && <p className="text-xs text-slate-500 mt-1">Uploading…</p>}
       {error && <p className="text-xs text-red-400 mt-1" role="alert">{error}</p>}
 
-      <div className="mt-2 h-24 w-24 bg-slate-100 border border-slate-200 rounded-lg flex items-center justify-center overflow-hidden">
+      <div className={`mt-2 bg-slate-100 border border-slate-200 rounded-lg flex items-center justify-center overflow-hidden ${variant === 'banner' ? 'h-24 w-full max-w-md' : 'h-24 w-24'}`}>
         {value ? (
-          <img src={value} alt="Preview" className="max-h-full max-w-full object-contain" onError={(e) => (e.target.style.display = 'none')} />
+          <img
+            src={value}
+            alt="Preview"
+            className={variant === 'banner' ? 'h-full w-full object-cover' : 'max-h-full max-w-full object-contain'}
+            onError={(e) => (e.target.style.display = 'none')}
+          />
         ) : (
           <ImageOff className="w-6 h-6 text-slate-600" />
         )}

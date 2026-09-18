@@ -42,10 +42,10 @@ export default function DriverOnboardingPage() {
         return 'Fill in your bank account details.';
       }
       if (i === 3 && f.payoutMethod === 'LYNK_WALLET' && !f.lynkWalletId) return 'Enter your Lynk wallet ID.';
-      if (i === 4 && (!fl.licensePhoto || !fl.insuranceCert)) return "Upload your driver's license and vehicle insurance/fitness certificate.";
+      if (i === 4 && (!fl.licensePhoto || !fl.insuranceCert || !fl.registrationCert)) return "Upload your driver's license, certificate of insurance, and certificate of registration.";
       return null;
     },
-    submit: (f, fl) => submitDriverApplication(f, { licensePhoto: fl.licensePhoto, insuranceCert: fl.insuranceCert, fitnessCert: fl.fitnessCert }),
+    submit: (f, fl) => submitDriverApplication(f, { licensePhoto: fl.licensePhoto, insuranceCert: fl.insuranceCert, registrationCert: fl.registrationCert }),
   });
 
   if (result) {
@@ -135,8 +135,8 @@ export default function DriverOnboardingPage() {
       {step === 4 && (
         <>
           <DocUploadField label="Valid Jamaican driver's license photo" required value={files.licensePhoto} onChange={updateFile('licensePhoto')} />
-          <DocUploadField label="Vehicle certificate of fitness / insurance" required value={files.insuranceCert} onChange={updateFile('insuranceCert')} />
-          <DocUploadField label="Certificate of fitness (if separate from insurance)" hint="Optional" value={files.fitnessCert} onChange={updateFile('fitnessCert')} />
+          <DocUploadField label="Certificate of insurance" required value={files.insuranceCert} onChange={updateFile('insuranceCert')} />
+          <DocUploadField label="Certificate of registration" required value={files.registrationCert} onChange={updateFile('registrationCert')} />
         </>
       )}
     </OnboardingShell>

@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { Plus, Package, ImageOff, Pencil, Trash2, PauseCircle, PlayCircle, X } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Plus, Package, ImageOff, Pencil, Trash2, PauseCircle, PlayCircle, Search, X } from 'lucide-react';
 import { apiRequest } from '../../api/client.js';
 import { useToast } from '../../context/ToastContext.jsx';
 import MultiImageInput from '../../components/dashboard/MultiImageInput.jsx';
@@ -30,6 +30,7 @@ export default function ProductsPanel({ warehouseId, warehouses = [] }) {
   const [form, setForm] = useState(EMPTY_FORM);
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [search, setSearch] = useState('');
   const { notify } = useToast();
 
   function load() {
@@ -39,7 +40,20 @@ export default function ProductsPanel({ warehouseId, warehouses = [] }) {
       .finally(() => setLoading(false));
   }
 
-  useEffect(load, [warehouseId]);
+  useEffect(() => {
+    setSearch('');
+    load();
+  }, [warehouseId]);
+
+  const filteredProducts = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return products;
+    return products.filter((p) =>
+      [p.title, p.sku, p.category, p.description, p.condition === 'USED' ? 'used' : 'new']
+        .filter(Boolean)
+        .some((field) => field.toLowerCase().includes(q)),
+    );
+  }, [products, search]);
 
   function update(field) {
     return (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
@@ -262,6 +276,23 @@ export default function ProductsPanel({ warehouseId, warehouses = [] }) {
       )}
 
       {products.length > 0 && (
+        <div className="relative mb-4 max-w-xs">
+          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search by title, SKU, or category…"
+            className="w-full bg-white border border-slate-300 rounded-lg pl-9 pr-3 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-secondary/20 focus:border-secondary"
+          />
+        </div>
+      )}
+
+      {products.length > 0 && filteredProducts.length === 0 && (
+        <p className="text-sm text-slate-500">No products match “{search}”.</p>
+      )}
+
+      {filteredProducts.length > 0 && (
         <div className="bg-white border border-slate-200 shadow-sm rounded-2xl overflow-hidden">
           <table className="w-full text-left text-xs text-slate-700">
             <thead className="table-header-row uppercase">
@@ -277,7 +308,7 @@ export default function ProductsPanel({ warehouseId, warehouses = [] }) {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {products.map((p) => (
+              {filteredProducts.map((p) => (
                 <tr key={p.id} className={`hover:bg-surface transition ${p.isActive ? '' : 'opacity-50'}`}>
                   <td className="px-5 py-3">
                     <div className="h-10 w-10 bg-slate-100 border border-slate-200 rounded-lg flex items-center justify-center overflow-hidden">
