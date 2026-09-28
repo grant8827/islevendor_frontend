@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Users, Pencil, PauseCircle, PlayCircle, Trash2 } from 'lucide-react';
+import { Users, Plus, Eye, PauseCircle, PlayCircle, Trash2 } from 'lucide-react';
 import { apiRequest } from '../../api/client.js';
 import { useToast } from '../../context/ToastContext.jsx';
 import AssignItemsModal from './AssignItemsModal.jsx';
+import ViewApplicantModal from './ViewApplicantModal.jsx';
 
 export default function ApprovedResellersSection({ warehouseId }) {
   const [resellers, setResellers] = useState(null);
   const [editingStore, setEditingStore] = useState(null);
+  const [viewingReseller, setViewingReseller] = useState(null);
   const { notify } = useToast();
 
   function load() {
@@ -90,18 +92,26 @@ export default function ApprovedResellersSection({ warehouseId }) {
                     <div className="flex items-center justify-end gap-1.5">
                       <button
                         type="button"
-                        title="Add/remove items for this seller"
+                        title="Add items"
                         onClick={() => setEditingStore(r.store)}
-                        className="p-1.5 rounded-lg text-slate-500 hover:text-navy hover:bg-slate-100 transition"
+                        className="p-1.5 rounded-lg text-emerald-600 bg-emerald-50 hover:bg-emerald-100 transition"
                       >
-                        <Pencil className="w-3.5 h-3.5" />
+                        <Plus className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        title="View reseller details"
+                        onClick={() => setViewingReseller(r)}
+                        className="p-1.5 rounded-lg text-blue-600 bg-blue-50 hover:bg-blue-100 transition"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
                       </button>
                       <button
                         type="button"
                         title={r.status === 'APPROVED' ? 'Suspend' : 'Unsuspend'}
                         onClick={() => toggleSuspend(r)}
                         className={`p-1.5 rounded-lg transition ${
-                          r.status === 'APPROVED' ? 'text-slate-500 hover:text-primary hover:bg-slate-100' : 'text-primary hover:bg-slate-100'
+                          r.status === 'APPROVED' ? 'text-amber-600 bg-amber-50 hover:bg-amber-100' : 'text-emerald-600 bg-emerald-50 hover:bg-emerald-100'
                         }`}
                       >
                         {r.status === 'APPROVED' ? <PauseCircle className="w-3.5 h-3.5" /> : <PlayCircle className="w-3.5 h-3.5" />}
@@ -110,7 +120,7 @@ export default function ApprovedResellersSection({ warehouseId }) {
                         type="button"
                         title="Remove"
                         onClick={() => remove(r)}
-                        className="p-1.5 rounded-lg text-slate-500 hover:text-red-600 hover:bg-slate-100 transition"
+                        className="p-1.5 rounded-lg text-red-600 bg-red-50 hover:bg-red-100 transition"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -122,6 +132,8 @@ export default function ApprovedResellersSection({ warehouseId }) {
           </table>
         </div>
       )}
+
+      {viewingReseller && <ViewApplicantModal application={viewingReseller} onClose={() => setViewingReseller(null)} />}
 
       {editingStore && (
         <AssignItemsModal warehouseId={warehouseId} store={editingStore} onClose={() => setEditingStore(null)} />

@@ -15,6 +15,7 @@ import ProductsPanel from './ProductsPanel.jsx';
 import ApplicationsPage from './ApplicationsPage.jsx';
 import PackingQueuePanel from './PackingQueuePanel.jsx';
 import ApprovedResellersSection from './ApprovedResellersSection.jsx';
+import ApprovedDriversSection from './ApprovedDriversSection.jsx';
 import ResellerCommissionCard from './ResellerCommissionCard.jsx';
 import StaffPanel from './StaffPanel.jsx';
 import DashboardLoadError from '../../components/dashboard/DashboardLoadError.jsx';
@@ -207,6 +208,7 @@ export default function WarehouseDashboard() {
                 <ResellerCommissionCard warehouse={warehouse} onSaved={() => loadWarehouses(warehouse.id)} />
               </div>
               <ApprovedResellersSection warehouseId={warehouse.id} />
+              <ApprovedDriversSection warehouseId={warehouse.id} />
               <div className="mt-8">
                 <h3 className="font-bold text-navy text-base mb-4">Products in {warehouse.name}</h3>
                 <ProductsPanel warehouseId={warehouse.id} warehouses={warehouses} />

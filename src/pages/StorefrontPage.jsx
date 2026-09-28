@@ -66,7 +66,10 @@ export default function StorefrontPage() {
                 <div>
                   <h1 className="text-2xl sm:text-3xl font-black leading-tight">{store.storeName}</h1>
                   <p className={`mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs ${heroTheme(store).muted}`}>
-                    {store.parish && (
+                    {/* A reseller's items ship from their warehouses (each card says
+                        which parish), not the reseller's own address — only a
+                        shop, which ships its own stock, shows its location. */}
+                    {store.kind !== 'AFFILIATE' && store.parish && (
                       <span className="flex items-center gap-1">
                         <MapPin className="w-3.5 h-3.5" /> {store.parish}
                       </span>

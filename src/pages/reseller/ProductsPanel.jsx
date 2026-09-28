@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Package, Plus, Check, Trash2 } from 'lucide-react';
+import { Package, Plus, Check, Trash2, ImageOff } from 'lucide-react';
 import { apiRequest } from '../../api/client.js';
 import { useToast } from '../../context/ToastContext.jsx';
 
@@ -119,6 +119,13 @@ export default function ProductsPanel({ store }) {
               return (
                 <div key={product.id} className="bg-white border border-slate-200 shadow-sm rounded-xl p-4 flex flex-col justify-between">
                   <div>
+                    <div className="h-40 mb-3 bg-slate-50 border border-slate-100 rounded-lg flex items-center justify-center overflow-hidden">
+                      {product.imageUrl ? (
+                        <img src={product.imageUrl} alt={product.title} className="max-h-full max-w-full object-contain" />
+                      ) : (
+                        <ImageOff className="w-6 h-6 text-slate-400" />
+                      )}
+                    </div>
                     <p className="text-sm font-bold text-slate-900 flex items-center gap-2">
                       {product.title}
                       {!product.isActive && (

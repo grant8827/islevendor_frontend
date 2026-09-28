@@ -14,6 +14,7 @@ import MyStorePanel from './MyStorePanel.jsx';
 import ProfilePanel from '../../components/dashboard/ProfilePanel.jsx';
 import DashboardLoadError from '../../components/dashboard/DashboardLoadError.jsx';
 import RevenueAnalytics from '../../components/dashboard/analytics/RevenueAnalytics.jsx';
+import ResellerOverviewStats from './ResellerOverviewStats.jsx';
 
 // A reseller earns the margin above wholesale (its commission) on each order.
 const earningOf = (order) => Number(order.resellerMarginJmd);
@@ -109,17 +110,12 @@ export default function ResellerDashboard() {
                   View your public storefront →
                 </Link>
               </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl">
-                <div className="bg-white border border-slate-200 shadow-sm p-5 rounded-2xl">
-                  <span className="text-xs text-slate-500">Pending Warehouse Applications</span>
-                  <p className="text-2xl font-bold text-secondary mt-1">{pendingCount}</p>
-                </div>
-              </div>
+              <ResellerOverviewStats store={store} />
               <RevenueAnalytics
                 endpoint={`/commerce/stores/${store.id}/orders`}
                 earningOf={earningOf}
                 revenueLabel="Earnings"
-                revenueNote="Your commission on paid orders, excluding refunds."
+                revenueNote="Your store's sales only — your commission on paid orders, excluding refunds."
               />
             </div>
           )}

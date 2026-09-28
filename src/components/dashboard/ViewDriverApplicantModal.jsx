@@ -53,7 +53,9 @@ export default function ViewDriverApplicantModal({ application, onClose }) {
               {driver.user.fullName}
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">
-              Applied {new Date(application.requestedAt).toLocaleDateString()}
+              {application.decidedAt && application.status !== 'PENDING'
+                ? `${{ APPROVED: 'Approved', SUSPENDED: 'Suspended', REJECTED: 'Rejected' }[application.status] ?? 'Decided'} ${new Date(application.decidedAt).toLocaleDateString()}`
+                : `Applied ${new Date(application.requestedAt).toLocaleDateString()}`}
               {driver.referenceId && <> · {driver.referenceId}</>}
             </p>
           </div>
@@ -80,15 +82,6 @@ export default function ViewDriverApplicantModal({ application, onClose }) {
             <Row label="Cold box" value={driver.hasColdBox ? 'Yes' : 'No'} />
             <Row label="Zone parishes" value={driver.zoneParishes?.length ? driver.zoneParishes.join(', ') : null} />
             <Row label="Availability" value={driver.availability?.replaceAll('_', ' ')} />
-          </Section>
-
-          <Section title="Payout">
-            <Row label="Method" value={driver.payoutMethod?.replaceAll('_', ' ')} />
-            <Row label="Bank" value={driver.bankName} />
-            <Row label="Account holder" value={driver.accountHolderName} />
-            <Row label="Account number" value={driver.accountNumber} />
-            <Row label="Branch code" value={driver.branchCode} />
-            <Row label="Lynk Wallet ID" value={driver.lynkWalletId} />
           </Section>
 
           {(driver.licenseImageUrl || driver.insuranceCertUrl || driver.registrationCertUrl) && (

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { X, Package, Check } from 'lucide-react';
+import { X, Package, Check, ImageOff } from 'lucide-react';
 import { apiRequest } from '../../api/client.js';
 import { useToast } from '../../context/ToastContext.jsx';
 
@@ -50,7 +50,7 @@ export default function AssignItemsModal({ warehouseId, store, onClose }) {
           <div>
             <h2 className="font-bold text-navy flex items-center gap-2">
               <Package className="w-4 h-4 text-primary" />
-              Items for {store.storeName}
+              Add items for {store.storeName}
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">Checking an item lists it on their storefront right away — they can remove it themselves if they don't want it.</p>
           </div>
@@ -80,6 +80,13 @@ export default function AssignItemsModal({ warehouseId, store, onClose }) {
                   }`}
                 >
                   {granted && <Check className="w-3.5 h-3.5 text-white" />}
+                </span>
+                <span className="h-12 w-12 bg-slate-100 border border-slate-200 rounded-lg flex items-center justify-center overflow-hidden shrink-0">
+                  {product.imageUrl ? (
+                    <img src={product.imageUrl} alt="" className="max-h-full max-w-full object-contain" />
+                  ) : (
+                    <ImageOff className="w-4 h-4 text-slate-400" />
+                  )}
                 </span>
                 <span className="flex-1">
                   <span className="text-sm font-bold text-slate-900 block">{product.title}</span>

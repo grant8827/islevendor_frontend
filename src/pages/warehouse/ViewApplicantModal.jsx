@@ -37,7 +37,9 @@ export default function ViewApplicantModal({ application, onClose }) {
               {store.storeName}
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">
-              Applied {new Date(application.requestedAt).toLocaleDateString()}
+              {application.decidedAt && application.status !== 'PENDING'
+                ? `${{ APPROVED: 'Approved', SUSPENDED: 'Suspended', REJECTED: 'Rejected' }[application.status] ?? 'Decided'} ${new Date(application.decidedAt).toLocaleDateString()}`
+                : `Applied ${new Date(application.requestedAt).toLocaleDateString()}`}
               {store.referenceId && <> · {store.referenceId}</>}
             </p>
           </div>
@@ -64,15 +66,6 @@ export default function ViewApplicantModal({ application, onClose }) {
             <Row label="Primary sales channel" value={store.primarySalesChannel?.replaceAll('_', ' ')} />
             <Row label="Target categories" value={store.targetCategories?.length ? store.targetCategories.join(', ') : null} />
             <Row label="Default markup" value={store.defaultMarkupPercent ? `${store.defaultMarkupPercent}%` : null} />
-          </Section>
-
-          <Section title="Payout">
-            <Row label="Method" value={store.payoutMethod?.replaceAll('_', ' ')} />
-            <Row label="Bank" value={store.bankName} />
-            <Row label="Account holder" value={store.accountHolderName} />
-            <Row label="Account number" value={store.accountNumber} />
-            <Row label="Branch code" value={store.branchCode} />
-            <Row label="Lynk Wallet ID" value={store.lynkWalletId} />
           </Section>
 
           {store.idDocUrl && (
