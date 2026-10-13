@@ -27,8 +27,10 @@ const SUBTABS = [
  * ApplicationsPage: "Payout" shows the current balance and every ledger leg
  * not yet withdrawn, with a Withdraw button; "Payout History" (see
  * PayoutHistoryPanel.jsx) lists past withdrawals, filterable by month/year.
- * Withdrawing is bookkeeping only — no real bank/Lynk disbursement is wired
- * up yet (see ledger.service.ts's withdrawBalance).
+ * Only the Available balance can be withdrawn — Pending is still in escrow
+ * until the order is delivered. Withdrawing records a payout *request*; no
+ * real bank/Lynk disbursement is wired up yet (see ledger.service.ts's
+ * withdrawBalance).
  */
 export default function PayoutsPanel() {
   const [subTab, setSubTab] = useState('payout');
@@ -51,13 +53,12 @@ export default function PayoutsPanel() {
     }),
     { pending: 0, available: 0 },
   );
-  const totalBalance = totals.pending + totals.available;
 
   async function withdraw() {
     setWithdrawing(true);
     try {
       await apiRequest('/ledger/withdraw', { method: 'POST' });
-      notify('Withdrawal recorded — see Payout History.');
+      notify('Withdrawal requested — see Payout History.');
       load();
     } catch (err) {
       notify(err.message);
@@ -104,11 +105,11 @@ export default function PayoutsPanel() {
           <button
             type="button"
             onClick={withdraw}
-            disabled={totalBalance <= 0 || withdrawing}
+            disabled={totals.available <= 0 || withdrawing}
             className="flex items-center gap-2 btn-primary text-xs font-bold px-4 py-2.5 rounded-lg transition disabled:opacity-40 mb-8"
           >
             <Banknote className="w-4 h-4" />
-            {withdrawing ? 'Withdrawing…' : `Withdraw J$${totalBalance.toLocaleString()}`}
+            {withdrawing ? 'Withdrawing…' : `Withdraw J$${totals.available.toLocaleString()}`}
           </button>
 
           <h3 className="font-bold text-navy text-sm mb-3">Not yet withdrawn</h3>
