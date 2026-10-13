@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { PackageCheck, MapPin, Phone, TriangleAlert } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { apiRequest } from '../../api/client.js';
@@ -13,12 +13,16 @@ import { apiRequest } from '../../api/client.js';
 // why: a photographed label shouldn't leak PII to anyone with a camera).
 export default function ScanPickupPage() {
   const { orderId } = useParams();
+  // The label's signed pickup token (see printLabel.js) — the API won't let
+  // a driver claim a package on the order id alone.
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get('t') ?? undefined;
   const { user } = useAuth();
   const [state, setState] = useState({ status: 'loading', order: null, error: null });
 
   function confirmPickup() {
     setState({ status: 'loading', order: null, error: null });
-    apiRequest(`/dispatch/orders/${orderId}/scan-pickup`, { method: 'POST' })
+    apiRequest(`/dispatch/orders/${orderId}/scan-pickup`, { method: 'POST', body: { token } })
       .then((order) => setState({ status: 'done', order, error: null }))
       .catch((err) => setState({ status: 'error', order: null, error: err.message }));
   }

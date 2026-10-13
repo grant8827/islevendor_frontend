@@ -17,6 +17,8 @@ import DriverOnboardingPage from './pages/onboarding/DriverOnboardingPage.jsx';
 import IsleDashLoginPage from './pages/isledash/IsleDashLoginPage.jsx';
 import IsleDashApp from './pages/isledash/IsleDashApp.jsx';
 import ScanPickupPage from './pages/isledash/ScanPickupPage.jsx';
+import AdminLoginPage from './pages/admin/AdminLoginPage.jsx';
+import AdminApp from './pages/admin/AdminApp.jsx';
 
 export default function App() {
   return (
@@ -83,6 +85,20 @@ export default function App() {
         element={
           <ProtectedRoute redirectTo="/isledash/login">
             <ScanPickupPage />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Admin console: platform staff only, isolated like IsleDash — its
+          own login (no registration, no marketplace chrome) and its own
+          shell. AdminApp turns away any signed-in non-admin; the API
+          enforces the same independently. */}
+      <Route path="/admin/login" element={<AdminLoginPage />} />
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute redirectTo="/admin/login">
+            <AdminApp />
           </ProtectedRoute>
         }
       />
