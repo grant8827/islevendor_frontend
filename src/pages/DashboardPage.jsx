@@ -1,12 +1,10 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
-import DashboardTopBar from '../components/dashboard/DashboardTopBar.jsx';
 import WarehouseDashboard from './warehouse/WarehouseDashboard.jsx';
 import ResellerDashboard from './reseller/ResellerDashboard.jsx';
 import ShopDashboard from './shop/ShopDashboard.jsx';
 
-// Admin ledger view is still a generic placeholder below — warehouse,
-// reseller (RESELLER), store, and driver are the four roles built out so far.
+// Sends each role to its own portal.
 export default function DashboardPage() {
   const { user } = useAuth();
 
@@ -22,15 +20,8 @@ export default function DashboardPage() {
   // pages/isledash/IsleDashApp.jsx.
   if (user.role === 'DRIVER') return <Navigate to="/isledash" replace />;
 
-  return (
-    <div className="min-h-screen bg-surface">
-      <DashboardTopBar />
-      <div className="p-8 text-ink">
-        <h2 className="font-bold text-navy text-lg mb-1">Dashboard</h2>
-        <p className="text-sm text-slate-500">
-          Signed in as <strong className="text-slate-900">{user.fullName}</strong> ({user.role})
-        </p>
-      </div>
-    </div>
-  );
+  // Platform staff work in the admin console (see pages/admin/AdminApp.jsx).
+  if (user.role === 'ADMIN') return <Navigate to="/admin" replace />;
+
+  return <Navigate to="/" replace />;
 }
