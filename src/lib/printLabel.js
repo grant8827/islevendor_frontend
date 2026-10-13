@@ -1,4 +1,5 @@
 import QRCode from 'qrcode';
+import { apiRequest } from '../api/client.js';
 
 // Opens a small popup with a printable shipping label and immediately
 // triggers the browser print dialog — used by the warehouse/shop Packing
@@ -25,9 +26,13 @@ export async function printOrderLabel({ order, seller }) {
   if (!w) return; // popup blocked — nothing else we can do without a library
   w.document.write('<p style="font-family:sans-serif;padding:20px;color:#64748b">Generating label…</p>');
 
-  const scanUrl = `${window.location.origin}/isledash/scan/${order.id}`;
   let qrDataUrl = '';
   try {
+    // The order id alone can't claim a package — the QR carries a signed,
+    // expiring pickup token minted for this label (see backend-node's
+    // lib/pickupToken.ts). Printing again invalidates the previous label.
+    const { token } = await apiRequest(`/dispatch/orders/${order.id}/pickup-token`, { method: 'POST' });
+    const scanUrl = `${window.location.origin}/isledash/scan/${order.id}?t=${encodeURIComponent(token)}`;
     qrDataUrl = await QRCode.toDataURL(scanUrl, { width: 180, margin: 1 });
   } catch {
     // Label still prints fine without it — the order # is there as a

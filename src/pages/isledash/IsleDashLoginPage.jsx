@@ -20,7 +20,10 @@ export default function IsleDashLoginPage() {
   // driver scanning a shipping label's QR code (see ScanPickupPage.jsx)
   // lands back on that scan page after signing in, not just the default
   // Delivery tab.
-  const from = location.state?.from?.pathname ?? '/isledash';
+  // Keep the query string — a label scan link carries its pickup token there
+  // (see printLabel.js), and losing it would make the post-login scan fail.
+  const fromLocation = location.state?.from;
+  const from = fromLocation ? `${fromLocation.pathname}${fromLocation.search ?? ''}` : '/isledash';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
