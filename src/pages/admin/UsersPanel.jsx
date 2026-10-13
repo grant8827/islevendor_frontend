@@ -1,19 +1,36 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Search } from 'lucide-react';
+import { LogOut, Search } from 'lucide-react';
 import { apiRequest } from '../../api/client.js';
+import { useAuth } from '../../context/AuthContext.jsx';
+import { useToast } from '../../context/ToastContext.jsx';
 import { Badge, ListState, Pagination } from './adminShared.jsx';
 import { humanize, inputClass } from './adminFormat.js';
 
 const ROLES = ['CUSTOMER', 'WAREHOUSE', 'RESELLER', 'STORE', 'DRIVER', 'ADMIN'];
 
-// Every account on the platform, searchable by name or email. Read-only for
-// now — suspending, role changes and session revocation come with the user
-// management work.
+// Every account on the platform, searchable by name or email. The one action
+// so far is signing a user out of every device (for a suspected compromised
+// account) — suspending and role changes come with the user management work.
 export default function UsersPanel() {
   const [query, setQuery] = useState('');
   const [filters, setFilters] = useState({ q: '', role: '', page: 1 });
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
+  const { user: me, logout } = useAuth();
+  const { notify } = useToast();
+
+  async function signOutEverywhere(target) {
+    const reason = window.prompt(`Sign ${target.fullName} out of every device?\n\nReason (recorded in the audit log):`);
+    if (!reason?.trim()) return;
+    try {
+      await apiRequest(`/admin/users/${target.id}/revoke-sessions`, { method: 'POST', body: { reason: reason.trim() } });
+      // Doing it to your own account ends this session too.
+      if (target.id === me.id) logout();
+      else notify(`${target.fullName} has been signed out everywhere.`);
+    } catch (err) {
+      notify(err.message);
+    }
+  }
 
   const load = useCallback(() => {
     setResult(null);
@@ -66,6 +83,7 @@ export default function UsersPanel() {
                   <th className="px-5 py-3">Phone</th>
                   <th className="px-5 py-3">Role</th>
                   <th className="px-5 py-3">Joined</th>
+                  <th className="px-5 py-3" />
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -78,6 +96,11 @@ export default function UsersPanel() {
                       <Badge className={u.role === 'ADMIN' ? 'bg-navy text-white border-navy' : undefined}>{humanize(u.role)}</Badge>
                     </td>
                     <td className="px-5 py-3 text-slate-500">{new Date(u.createdAt).toLocaleDateString()}</td>
+                    <td className="px-5 py-3 text-right">
+                      <button type="button" onClick={() => signOutEverywhere(u)} className="flex items-center gap-1 ml-auto text-red-700 hover:underline font-bold whitespace-nowrap">
+                        <LogOut className="w-3.5 h-3.5" /> Sign out everywhere
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>

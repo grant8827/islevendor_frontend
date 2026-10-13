@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Building2, KeyRound, UserRound } from 'lucide-react';
-import { apiRequest } from '../../api/client.js';
+import { apiRequest, setToken } from '../../api/client.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
 
@@ -27,8 +27,11 @@ export default function ProfilePanel({ business, businessType = 'Business' }) {
         method: 'PATCH',
         body: { currentPassword: form.currentPassword, newPassword: form.newPassword },
       });
+      // Changing the password signs out every other device; the response
+      // carries a replacement token so this one stays signed in.
+      if (result.token) setToken(result.token);
       setForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
-      notify(result.message);
+      notify(`${result.message} — other devices have been signed out.`);
     } catch (err) {
       setError(err.message);
     } finally {

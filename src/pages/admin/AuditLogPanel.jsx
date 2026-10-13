@@ -8,12 +8,14 @@ const ACTIONS = {
   'kyc_document.access_granted': 'Document viewed',
   'kyc_document.deleted': 'Document deleted',
   'admin.created': 'Administrator created',
+  'user.sessions_revoked': 'User signed out everywhere',
 };
 
 function detailOf(event) {
   const { metadata } = event;
   if (event.action === 'applicant.decision') return `${metadata.decision}${metadata.reason ? ` — ${metadata.reason}` : ''}`;
   if (event.action.startsWith('kyc_document.')) return metadata.kind;
+  if (event.action === 'user.sessions_revoked') return metadata.reason;
   if (event.action === 'admin.created') return `${metadata.email} (by ${metadata.provisionedBy})`;
   return JSON.stringify(metadata);
 }
