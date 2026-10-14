@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { History } from 'lucide-react';
 import { apiRequest } from '../../api/client.js';
+import { formatArrivalDate } from '../../lib/payoutTiming.js';
 
 const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -104,6 +105,9 @@ export default function PayoutHistoryPanel() {
                     <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded border ${PAYOUT_STATUS[p.status]?.style ?? PAYOUT_STATUS.REQUESTED.style}`}>
                       {PAYOUT_STATUS[p.status]?.label ?? p.status}
                     </span>
+                    {p.status === 'REQUESTED' && p.expectedBy && (
+                      <span className="block mt-1 text-[11px] text-slate-500">Expected by {formatArrivalDate(p.expectedBy)}</span>
+                    )}
                     {p.status === 'PAID' && p.reference && <span className="block mt-1 text-[11px] text-slate-500">Ref {p.reference}</span>}
                     {p.status === 'FAILED' && <span className="block mt-1 text-[11px] text-slate-500">Returned to your balance{p.note ? ` — ${p.note}` : ''}</span>}
                   </td>

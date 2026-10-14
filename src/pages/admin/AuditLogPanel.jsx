@@ -10,6 +10,7 @@ const ACTIONS = {
   'admin.created': 'Administrator created',
   'user.sessions_revoked': 'User signed out everywhere',
   'settings.isledash_rate_changed': 'IsleDash pricing changed',
+  'settings.payout_timing_changed': 'Payout time changed',
   'ledger.platform_withdrawal_requested': 'IsleVendor withdrawal requested',
   'payout.paid': 'Payout paid',
   'payout.failed': 'Payout failed',
@@ -20,6 +21,10 @@ function detailOf(event) {
   if (event.action === 'applicant.decision') return `${metadata.decision}${metadata.reason ? ` — ${metadata.reason}` : ''}`;
   if (event.action.startsWith('kyc_document.')) return metadata.kind;
   if (event.action === 'user.sessions_revoked') return metadata.reason;
+  if (event.action === 'settings.payout_timing_changed') {
+    const span = (t) => `${t.minBusinessDays}–${t.maxBusinessDays} business days`;
+    return `${span(metadata.before)} → ${span(metadata.after)}`;
+  }
   if (event.action.startsWith('payout.') || event.action === 'ledger.platform_withdrawal_requested') {
     return [`J$${Number(metadata.amountJmd).toLocaleString()}`, metadata.reference && `ref ${metadata.reference}`, metadata.note].filter(Boolean).join(' · ');
   }

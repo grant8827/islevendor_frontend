@@ -4,6 +4,7 @@ import { apiRequest } from '../../api/client.js';
 import { useToast } from '../../context/ToastContext.jsx';
 import { Badge, ListState, Pagination } from './adminShared.jsx';
 import { formatDateTime, humanize, inputClass } from './adminFormat.js';
+import { formatArrivalDate } from '../../lib/payoutTiming.js';
 
 const money = (n) => `J$${Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
@@ -257,7 +258,15 @@ export default function AdminPayoutsPanel() {
                 <tbody className="divide-y divide-slate-100 align-top">
                   {queue.payouts.map((p) => (
                     <tr key={p.id}>
-                      <td className="px-5 py-3 text-slate-500 whitespace-nowrap">{formatDateTime(p.createdAt)}</td>
+                      <td className="px-5 py-3 text-slate-500 whitespace-nowrap">
+                        {formatDateTime(p.createdAt)}
+                        {p.status === 'REQUESTED' && p.expectedBy && (
+                          <span className={`block mt-1 font-bold ${new Date(p.expectedBy) < new Date(new Date().toDateString()) ? 'text-red-600' : 'text-slate-600'}`}>
+                            Due by {formatArrivalDate(p.expectedBy)}
+                            {new Date(p.expectedBy) < new Date(new Date().toDateString()) && ' — overdue'}
+                          </span>
+                        )}
+                      </td>
                       <td className="px-5 py-3">
                         <p className="font-bold text-slate-900">{p.ledgerAccount.user?.fullName ?? 'IsleVendor'}</p>
                         <p className="text-slate-500">
