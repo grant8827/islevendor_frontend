@@ -6,6 +6,7 @@ import { apiRequest } from '../../api/client.js';
 import { getDocumentAlerts } from '../../api/drivers.js';
 import DashboardTopBar from '../../components/dashboard/DashboardTopBar.jsx';
 import DashboardSidebar from '../../components/dashboard/DashboardSidebar.jsx';
+import ApprovalBanner from '../../components/dashboard/ApprovalBanner.jsx';
 import ApplyToDeliverPanel from './ApplyToDeliverPanel.jsx';
 import DeliveryPanel from './DeliveryPanel.jsx';
 import DocumentExpiryAlertModal from './DocumentExpiryAlertModal.jsx';
@@ -83,6 +84,7 @@ export default function DriverDashboard() {
       <div className="flex flex-1">
         <DashboardSidebar items={items} active={activeTab} onSelect={setActiveTab} />
         <main className="flex-1 p-8 text-ink">
+          <ApprovalBanner status={user.driverProfile?.applicantStatus} audience="driver" />
           {activeTab === 'overview' && (
             <div>
               <h2 className="font-bold text-navy text-lg mb-4">Overview</h2>

@@ -3,6 +3,7 @@ import { LayoutDashboard, Building2, Package, ClipboardList, Truck, UserRound, L
 import { apiRequest } from '../../api/client.js';
 import DashboardTopBar from '../../components/dashboard/DashboardTopBar.jsx';
 import DashboardSidebar from '../../components/dashboard/DashboardSidebar.jsx';
+import ApprovalBanner from '../../components/dashboard/ApprovalBanner.jsx';
 import DeliveryApplicationsPanel from '../../components/dashboard/DeliveryApplicationsPanel.jsx';
 import OrdersPanel from '../../components/dashboard/OrdersPanel.jsx';
 import FeedbackPanel from '../../components/dashboard/FeedbackPanel.jsx';
@@ -134,6 +135,7 @@ export default function ShopDashboard() {
       <div className="flex flex-1">
         <DashboardSidebar items={items} active={activeTab} onSelect={setActiveTab} />
         <main className="flex-1 p-8 text-ink">
+          <ApprovalBanner status={shop.applicantStatus} />
           {activeTab === 'overview' && <OverviewPanel shop={shop} stats={stats} />}
           {activeTab === 'store' && (
             <div>

@@ -56,7 +56,7 @@ export default function ApplyToDeliverPanel() {
         <Truck className="w-5 h-5 text-primary" />
         <div>
           <h2 className="font-bold text-navy text-lg">Apply to Deliver</h2>
-          <p className="text-xs text-slate-500">Browse warehouses and stores and apply to be one of their regular couriers.</p>
+          <p className="text-xs text-slate-500">Browse IsleVendor-approved warehouses and stores and apply to be one of their couriers. You'll only be offered pickups from places that accept you.</p>
         </div>
       </div>
 

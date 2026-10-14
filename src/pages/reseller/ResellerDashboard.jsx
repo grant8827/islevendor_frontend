@@ -4,6 +4,7 @@ import { LayoutDashboard, Store, Warehouse as WarehouseIcon, Package, UserRound,
 import { apiRequest } from '../../api/client.js';
 import DashboardTopBar from '../../components/dashboard/DashboardTopBar.jsx';
 import DashboardSidebar from '../../components/dashboard/DashboardSidebar.jsx';
+import ApprovalBanner from '../../components/dashboard/ApprovalBanner.jsx';
 import OrdersPanel from '../../components/dashboard/OrdersPanel.jsx';
 import FeedbackPanel from '../../components/dashboard/FeedbackPanel.jsx';
 import PayoutsPanel from '../../components/dashboard/PayoutsPanel.jsx';
@@ -102,6 +103,7 @@ export default function ResellerDashboard() {
       <div className="flex flex-1">
         <DashboardSidebar items={items} active={activeTab} onSelect={setActiveTab} />
         <main className="flex-1 p-8 text-ink">
+          <ApprovalBanner status={store.applicantStatus} />
           {activeTab === 'overview' && (
             <div>
               <h2 className="font-bold text-navy text-lg mb-1">{store.storeName}</h2>
