@@ -9,13 +9,19 @@ import { formatArrivalDate } from '../../lib/payoutTiming.js';
 const money = (n) => `J$${Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 const STATUS_TABS = [
-  { key: 'REQUESTED', label: 'To pay' },
+  { key: 'REQUESTED', label: 'To approve' },
+  { key: 'APPROVED', label: 'Approved' },
+  { key: 'SUBMITTED', label: 'Sent to WiPay' },
+  { key: 'PROCESSING', label: 'WiPay processing' },
   { key: 'PAID', label: 'Paid' },
   { key: 'FAILED', label: 'Failed' },
 ];
 
 const STATUS_STYLES = {
   REQUESTED: 'bg-amber-100 text-amber-700 border-amber-300',
+  APPROVED: 'bg-sky-100 text-sky-700 border-sky-300',
+  SUBMITTED: 'bg-sky-100 text-sky-700 border-sky-300',
+  PROCESSING: 'bg-sky-100 text-sky-700 border-sky-300',
   PAID: 'bg-primary/10 text-primary-dark border-primary/30',
   FAILED: 'bg-red-100 text-red-700 border-red-300',
 };
@@ -38,7 +44,9 @@ function Destination({ destination }) {
       <span className="block font-mono">
         {destination.accountNumber}
         {destination.branchCode && ` · branch ${destination.branchCode}`}
+        {destination.bankAccountType && ` · ${destination.bankAccountType.toLowerCase()}`}
       </span>
+      {destination.source === 'sign_up' && <span className="block text-amber-700">From sign-up — not confirmed in their payout details yet</span>}
     </span>
   );
 }
@@ -126,6 +134,21 @@ export default function AdminPayoutsPanel() {
   const [queue, setQueue] = useState(null);
   const [queueError, setQueueError] = useState(null);
   const [settling, setSettling] = useState(null); // { payout, outcome }
+  const [acting, setActing] = useState(null); // payout id with a request in flight
+
+  // Approve, send through WiPay, or check with WiPay — each a single POST.
+  async function act(payout, action, success) {
+    setActing(payout.id);
+    try {
+      await apiRequest(`/admin/payouts/${payout.id}/${action}`, { method: 'POST' });
+      notify(success);
+    } catch (err) {
+      notify(err.message);
+    } finally {
+      setActing(null);
+      loadQueue();
+    }
+  }
 
   const loadPlatform = useCallback(() => {
     apiRequest('/admin/ledger/platform')
@@ -225,7 +248,10 @@ export default function AdminPayoutsPanel() {
         <h2 className="font-bold text-navy text-lg mb-1 flex items-center gap-2">
           <Banknote className="w-5 h-5 text-primary" /> Payout requests
         </h2>
-        <p className="text-xs text-slate-500 mb-4">Send each one by bank or Lynk transfer, then record it here. A failed payout returns the money to the owner's available balance.</p>
+        <p className="text-xs text-slate-500 mb-4">
+          Approve each request, then pay it — by your own bank or Lynk transfer (record it with "Paid by hand"){' '}
+          {queue?.automatedPayoutsEnabled ? 'or automatically with "Send via WiPay", which is marked paid once WiPay confirms the transfer' : '— automatic WiPay payouts are switched off'}. A failed payout returns the money to the owner's available balance.
+        </p>
 
         <div className="flex gap-1 border-b border-slate-200 mb-4">
           {STATUS_TABS.map(({ key, label }) => (
@@ -280,20 +306,46 @@ export default function AdminPayoutsPanel() {
                       </td>
                       <td className="px-5 py-3">
                         <Badge className={STATUS_STYLES[p.status]}>{humanize(p.status)}</Badge>
+                        {p.channel === 'WIPAY' && <p className="mt-1 text-slate-500">via WiPay{p.providerTransactionId && ` · ${p.providerTransactionId}`}</p>}
+                        {p.providerStatusDescription && <p className="mt-1 text-slate-500">WiPay: {p.providerStatusDescription}</p>}
+                        {p.providerFeeJmd && <p className="mt-1 text-slate-500">WiPay fee {money(p.providerFeeJmd)}</p>}
                         {p.reference && <p className="mt-1 font-mono text-slate-500">Ref {p.reference}</p>}
                         {p.note && <p className="mt-1 text-slate-500">{p.note}</p>}
+                        {p.lastError && <p className="mt-1 text-red-600 max-w-xs whitespace-normal">{p.lastError}</p>}
                       </td>
                       <td className="px-5 py-3 text-right whitespace-nowrap">
-                        {p.status === 'REQUESTED' && (
-                          <span className="flex justify-end gap-2">
-                            <button type="button" onClick={() => setSettling({ payout: p, outcome: 'PAID' })} className="btn-primary text-[11px] font-bold px-3 py-1.5 rounded-lg">
-                              Mark paid
+                        <span className="flex flex-wrap justify-end gap-2">
+                          {p.status === 'REQUESTED' && (
+                            <button type="button" disabled={acting === p.id} onClick={() => act(p, 'approve', 'Payout approved.')} className="btn-primary text-[11px] font-bold px-3 py-1.5 rounded-lg disabled:opacity-40">
+                              Approve
                             </button>
-                            <button type="button" onClick={() => setSettling({ payout: p, outcome: 'FAILED' })} className="text-[11px] font-bold px-3 py-1.5 rounded-lg border border-red-300 text-red-700 hover:bg-red-50">
-                              Failed
+                          )}
+                          {p.status === 'APPROVED' && queue.automatedPayoutsEnabled && p.destination?.readyForAutomaticPayout && (
+                            <button
+                              type="button"
+                              disabled={acting === p.id}
+                              onClick={() => act(p, 'send-wipay', 'Sent to WiPay — it’s marked paid once WiPay confirms the transfer.')}
+                              className="btn-primary text-[11px] font-bold px-3 py-1.5 rounded-lg disabled:opacity-40"
+                            >
+                              Send via WiPay
                             </button>
-                          </span>
-                        )}
+                          )}
+                          {['REQUESTED', 'APPROVED'].includes(p.status) && (
+                            <>
+                              <button type="button" onClick={() => setSettling({ payout: p, outcome: 'PAID' })} className="text-[11px] font-bold px-3 py-1.5 rounded-lg border border-slate-300 text-slate-700 hover:bg-surface">
+                                Paid by hand
+                              </button>
+                              <button type="button" onClick={() => setSettling({ payout: p, outcome: 'FAILED' })} className="text-[11px] font-bold px-3 py-1.5 rounded-lg border border-red-300 text-red-700 hover:bg-red-50">
+                                Failed
+                              </button>
+                            </>
+                          )}
+                          {['SUBMITTED', 'PROCESSING'].includes(p.status) && (
+                            <button type="button" disabled={acting === p.id} onClick={() => act(p, 'check-wipay', 'Checked with WiPay.')} className="text-[11px] font-bold px-3 py-1.5 rounded-lg border border-sky-300 text-sky-700 hover:bg-sky-50 disabled:opacity-40">
+                              Check with WiPay
+                            </button>
+                          )}
+                        </span>
                       </td>
                     </tr>
                   ))}

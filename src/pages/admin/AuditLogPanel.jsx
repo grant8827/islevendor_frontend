@@ -14,6 +14,11 @@ const ACTIONS = {
   'ledger.platform_withdrawal_requested': 'IsleVendor withdrawal requested',
   'payout.paid': 'Payout paid',
   'payout.failed': 'Payout failed',
+  'payout.approved': 'Payout approved',
+  'payout.wipay_submission_started': 'Payout being sent to WiPay',
+  'payout.sent_to_wipay': 'Payout sent to WiPay',
+  'payout.checked_with_wipay': 'Payout checked with WiPay',
+  'payout_account.updated': 'Payout details changed',
 };
 
 function detailOf(event) {
@@ -21,12 +26,16 @@ function detailOf(event) {
   if (event.action === 'applicant.decision') return `${metadata.decision}${metadata.reason ? ` — ${metadata.reason}` : ''}`;
   if (event.action.startsWith('kyc_document.')) return metadata.kind;
   if (event.action === 'user.sessions_revoked') return metadata.reason;
+  if (event.action === 'payout_account.updated') return [metadata.method, metadata.bankName, metadata.accountNumber].filter(Boolean).join(' · ');
+  if (event.action === 'payout.checked_with_wipay') return `${metadata.status}${metadata.wipayStatus !== undefined ? ` (WiPay ${metadata.wipayStatus})` : ''}`;
   if (event.action === 'settings.payout_timing_changed') {
     const span = (t) => `${t.minBusinessDays}–${t.maxBusinessDays} business days`;
     return `${span(metadata.before)} → ${span(metadata.after)}`;
   }
   if (event.action.startsWith('payout.') || event.action === 'ledger.platform_withdrawal_requested') {
-    return [`J$${Number(metadata.amountJmd).toLocaleString()}`, metadata.reference && `ref ${metadata.reference}`, metadata.note].filter(Boolean).join(' · ');
+    return [metadata.amountJmd && `J$${Number(metadata.amountJmd).toLocaleString()}`, metadata.reference && `ref ${metadata.reference}`, metadata.transactionId, metadata.note]
+      .filter(Boolean)
+      .join(' · ');
   }
   if (event.action === 'settings.isledash_rate_changed') {
     const rate = (r) => `J$${Number(r.baseFeeJmd).toLocaleString()} + ${r.extraItemPercent}% per extra item`;

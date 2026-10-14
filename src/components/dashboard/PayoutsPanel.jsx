@@ -3,6 +3,7 @@ import { Wallet, History, Banknote } from 'lucide-react';
 import { apiRequest } from '../../api/client.js';
 import { useToast } from '../../context/ToastContext.jsx';
 import PayoutHistoryPanel from './PayoutHistoryPanel.jsx';
+import PayoutDetailsCard from './PayoutDetailsCard.jsx';
 import { describePayoutTime, expectedArrival, formatArrivalDate } from '../../lib/payoutTiming.js';
 
 const escrowLabelOf = (t) => (t.escrowState === 'HELD_IN_ESCROW' ? 'Pending' : 'Available');
@@ -102,6 +103,7 @@ export default function PayoutsPanel() {
 
       {subTab === 'payout' && (
         <div>
+          <PayoutDetailsCard />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-lg mb-4">
             <div className="bg-white border border-slate-200 shadow-sm rounded-xl p-5">
               <p className="text-xs text-slate-500">Pending</p>

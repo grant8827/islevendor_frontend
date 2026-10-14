@@ -18,6 +18,9 @@ const MONTHS = [
 // failed (the money went back into the available balance).
 const PAYOUT_STATUS = {
   REQUESTED: { label: 'Processing', style: 'bg-amber-100 text-amber-700 border-amber-300' },
+  APPROVED: { label: 'Approved', style: 'bg-sky-100 text-sky-700 border-sky-300' },
+  SUBMITTED: { label: 'Sending to your bank', style: 'bg-sky-100 text-sky-700 border-sky-300' },
+  PROCESSING: { label: 'Sending to your bank', style: 'bg-sky-100 text-sky-700 border-sky-300' },
   PAID: { label: 'Paid', style: 'bg-primary/10 text-primary-dark border-primary/30' },
   FAILED: { label: 'Failed', style: 'bg-red-100 text-red-700 border-red-300' },
 };
@@ -105,7 +108,7 @@ export default function PayoutHistoryPanel() {
                     <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded border ${PAYOUT_STATUS[p.status]?.style ?? PAYOUT_STATUS.REQUESTED.style}`}>
                       {PAYOUT_STATUS[p.status]?.label ?? p.status}
                     </span>
-                    {p.status === 'REQUESTED' && p.expectedBy && (
+                    {['REQUESTED', 'APPROVED', 'SUBMITTED', 'PROCESSING'].includes(p.status) && p.expectedBy && (
                       <span className="block mt-1 text-[11px] text-slate-500">Expected by {formatArrivalDate(p.expectedBy)}</span>
                     )}
                     {p.status === 'PAID' && p.reference && <span className="block mt-1 text-[11px] text-slate-500">Ref {p.reference}</span>}
