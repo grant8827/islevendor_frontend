@@ -176,7 +176,12 @@ export default function ShopDashboard() {
           {activeTab === 'payouts' && <PayoutsPanel />}
           {activeTab === 'feedback' && <FeedbackPanel endpoint={`/shop/${shop.id}/feedback`} />}
           {activeTab === 'delivery-applications' && (
-            <DeliveryApplicationsPanel ownerType="shop" ownerId={shop.id} onDecision={loadStats} />
+            <DeliveryApplicationsPanel
+              ownerType="shop"
+              ownerId={shop.id}
+              onDecision={loadStats}
+              defaultLocation={`${shop.pickupAddress || shop.addressLine}, ${shop.parish}`}
+            />
           )}
           {activeTab === 'packing' && <PackingQueuePanel shopId={shop.id} shop={shop} />}
           {activeTab === 'profile' && (

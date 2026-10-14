@@ -50,7 +50,12 @@ export default function ApplicationsPage({ warehouse, pendingApplicants, pending
 
       {subTab === 'vacancies' && <VacanciesPanel warehouse={warehouse} onWarehouseUpdated={onWarehouseUpdated} canEditCommission={canEditCommission} />}
       {subTab === 'applicants' && <ApplicationsPanel warehouseId={warehouseId} onDecision={onDecision} />}
-      {subTab === 'drivers' && <DeliveryApplicationsPanel ownerType="warehouse" ownerId={warehouseId} onDecision={onDecision} />}
+      {subTab === 'drivers' && <DeliveryApplicationsPanel
+          ownerType="warehouse"
+          ownerId={warehouseId}
+          onDecision={onDecision}
+          defaultLocation={`${warehouse.addressLine}, ${warehouse.parish}`}
+        />}
     </div>
   );
 }
