@@ -153,6 +153,11 @@ function OrderRow({ order, onRated }) {
             {STATUS_LABELS[order.status] || order.status}
           </span>
           <p className="text-sm font-black text-slate-900 mt-1.5">J${Number(order.totalPaidJmd).toLocaleString()}</p>
+          {order.status === 'AWAITING_PAYMENT' && order.checkoutPaymentId && (
+            <Link to={`/payment/${order.checkoutPaymentId}`} className="inline-block mt-2 btn-primary text-[11px] font-bold px-3 py-1.5 rounded-lg">
+              Pay now
+            </Link>
+          )}
         </div>
       </div>
       <div className="space-y-3">

@@ -88,8 +88,9 @@ export default function CartPage() {
 
     setPlacing(true);
     try {
-      // The whole cart in one request: the server places every item or none.
-      await apiRequest('/orders/checkout', {
+      // The whole cart in one request: the server places every item or none,
+      // then starts one WiPay card payment for the total.
+      const { payment } = await apiRequest('/orders/checkout', {
         method: 'POST',
         body: {
           items: items.map(({ kind, storeId, masterProductId, quantity }) => ({ kind, storeId, masterProductId, quantity })),
@@ -97,10 +98,17 @@ export default function CartPage() {
           ...(needsAddress ? { deliveryAddress: deliveryAddress.trim() } : {}),
         },
       });
-      const count = items.length;
       clear();
-      notify(`Order${count > 1 ? 's' : ''} placed — awaiting payment confirmation.`);
-      navigate('/account');
+      if (payment?.checkoutUrl) {
+        // Off to WiPay's card page; WiPay brings the customer back to their
+        // payment status page.
+        window.location.assign(payment.checkoutUrl);
+        return;
+      }
+      // The orders are saved even if paying couldn't start — they can pay
+      // from their status page or account.
+      notify(payment?.message ? `Order placed. ${payment.message}` : 'Order placed.');
+      navigate(payment?.id ? `/payment/${payment.id}` : '/account?tab=orders');
     } catch (err) {
       setError(err.message);
       loadQuote();
@@ -282,13 +290,14 @@ export default function CartPage() {
               {error && <p className="text-xs text-red-600" role="alert">{error}</p>}
               {!user && <p className="text-xs text-slate-500">You'll need to log in to check out.</p>}
 
+              <p className="text-[11px] text-slate-500">You'll pay securely by card on WiPay's page, then come back here.</p>
               <button
                 type="button"
                 onClick={handleCheckout}
                 disabled={placing || !canCheckout}
                 className="btn-primary w-full disabled:opacity-60 text-sm py-3"
               >
-                {placing ? 'Placing order…' : user ? 'Proceed to Checkout' : 'Log in to Checkout'}
+                {placing ? 'Placing order…' : user ? 'Pay with card' : 'Log in to Checkout'}
               </button>
             </div>
           </div>
