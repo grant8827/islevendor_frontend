@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Trash2, ShoppingBag, ImageOff, ArrowLeft } from 'lucide-react';
 import { useCart } from '../context/CartContext.jsx';
@@ -7,14 +7,72 @@ import { useToast } from '../context/ToastContext.jsx';
 import { apiRequest } from '../api/client.js';
 import Navbar from '../components/marketplace/Navbar.jsx';
 
+const formatJmd = (value) => `J$${Number(value).toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+const quoteKey = (item) => `${item.kind}:${item.storeId}:${item.masterProductId}`;
+
 export default function CartPage() {
-  const { items, removeItem, updateQuantity, clear, subtotalJmd } = useCart();
+  const { items, removeItem, updateQuantity, subtotalJmd } = useCart();
   const { user } = useAuth();
   const { notify } = useToast();
   const navigate = useNavigate();
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [placing, setPlacing] = useState(false);
   const [error, setError] = useState(null);
+  // The server's view of the cart (POST /orders/quote): live prices, stock,
+  // and each seller's delivery options. Null while loading.
+  const [quote, setQuote] = useState(null);
+  const [quoteError, setQuoteError] = useState(null);
+  // Delivery method chosen per seller, keyed by the quote's sellerKey.
+  const [choices, setChoices] = useState({});
+  const requestId = useRef(0);
+
+  const loadQuote = useCallback(() => {
+    if (items.length === 0) return;
+    const id = ++requestId.current;
+    setQuoteError(null);
+    apiRequest('/orders/quote', {
+      method: 'POST',
+      auth: false,
+      body: { items: items.map(({ kind, storeId, masterProductId, quantity }) => ({ kind, storeId, masterProductId, quantity })) },
+    })
+      .then((data) => {
+        if (id !== requestId.current) return;
+        setQuote(data);
+        // Keep a choice the seller still offers; otherwise default to their first option.
+        setChoices((current) =>
+          Object.fromEntries(
+            data.sellers.map((seller) => [
+              seller.key,
+              seller.options.some((o) => o.method === current[seller.key]) ? current[seller.key] : seller.options[0]?.method,
+            ]),
+          ),
+        );
+      })
+      .catch((err) => {
+        if (id === requestId.current) setQuoteError(err.message);
+      });
+  }, [items]);
+
+  useEffect(loadQuote, [loadQuote]);
+
+  const quoted = new Map((quote?.items ?? []).map((line) => [quoteKey(line), line]));
+  const lineFor = (item) => quoted.get(quoteKey(item));
+
+  // Items grouped by the business that ships them, each with the option the
+  // customer picked. Every cart item is still placed as its own order, so a
+  // delivery fee applies to each item in a group.
+  const groups = (quote?.sellers ?? []).map((seller) => {
+    const groupItems = items.filter((item) => lineFor(item)?.sellerKey === seller.key);
+    const option = seller.options.find((o) => o.method === choices[seller.key]) ?? null;
+    return { seller, items: groupItems, option, deliveryTotal: option ? Number(option.feeJmd) * groupItems.length : 0 };
+  });
+  const ungrouped = items.filter((item) => !lineFor(item)?.sellerKey);
+  const unavailable = items.filter((item) => lineFor(item) && !lineFor(item).available);
+  const goodsTotal = (quote?.items ?? []).filter((l) => l.available).reduce((sum, l) => sum + Number(l.goodsTotalJmd), 0);
+  const deliveryTotal = groups.reduce((sum, g) => sum + g.deliveryTotal, 0);
+  const needsAddress = groups.some((g) => g.option?.needsAddress);
+  const sellerWithoutOptions = groups.find((g) => g.seller.options.length === 0);
+  const canCheckout = quote && unavailable.length === 0 && ungrouped.length === 0 && !sellerWithoutOptions;
 
   async function handleCheckout() {
     setError(null);
@@ -23,36 +81,88 @@ export default function CartPage() {
       navigate('/login');
       return;
     }
-    if (!deliveryAddress.trim()) {
+    if (needsAddress && !deliveryAddress.trim()) {
       setError('Enter a delivery address.');
       return;
     }
 
     setPlacing(true);
+    let placed = 0;
     try {
       // Our order model is one product per order (no line-items table yet),
-      // so a multi-item cart places one real order per line.
-      for (const item of items) {
-        await apiRequest('/orders', {
-          method: 'POST',
-          body: {
-            kind: item.kind,
-            storeId: item.storeId,
-            masterProductId: item.masterProductId,
-            quantity: item.quantity,
-            deliveryAddress,
-          },
-        });
+      // so a multi-item cart places one real order per line. Each placed
+      // line leaves the cart straight away, so retrying after a failure
+      // can't order anything twice.
+      for (const group of groups) {
+        for (const item of group.items) {
+          await apiRequest('/orders', {
+            method: 'POST',
+            body: {
+              kind: item.kind,
+              storeId: item.storeId,
+              masterProductId: item.masterProductId,
+              quantity: item.quantity,
+              deliveryMethod: group.option.method,
+              ...(group.option.needsAddress ? { deliveryAddress: deliveryAddress.trim() } : {}),
+            },
+          });
+          removeItem(item.listingId);
+          placed += 1;
+        }
       }
-      clear();
-      notify(`Order${items.length > 1 ? 's' : ''} placed — awaiting payment confirmation.`);
-      navigate('/dashboard');
+      notify(`Order${placed > 1 ? 's' : ''} placed — awaiting payment confirmation.`);
+      navigate('/account');
     } catch (err) {
-      setError(err.message);
+      setError(placed > 0 ? `${placed} item${placed > 1 ? 's were' : ' was'} ordered; the rest weren't: ${err.message}` : err.message);
+      loadQuote();
     } finally {
       setPlacing(false);
     }
   }
+
+  const renderItem = (item) => {
+    const line = lineFor(item);
+    return (
+      <div key={item.listingId} className="flex items-start gap-4 p-5">
+        <div className="h-20 w-20 shrink-0 bg-slate-100 rounded-lg flex items-center justify-center overflow-hidden">
+          {item.imageUrl ? <img src={item.imageUrl} alt={item.title} className="max-h-full max-w-full object-contain" /> : <ImageOff className="w-6 h-6 text-slate-300" />}
+        </div>
+
+        <div className="flex-1 min-w-0">
+          <Link to={`/product/${item.listingId}`} className="text-sm font-bold text-slate-900 hover:text-secondary transition line-clamp-2">
+            {item.title}
+          </Link>
+          <p className="text-xs text-slate-500 mt-0.5">Sold by {item.storeName}</p>
+          {line && !line.available && (
+            <p className="text-xs font-bold text-red-600 mt-1" role="alert">
+              {line.reason} — remove it or lower the quantity to check out.
+            </p>
+          )}
+
+          <div className="flex items-center gap-3 mt-3">
+            <label className="flex items-center gap-1.5 text-xs text-slate-600">
+              Qty
+              <input
+                type="number"
+                min={1}
+                value={item.quantity}
+                onChange={(e) => updateQuantity(item.listingId, Number(e.target.value))}
+                className="w-16 text-xs border border-slate-300 rounded px-2 py-1"
+              />
+            </label>
+            <button type="button" onClick={() => removeItem(item.listingId)} className="flex items-center gap-1 text-xs text-slate-400 hover:text-red-500 transition">
+              <Trash2 className="w-3.5 h-3.5" />
+              Remove
+            </button>
+          </div>
+        </div>
+
+        <p className="text-sm font-black text-slate-900 shrink-0">
+          {line?.available ? formatJmd(line.goodsTotalJmd) : formatJmd(item.retailPriceJmd * item.quantity)}
+        </p>
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-surface">
@@ -82,74 +192,101 @@ export default function CartPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-            {/* ITEMS */}
-            <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-200 divide-y divide-slate-100">
-              {items.map((item) => (
-                <div key={item.listingId} className="flex items-start gap-4 p-5">
-                  <div className="h-20 w-20 shrink-0 bg-slate-100 rounded-lg flex items-center justify-center overflow-hidden">
-                    {item.imageUrl ? (
-                      <img src={item.imageUrl} alt={item.title} className="max-h-full max-w-full object-contain" />
-                    ) : (
-                      <ImageOff className="w-6 h-6 text-slate-300" />
-                    )}
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    <Link to={`/product/${item.listingId}`} className="text-sm font-bold text-slate-900 hover:text-secondary transition line-clamp-2">
-                      {item.title}
-                    </Link>
-                    <p className="text-xs text-slate-500 mt-0.5">Sold by {item.storeName}</p>
-                    <p className="text-sm font-bold text-slate-900 mt-2">
-                      J${item.retailPriceJmd.toLocaleString()}
-                    </p>
-
-                    <div className="flex items-center gap-3 mt-3">
-                      <label className="flex items-center gap-1.5 text-xs text-slate-600">
-                        Qty
-                        <input
-                          type="number"
-                          min={1}
-                          value={item.quantity}
-                          onChange={(e) => updateQuantity(item.listingId, Number(e.target.value))}
-                          className="w-16 text-xs border border-slate-300 rounded px-2 py-1"
-                        />
-                      </label>
-                      <button
-                        type="button"
-                        onClick={() => removeItem(item.listingId)}
-                        className="flex items-center gap-1 text-xs text-slate-400 hover:text-red-500 transition"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                        Remove
-                      </button>
-                    </div>
-                  </div>
-
-                  <p className="text-sm font-black text-slate-900 shrink-0">
-                    J${(item.retailPriceJmd * item.quantity).toLocaleString()}
-                  </p>
+            {/* ITEMS, grouped by who ships them */}
+            <div className="lg:col-span-2 space-y-4">
+              {quoteError && (
+                <div className="bg-white rounded-2xl border border-red-200 p-4 text-sm text-red-600" role="alert">
+                  Couldn't check prices and delivery options: {quoteError}{' '}
+                  <button type="button" onClick={loadQuote} className="underline font-bold">
+                    Try again
+                  </button>
                 </div>
+              )}
+              {!quote && !quoteError && <p className="text-sm text-slate-500">Checking prices and delivery options…</p>}
+
+              {groups.map((group) => (
+                <section key={group.seller.key} className="bg-white rounded-2xl shadow-sm border border-slate-200">
+                  <h2 className="px-5 pt-4 text-xs uppercase tracking-wide text-slate-500">Shipped by {group.seller.name}</h2>
+                  <div className="divide-y divide-slate-100">{group.items.map(renderItem)}</div>
+
+                  <fieldset className="border-t border-slate-100 px-5 py-4">
+                    <legend className="sr-only">Delivery for items shipped by {group.seller.name}</legend>
+                    <p className="text-xs font-bold text-slate-700 mb-2">How do you want to get {group.items.length > 1 ? 'these' : 'it'}?</p>
+                    {group.seller.options.length === 0 && (
+                      <p className="text-xs text-red-600" role="alert">
+                        This seller hasn't set up any delivery options yet, so these items can't be ordered right now.
+                      </p>
+                    )}
+                    <div className="space-y-2">
+                      {group.seller.options.map((option) => (
+                        <label
+                          key={option.method}
+                          className={`flex items-start gap-3 rounded-lg border p-3 cursor-pointer transition ${
+                            choices[group.seller.key] === option.method ? 'border-primary bg-primary/5' : 'border-slate-200 hover:border-slate-300'
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name={`delivery-${group.seller.key}`}
+                            className="mt-1 accent-[var(--primary)]"
+                            checked={choices[group.seller.key] === option.method}
+                            onChange={() => setChoices((c) => ({ ...c, [group.seller.key]: option.method }))}
+                          />
+                          <span className="flex-1 min-w-0">
+                            <span className="flex justify-between gap-3 text-sm font-bold text-slate-900">
+                              {option.label}
+                              <span>{Number(option.feeJmd) === 0 ? 'Free' : formatJmd(option.feeJmd)}</span>
+                            </span>
+                            {option.detail && <span className="block text-xs text-slate-500 mt-0.5">{option.detail}</span>}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                    {group.items.length > 1 && group.option && Number(group.option.feeJmd) > 0 && (
+                      <p className="text-[11px] text-slate-500 mt-2">Each item ships as its own order, so the delivery fee applies to each one.</p>
+                    )}
+                  </fieldset>
+                </section>
               ))}
+
+              {/* Items the quote couldn't place under a seller (no longer sold, or still loading). */}
+              {ungrouped.length > 0 && (
+                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 divide-y divide-slate-100">{ungrouped.map(renderItem)}</div>
+              )}
             </div>
 
             {/* CHECKOUT SUMMARY */}
             <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-4 lg:sticky lg:top-24">
-              <div className="flex justify-between text-sm font-bold text-slate-900">
-                <span>Subtotal ({items.reduce((n, i) => n + i.quantity, 0)} items)</span>
-                <span>J${subtotalJmd.toLocaleString()}</span>
-              </div>
-              <p className="text-[11px] text-slate-500">Delivery fee and platform commission are added at checkout.</p>
+              <dl className="space-y-2 text-sm">
+                <div className="flex justify-between text-slate-700">
+                  <dt>Items ({items.reduce((n, i) => n + i.quantity, 0)})</dt>
+                  <dd>{quote ? formatJmd(goodsTotal) : formatJmd(subtotalJmd)}</dd>
+                </div>
+                <div className="flex justify-between text-slate-700">
+                  <dt>Delivery</dt>
+                  <dd>{quote ? (deliveryTotal === 0 ? 'Free' : formatJmd(deliveryTotal)) : '—'}</dd>
+                </div>
+                <div className="flex justify-between font-bold text-slate-900 border-t border-slate-100 pt-2">
+                  <dt>Total</dt>
+                  <dd>{quote ? formatJmd(goodsTotal + deliveryTotal) : '—'}</dd>
+                </div>
+              </dl>
 
-              <div>
-                <label className="block text-xs text-slate-600 mb-1">Delivery address</label>
-                <input
-                  type="text"
-                  placeholder="Where should we deliver this?"
-                  value={deliveryAddress}
-                  onChange={(e) => setDeliveryAddress(e.target.value)}
-                  className="w-full text-sm border border-slate-300 rounded-lg px-3 py-2"
-                />
-              </div>
+              {needsAddress && (
+                <div>
+                  <label htmlFor="delivery-address" className="block text-xs text-slate-600 mb-1">
+                    Delivery address
+                  </label>
+                  <input
+                    id="delivery-address"
+                    type="text"
+                    placeholder="Where should we deliver this?"
+                    value={deliveryAddress}
+                    onChange={(e) => setDeliveryAddress(e.target.value)}
+                    className="w-full text-sm border border-slate-300 rounded-lg px-3 py-2"
+                  />
+                </div>
+              )}
 
               {error && <p className="text-xs text-red-600" role="alert">{error}</p>}
               {!user && <p className="text-xs text-slate-500">You'll need to log in to check out.</p>}
@@ -157,7 +294,7 @@ export default function CartPage() {
               <button
                 type="button"
                 onClick={handleCheckout}
-                disabled={placing}
+                disabled={placing || !canCheckout}
                 className="btn-primary w-full disabled:opacity-60 text-sm py-3"
               >
                 {placing ? 'Placing order…' : user ? 'Proceed to Checkout' : 'Log in to Checkout'}

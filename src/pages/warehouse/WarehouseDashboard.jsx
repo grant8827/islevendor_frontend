@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext.jsx';
 import DashboardTopBar from '../../components/dashboard/DashboardTopBar.jsx';
 import DashboardSidebar from '../../components/dashboard/DashboardSidebar.jsx';
 import ApprovalBanner from '../../components/dashboard/ApprovalBanner.jsx';
+import DeliveryOptionsCard from '../../components/dashboard/DeliveryOptionsCard.jsx';
 import OrdersPanel from '../../components/dashboard/OrdersPanel.jsx';
 import FeedbackPanel from '../../components/dashboard/FeedbackPanel.jsx';
 import PayoutsPanel from '../../components/dashboard/PayoutsPanel.jsx';
@@ -208,6 +209,14 @@ export default function WarehouseDashboard() {
                   <p><span className="text-slate-500">Parish:</span> <span className="text-slate-900">{warehouse.parish}</span></p>
                 </div>
                 <ResellerCommissionCard warehouse={warehouse} onSaved={() => loadWarehouses(warehouse.id)} />
+                <DeliveryOptionsCard
+                  key={warehouse.id}
+                  business={warehouse}
+                  endpoint={`/warehouse/${warehouse.id}/delivery-options`}
+                  pickupLocation={`${warehouse.addressLine}, ${warehouse.parish}`}
+                  readOnly={isStaff}
+                  onSaved={() => loadWarehouses(warehouse.id)}
+                />
               </div>
               <ApprovedResellersSection warehouseId={warehouse.id} />
               <ApprovedDriversSection warehouseId={warehouse.id} />

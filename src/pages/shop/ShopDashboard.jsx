@@ -4,6 +4,7 @@ import { apiRequest } from '../../api/client.js';
 import DashboardTopBar from '../../components/dashboard/DashboardTopBar.jsx';
 import DashboardSidebar from '../../components/dashboard/DashboardSidebar.jsx';
 import ApprovalBanner from '../../components/dashboard/ApprovalBanner.jsx';
+import DeliveryOptionsCard from '../../components/dashboard/DeliveryOptionsCard.jsx';
 import DeliveryApplicationsPanel from '../../components/dashboard/DeliveryApplicationsPanel.jsx';
 import OrdersPanel from '../../components/dashboard/OrdersPanel.jsx';
 import FeedbackPanel from '../../components/dashboard/FeedbackPanel.jsx';
@@ -145,6 +146,15 @@ export default function ShopDashboard() {
                 <p><span className="text-slate-500">Address:</span> <span className="text-slate-900">{shop.addressLine}</span></p>
                 <p><span className="text-slate-500">Parish:</span> <span className="text-slate-900">{shop.parish}</span></p>
                 <p><span className="text-slate-500">URL:</span> <span className="text-slate-900">/store/{shop.slug}</span></p>
+              </div>
+              <div className="max-w-md mt-4">
+                <DeliveryOptionsCard
+                  key={shop.id}
+                  business={shop}
+                  endpoint={`/shop/${shop.id}/delivery-options`}
+                  pickupLocation={`${shop.pickupAddress || shop.addressLine}, ${shop.parish}`}
+                  onSaved={() => loadShops(shop.id)}
+                />
               </div>
               <div className="mt-8">
                 <h3 className="font-bold text-navy text-base mb-4">Items sold by {shop.shopName}</h3>
