@@ -11,7 +11,7 @@ const formatJmd = (value) => `J$${Number(value).toLocaleString(undefined, { maxi
 const quoteKey = (item) => `${item.kind}:${item.storeId}:${item.masterProductId}`;
 
 export default function CartPage() {
-  const { items, removeItem, updateQuantity, subtotalJmd } = useCart();
+  const { items, removeItem, updateQuantity, clear, subtotalJmd } = useCart();
   const { user } = useAuth();
   const { notify } = useToast();
   const navigate = useNavigate();
@@ -59,12 +59,12 @@ export default function CartPage() {
   const lineFor = (item) => quoted.get(quoteKey(item));
 
   // Items grouped by the business that ships them, each with the option the
-  // customer picked. Every cart item is still placed as its own order, so a
-  // delivery fee applies to each item in a group.
+  // customer picked. The quote prices each option for all of that seller's
+  // items together (first item full fee, extras at the seller's rate).
   const groups = (quote?.sellers ?? []).map((seller) => {
     const groupItems = items.filter((item) => lineFor(item)?.sellerKey === seller.key);
     const option = seller.options.find((o) => o.method === choices[seller.key]) ?? null;
-    return { seller, items: groupItems, option, deliveryTotal: option ? Number(option.feeJmd) * groupItems.length : 0 };
+    return { seller, items: groupItems, option, deliveryTotal: option ? Number(option.feeJmd) : 0 };
   });
   const ungrouped = items.filter((item) => !lineFor(item)?.sellerKey);
   const unavailable = items.filter((item) => lineFor(item) && !lineFor(item).available);
@@ -87,33 +87,22 @@ export default function CartPage() {
     }
 
     setPlacing(true);
-    let placed = 0;
     try {
-      // Our order model is one product per order (no line-items table yet),
-      // so a multi-item cart places one real order per line. Each placed
-      // line leaves the cart straight away, so retrying after a failure
-      // can't order anything twice.
-      for (const group of groups) {
-        for (const item of group.items) {
-          await apiRequest('/orders', {
-            method: 'POST',
-            body: {
-              kind: item.kind,
-              storeId: item.storeId,
-              masterProductId: item.masterProductId,
-              quantity: item.quantity,
-              deliveryMethod: group.option.method,
-              ...(group.option.needsAddress ? { deliveryAddress: deliveryAddress.trim() } : {}),
-            },
-          });
-          removeItem(item.listingId);
-          placed += 1;
-        }
-      }
-      notify(`Order${placed > 1 ? 's' : ''} placed — awaiting payment confirmation.`);
+      // The whole cart in one request: the server places every item or none.
+      await apiRequest('/orders/checkout', {
+        method: 'POST',
+        body: {
+          items: items.map(({ kind, storeId, masterProductId, quantity }) => ({ kind, storeId, masterProductId, quantity })),
+          deliveryMethods: Object.fromEntries(groups.map((g) => [g.seller.key, g.option.method])),
+          ...(needsAddress ? { deliveryAddress: deliveryAddress.trim() } : {}),
+        },
+      });
+      const count = items.length;
+      clear();
+      notify(`Order${count > 1 ? 's' : ''} placed — awaiting payment confirmation.`);
       navigate('/account');
     } catch (err) {
-      setError(placed > 0 ? `${placed} item${placed > 1 ? 's were' : ' was'} ordered; the rest weren't: ${err.message}` : err.message);
+      setError(err.message);
       loadQuote();
     } finally {
       setPlacing(false);
@@ -242,8 +231,10 @@ export default function CartPage() {
                         </label>
                       ))}
                     </div>
-                    {group.items.length > 1 && group.option && Number(group.option.feeJmd) > 0 && (
-                      <p className="text-[11px] text-slate-500 mt-2">Each item ships as its own order, so the delivery fee applies to each one.</p>
+                    {group.seller.units > 1 && group.option && Number(group.option.feeJmd) > 0 && (
+                      <p className="text-[11px] text-slate-500 mt-2">
+                        {formatJmd(group.option.firstItemFeeJmd)} for the first item, {formatJmd(group.option.extraItemFeeJmd)} for each of the other {group.seller.units - 1}.
+                      </p>
                     )}
                   </fieldset>
                 </section>

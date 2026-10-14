@@ -121,6 +121,7 @@ export default function ShopDashboard() {
     { key: 'store', label: 'My Store', icon: Building2 },
     { key: 'products', label: 'Products', icon: Package, badge: stats.productCount },
     { key: 'orders', label: 'Orders', icon: ListOrdered },
+    { key: 'shipping', label: 'Shipping', icon: Truck },
     { key: 'payouts', label: 'Payouts', icon: Wallet },
     { key: 'feedback', label: 'Feedback', icon: MessageSquare },
     { key: 'delivery-applications', label: 'Delivery Applications', icon: Truck, badge: stats.pendingDeliveryApplications },
@@ -147,7 +148,17 @@ export default function ShopDashboard() {
                 <p><span className="text-slate-500">Parish:</span> <span className="text-slate-900">{shop.parish}</span></p>
                 <p><span className="text-slate-500">URL:</span> <span className="text-slate-900">/store/{shop.slug}</span></p>
               </div>
-              <div className="max-w-md mt-4">
+              <div className="mt-8">
+                <h3 className="font-bold text-navy text-base mb-4">Items sold by {shop.shopName}</h3>
+                <ProductsPanel shopId={shop.id} />
+              </div>
+            </div>
+          )}
+          {activeTab === 'shipping' && (
+            <div>
+              <h2 className="font-bold text-navy text-lg mb-1">Shipping</h2>
+              <p className="text-xs text-slate-500 mb-4">How customers get what they buy from {shop.shopName}.</p>
+              <div className="max-w-xl">
                 <DeliveryOptionsCard
                   key={shop.id}
                   business={shop}
@@ -155,10 +166,6 @@ export default function ShopDashboard() {
                   pickupLocation={`${shop.pickupAddress || shop.addressLine}, ${shop.parish}`}
                   onSaved={() => loadShops(shop.id)}
                 />
-              </div>
-              <div className="mt-8">
-                <h3 className="font-bold text-navy text-base mb-4">Items sold by {shop.shopName}</h3>
-                <ProductsPanel shopId={shop.id} />
               </div>
             </div>
           )}

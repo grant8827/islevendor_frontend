@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { LayoutDashboard, Warehouse as WarehouseIcon, Package, Briefcase, ClipboardList, UserRound, UsersRound, ListOrdered, MessageSquare, Wallet, X } from 'lucide-react';
+import { LayoutDashboard, Warehouse as WarehouseIcon, Package, Briefcase, ClipboardList, UserRound, UsersRound, ListOrdered, MessageSquare, Wallet, Truck, X } from 'lucide-react';
 import { apiRequest } from '../../api/client.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import DashboardTopBar from '../../components/dashboard/DashboardTopBar.jsx';
@@ -171,6 +171,7 @@ export default function WarehouseDashboard() {
         { key: 'warehouse', label: 'My Warehouse', icon: WarehouseIcon },
         { key: 'products', label: 'Products', icon: Package, badge: stats.productCount },
         { key: 'orders', label: 'Orders', icon: ListOrdered },
+        { key: 'shipping', label: 'Shipping', icon: Truck },
         ...(isOwner ? [{ key: 'payouts', label: 'Payouts', icon: Wallet }] : []),
         { key: 'feedback', label: 'Feedback', icon: MessageSquare },
         { key: 'applications', label: 'Applications', icon: Briefcase, badge: stats.pendingApplications + stats.pendingDeliveryApplications },
@@ -209,6 +210,20 @@ export default function WarehouseDashboard() {
                   <p><span className="text-slate-500">Parish:</span> <span className="text-slate-900">{warehouse.parish}</span></p>
                 </div>
                 <ResellerCommissionCard warehouse={warehouse} onSaved={() => loadWarehouses(warehouse.id)} />
+              </div>
+              <ApprovedResellersSection warehouseId={warehouse.id} />
+              <ApprovedDriversSection warehouseId={warehouse.id} />
+              <div className="mt-8">
+                <h3 className="font-bold text-navy text-base mb-4">Products in {warehouse.name}</h3>
+                <ProductsPanel warehouseId={warehouse.id} warehouses={warehouses} />
+              </div>
+            </div>
+          )}
+          {tab === 'shipping' && (
+            <div>
+              <h2 className="font-bold text-navy text-lg mb-1">Shipping</h2>
+              <p className="text-xs text-slate-500 mb-4">How customers get what they buy from {warehouse.name}, including everything your resellers sell from it.</p>
+              <div className="max-w-xl">
                 <DeliveryOptionsCard
                   key={warehouse.id}
                   business={warehouse}
@@ -217,12 +232,6 @@ export default function WarehouseDashboard() {
                   readOnly={isStaff}
                   onSaved={() => loadWarehouses(warehouse.id)}
                 />
-              </div>
-              <ApprovedResellersSection warehouseId={warehouse.id} />
-              <ApprovedDriversSection warehouseId={warehouse.id} />
-              <div className="mt-8">
-                <h3 className="font-bold text-navy text-base mb-4">Products in {warehouse.name}</h3>
-                <ProductsPanel warehouseId={warehouse.id} warehouses={warehouses} />
               </div>
             </div>
           )}
