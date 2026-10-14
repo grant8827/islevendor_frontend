@@ -78,6 +78,7 @@ export default function PaymentStatusPage() {
               </p>
               {payment.status === 'FAILED' && payment.message && <p className="text-xs text-slate-500 mt-2">{payment.message}</p>}
               <p className="text-2xl font-black text-slate-900 mt-5">{formatJmd(payment.amountJmd)}</p>
+              {payment.cardFeePaidBy !== 'merchant' && <p className="text-xs text-slate-500 mt-1">plus WiPay's card processing fee</p>}
 
               <ul className="mt-5 text-left text-sm divide-y divide-slate-100 border-y border-slate-100">
                 {payment.orders.map((o) => (

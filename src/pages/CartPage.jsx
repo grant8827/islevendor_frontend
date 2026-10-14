@@ -266,7 +266,7 @@ export default function CartPage() {
                   <dd>{quote ? (deliveryTotal === 0 ? 'Free' : formatJmd(deliveryTotal)) : '—'}</dd>
                 </div>
                 <div className="flex justify-between font-bold text-slate-900 border-t border-slate-100 pt-2">
-                  <dt>Total</dt>
+                  <dt>{quote?.cardFeePaidBy === 'customer' ? 'Total before card fee' : 'Total'}</dt>
                   <dd>{quote ? formatJmd(goodsTotal + deliveryTotal) : '—'}</dd>
                 </div>
               </dl>
@@ -290,7 +290,11 @@ export default function CartPage() {
               {error && <p className="text-xs text-red-600" role="alert">{error}</p>}
               {!user && <p className="text-xs text-slate-500">You'll need to log in to check out.</p>}
 
-              <p className="text-[11px] text-slate-500">You'll pay securely by card on WiPay's page, then come back here.</p>
+              <p className="text-[11px] text-slate-500">
+                You'll pay securely by card on WiPay's page, then come back here.
+                {quote?.cardFeePaidBy === 'customer' && " WiPay adds a card processing fee there, so the amount charged will be a little higher than this total."}
+                {quote?.cardFeePaidBy === 'split' && ' WiPay adds part of the card processing fee there, so the amount charged may be a little higher than this total.'}
+              </p>
               <button
                 type="button"
                 onClick={handleCheckout}
