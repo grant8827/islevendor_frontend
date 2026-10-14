@@ -4,6 +4,7 @@ import { apiRequest } from '../../api/client.js';
 import StarRating from '../marketplace/StarRating.jsx';
 import RefundOrderModal from './RefundOrderModal.jsx';
 import OrderTrackingList from './OrderTrackingList.jsx';
+import { itemsList, itemsOf } from '../../lib/orderItems.js';
 
 const SUBTABS = [
   { key: 'order', label: 'Order', icon: ClipboardList },
@@ -57,7 +58,7 @@ export default function OrdersPanel({ endpoint, showSeller = false, refundEndpoi
     setRefundingOrder(null);
   }
 
-  const itemTitleOf = (o) => o.storeListing?.masterProduct?.title ?? o.shopProduct?.title ?? 'Item';
+  const itemTitleOf = (o) => itemsList(o);
 
   const filteredOrders = useMemo(() => {
     if (!orders) return orders;
@@ -130,7 +131,14 @@ export default function OrdersPanel({ endpoint, showSeller = false, refundEndpoi
                   {filteredOrders.map((o) => (
                     <tr key={o.id} className="hover:bg-surface transition">
                       <td className="px-5 py-3 font-mono text-slate-500">#{orderNumberOf(o)}</td>
-                      <td className="px-5 py-3 font-bold text-slate-900">{itemTitleOf(o)}</td>
+                      <td className="px-5 py-3 text-slate-900">
+                        {itemsOf(o).map((item) => (
+                          <p key={item.id} className="font-bold">
+                            {item.quantity > 1 && <span className="font-normal text-slate-500">{item.quantity} × </span>}
+                            {item.title}
+                          </p>
+                        ))}
+                      </td>
                       {showSeller && <td className="px-5 py-3">{o.resellerStore?.storeName ?? '—'}</td>}
                       <td className="px-5 py-3">
                         <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded border ${STATUS_STYLES[o.status] || STATUS_STYLES.AWAITING_PAYMENT}`}>
@@ -152,8 +160,8 @@ export default function OrdersPanel({ endpoint, showSeller = false, refundEndpoi
                         )}
                       </td>
                       <td className="px-5 py-3">
-                        {o.rating ? (
-                          <StarRating value={o.rating.rating} size="w-3.5 h-3.5" />
+                        {o.ratings?.length ? (
+                          <StarRating value={o.ratings.reduce((sum, r) => sum + r.rating, 0) / o.ratings.length} size="w-3.5 h-3.5" />
                         ) : (
                           <span className="text-slate-400">—</span>
                         )}

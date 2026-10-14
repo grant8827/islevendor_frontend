@@ -1,5 +1,6 @@
 import QRCode from 'qrcode';
 import { apiRequest } from '../api/client.js';
+import { itemsOf } from './orderItems.js';
 
 // Opens a small popup with a printable shipping label and immediately
 // triggers the browser print dialog — used by the warehouse/shop Packing
@@ -78,6 +79,12 @@ export async function printOrderLabel({ order, seller }) {
     <div class="value">${escapeHtml(buyerName)}</div>
     <div>${escapeHtml(order.deliveryAddress)}</div>
     <div>${escapeHtml(buyerPhone)}</div>
+  </div>
+  <div class="row">
+    <div class="label">Contents</div>
+    ${itemsOf(order)
+      .map((item) => `<div>${escapeHtml(item.quantity)} × ${escapeHtml(item.title)}</div>`)
+      .join('')}
   </div>
   <div class="order-no">#${orderNumber}</div>
   ${

@@ -3,6 +3,7 @@ import { ClipboardList, Printer, Truck, PackageCheck, Store, CarFront } from 'lu
 import { apiRequest } from '../../api/client.js';
 import { useToast } from '../../context/ToastContext.jsx';
 import { printOrderLabel } from '../../lib/printLabel.js';
+import { itemsOf } from '../../lib/orderItems.js';
 
 const METHOD = {
   ISLEDASH: { label: 'IsleDash', icon: Truck, ready: 'Mark Boxed & Ready for Pickup' },
@@ -87,6 +88,13 @@ export default function PackingQueue({ ordersEndpoint, seller, shareOf, showRese
                   </span>
                 </span>
               </div>
+              <ul className="text-sm text-slate-900 space-y-0.5">
+                {itemsOf(order).map((item) => (
+                  <li key={item.id}>
+                    <span className="font-bold">{item.quantity} ×</span> {item.title}
+                  </li>
+                ))}
+              </ul>
               {showReseller && order.resellerStore && <p className="text-xs text-slate-500">Sold via {order.resellerStore.storeName}</p>}
               <p className="text-xs text-slate-500">
                 {order.deliveryMethod === 'PICKUP' ? order.deliveryAddress : `Deliver to: ${order.deliveryAddress}`}

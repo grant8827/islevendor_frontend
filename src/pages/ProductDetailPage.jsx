@@ -72,7 +72,7 @@ export default function ProductDetailPage() {
   async function submitRating(stars) {
     setMyRating(stars); // optimistic — it's just a star click, not a form
     try {
-      await apiRequest('/ratings', { method: 'POST', body: { orderId: ratingOrderId, rating: stars } });
+      await apiRequest('/ratings', { method: 'POST', body: { orderId: ratingOrderId, listingId: id, rating: stars } });
       notify('Thanks for rating this item!');
       // Refresh the average shown next to the stars.
       apiRequest(`/commerce/listings/${id}`, { auth: false }).then(setListing).catch(() => {});
@@ -85,7 +85,7 @@ export default function ProductDetailPage() {
     e.preventDefault();
     setSavingComment(true);
     try {
-      await apiRequest('/ratings', { method: 'POST', body: { orderId: ratingOrderId, rating: myRating, comment: commentDraft } });
+      await apiRequest('/ratings', { method: 'POST', body: { orderId: ratingOrderId, listingId: id, rating: myRating, comment: commentDraft } });
       notify('Feedback saved — thanks!');
     } catch (err) {
       notify(err.message);

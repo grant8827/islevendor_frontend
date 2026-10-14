@@ -150,11 +150,14 @@ export default function RevenueAnalytics({ endpoint, earningOf, revenueLabel = '
     const awaitingDelivery = cur.paid.filter((o) => o.status !== 'DELIVERED').reduce((sum, o) => sum + earningOf(o), 0);
     const refunded = rangeOrders.filter((o) => o.status === 'REFUNDED');
     const refundedValue = refunded.reduce((sum, o) => sum + earningOf(o), 0);
-    const ratings = rangeOrders.map((o) => o.rating?.rating).filter((r) => typeof r === 'number');
+    const ratings = rangeOrders.flatMap((o) => o.ratings ?? []).map((r) => r.rating);
 
     const statusCounts = STATUS_ORDER.map((status) => ({ status, count: rangeOrders.filter((o) => o.status === status).length })).filter((s) => s.count > 0);
 
-    const itemTitleOf = (o) => o.storeListing?.masterProduct?.title ?? o.shopProduct?.title ?? 'Item';
+    // Top products count each item in an order on its own — an order can
+    // hold several, each carrying its own share of the money fields.
+    const paidItems = cur.paid.flatMap((o) => (o.items?.length ? o.items : [o]));
+    const itemTitleOf = (i) => i.title ?? i.storeListing?.masterProduct?.title ?? i.shopProduct?.title ?? 'Item';
 
     return {
       cur,
@@ -166,7 +169,7 @@ export default function RevenueAnalytics({ endpoint, earningOf, revenueLabel = '
       avgRating: ratings.length ? ratings.reduce((a, b) => a + b, 0) / ratings.length : null,
       ratingCount: ratings.length,
       statusCounts,
-      topProducts: groupSum(cur.paid, itemTitleOf, earningOf).slice(0, 5),
+      topProducts: groupSum(paidItems, itemTitleOf, earningOf).slice(0, 5),
       topBreakdown: breakdown ? groupSum(cur.paid, breakdown.labelOf, earningOf).slice(0, 5) : [],
     };
   }, [orders, range, earningOf, breakdown]);
