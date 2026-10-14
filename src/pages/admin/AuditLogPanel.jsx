@@ -10,6 +10,9 @@ const ACTIONS = {
   'admin.created': 'Administrator created',
   'user.sessions_revoked': 'User signed out everywhere',
   'settings.isledash_rate_changed': 'IsleDash pricing changed',
+  'ledger.platform_withdrawal_requested': 'IsleVendor withdrawal requested',
+  'payout.paid': 'Payout paid',
+  'payout.failed': 'Payout failed',
 };
 
 function detailOf(event) {
@@ -17,6 +20,9 @@ function detailOf(event) {
   if (event.action === 'applicant.decision') return `${metadata.decision}${metadata.reason ? ` — ${metadata.reason}` : ''}`;
   if (event.action.startsWith('kyc_document.')) return metadata.kind;
   if (event.action === 'user.sessions_revoked') return metadata.reason;
+  if (event.action.startsWith('payout.') || event.action === 'ledger.platform_withdrawal_requested') {
+    return [`J$${Number(metadata.amountJmd).toLocaleString()}`, metadata.reference && `ref ${metadata.reference}`, metadata.note].filter(Boolean).join(' · ');
+  }
   if (event.action === 'settings.isledash_rate_changed') {
     const rate = (r) => `J$${Number(r.baseFeeJmd).toLocaleString()} + ${r.extraItemPercent}% per extra item`;
     return `${rate(metadata.before)} → ${rate(metadata.after)}`;
