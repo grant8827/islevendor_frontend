@@ -4,7 +4,7 @@ import { apiRequest } from '../../api/client.js';
 import { useToast } from '../../context/ToastContext.jsx';
 
 // What resellers earn — as a % of this warehouse's own (post-discount)
-// wholesale price, added on top alongside the platform's flat 5% to form
+// wholesale price, added on top alongside the platform's commission (set in IsleVendor Pay) to form
 // the customer's price (see backend-node/src/lib/pricing.ts). This is the
 // warehouse's own call; it isn't the reseller's to set.
 //
@@ -37,8 +37,8 @@ export default function ResellerCommissionCard({ warehouse, onSaved }) {
         <h3 className="font-bold text-navy text-sm">Reseller Commission</h3>
       </div>
       <p className="text-xs text-slate-500 mb-3">
-        What resellers earn on every sale, as a % of your wholesale price — added on top, alongside the platform's
-        flat 5%, to form the customer's price. Your own payout is always your full wholesale price.
+        What resellers earn on every sale, as a % of your wholesale price — added on top, alongside IsleVendor's
+        commission, to form the customer's price. Your own payout is always your full wholesale price.
       </p>
       <div className="flex items-center gap-2">
         <input

@@ -5,6 +5,7 @@ import { useToast } from '../../context/ToastContext.jsx';
 
 const STATUS_STYLES = {
   PENDING: 'bg-amber-100 text-amber-700 border-amber-300',
+  INTERVIEW: 'bg-sky-100 text-sky-700 border-sky-300',
   APPROVED: 'bg-primary/10 text-primary-dark border-primary/30',
   SUSPENDED: 'bg-amber-100 text-amber-700 border-amber-300',
   REJECTED: 'bg-red-100 text-red-700 border-red-300',
@@ -45,8 +46,11 @@ export default function ApplyToDeliverPanel() {
     }
   }
 
-  const statusForWarehouse = (warehouseId) => applications.find((a) => a.warehouseId === warehouseId)?.status;
-  const statusForShop = (shopId) => applications.find((a) => a.shopId === shopId)?.status;
+  // A pending application with an interview booked reads as INTERVIEW — the
+  // details are on the Messages tab.
+  const statusOf = (a) => (a?.status === 'PENDING' && a.interviewAt ? 'INTERVIEW' : a?.status);
+  const statusForWarehouse = (warehouseId) => statusOf(applications.find((a) => a.warehouseId === warehouseId));
+  const statusForShop = (shopId) => statusOf(applications.find((a) => a.shopId === shopId));
 
   if (loading) return <p className="text-sm text-slate-500">Loading…</p>;
 
@@ -56,7 +60,7 @@ export default function ApplyToDeliverPanel() {
         <Truck className="w-5 h-5 text-primary" />
         <div>
           <h2 className="font-bold text-navy text-lg">Apply to Deliver</h2>
-          <p className="text-xs text-slate-500">Browse warehouses and stores and apply to be one of their regular couriers.</p>
+          <p className="text-xs text-slate-500">Browse IsleVendor-approved warehouses and stores and apply to be one of their couriers. You'll only be offered pickups from places that accept you.</p>
         </div>
       </div>
 

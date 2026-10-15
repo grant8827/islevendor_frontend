@@ -19,6 +19,7 @@ import IsleDashApp from './pages/isledash/IsleDashApp.jsx';
 import ScanPickupPage from './pages/isledash/ScanPickupPage.jsx';
 import AdminLoginPage from './pages/admin/AdminLoginPage.jsx';
 import AdminApp from './pages/admin/AdminApp.jsx';
+import PaymentStatusPage from './pages/PaymentStatusPage.jsx';
 
 export default function App() {
   return (
@@ -99,6 +100,16 @@ export default function App() {
         element={
           <ProtectedRoute redirectTo="/admin/login">
             <AdminApp />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Where WiPay's return lands the customer after paying. */}
+      <Route
+        path="/payment/:id"
+        element={
+          <ProtectedRoute>
+            <PaymentStatusPage />
           </ProtectedRoute>
         }
       />

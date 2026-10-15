@@ -19,3 +19,6 @@ export const inputClass =
 export const humanize = (value) => String(value).toLowerCase().replaceAll('_', ' ');
 
 export const formatDateTime = (value) => (value ? new Date(value).toLocaleString() : '—');
+
+/** "J$1,234.50". */
+export const money = (n) => `J$${Number(n ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;

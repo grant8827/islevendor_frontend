@@ -3,6 +3,8 @@ import { LayoutDashboard, Building2, Package, ClipboardList, Truck, UserRound, L
 import { apiRequest } from '../../api/client.js';
 import DashboardTopBar from '../../components/dashboard/DashboardTopBar.jsx';
 import DashboardSidebar from '../../components/dashboard/DashboardSidebar.jsx';
+import ApprovalBanner from '../../components/dashboard/ApprovalBanner.jsx';
+import DeliveryOptionsCard from '../../components/dashboard/DeliveryOptionsCard.jsx';
 import DeliveryApplicationsPanel from '../../components/dashboard/DeliveryApplicationsPanel.jsx';
 import OrdersPanel from '../../components/dashboard/OrdersPanel.jsx';
 import FeedbackPanel from '../../components/dashboard/FeedbackPanel.jsx';
@@ -119,6 +121,7 @@ export default function ShopDashboard() {
     { key: 'store', label: 'My Store', icon: Building2 },
     { key: 'products', label: 'Products', icon: Package, badge: stats.productCount },
     { key: 'orders', label: 'Orders', icon: ListOrdered },
+    { key: 'shipping', label: 'Shipping', icon: Truck },
     { key: 'payouts', label: 'Payouts', icon: Wallet },
     { key: 'feedback', label: 'Feedback', icon: MessageSquare },
     { key: 'delivery-applications', label: 'Delivery Applications', icon: Truck, badge: stats.pendingDeliveryApplications },
@@ -134,6 +137,7 @@ export default function ShopDashboard() {
       <div className="flex flex-1">
         <DashboardSidebar items={items} active={activeTab} onSelect={setActiveTab} />
         <main className="flex-1 p-8 text-ink">
+          <ApprovalBanner status={shop.applicantStatus} />
           {activeTab === 'overview' && <OverviewPanel shop={shop} stats={stats} />}
           {activeTab === 'store' && (
             <div>
@@ -150,6 +154,21 @@ export default function ShopDashboard() {
               </div>
             </div>
           )}
+          {activeTab === 'shipping' && (
+            <div>
+              <h2 className="font-bold text-navy text-lg mb-1">Shipping</h2>
+              <p className="text-xs text-slate-500 mb-4">How customers get what they buy from {shop.shopName}.</p>
+              <div className="max-w-xl">
+                <DeliveryOptionsCard
+                  key={shop.id}
+                  business={shop}
+                  endpoint={`/shop/${shop.id}/delivery-options`}
+                  pickupLocation={`${shop.pickupAddress || shop.addressLine}, ${shop.parish}`}
+                  onSaved={() => loadShops(shop.id)}
+                />
+              </div>
+            </div>
+          )}
           {activeTab === 'products' && <ProductsPanel shopId={shop.id} />}
           {activeTab === 'orders' && (
             <OrdersPanel endpoint={`/shop/${shop.id}/orders`} refundEndpoint={(orderId) => `/shop/${shop.id}/orders/${orderId}/refund`} />
@@ -157,7 +176,12 @@ export default function ShopDashboard() {
           {activeTab === 'payouts' && <PayoutsPanel />}
           {activeTab === 'feedback' && <FeedbackPanel endpoint={`/shop/${shop.id}/feedback`} />}
           {activeTab === 'delivery-applications' && (
-            <DeliveryApplicationsPanel ownerType="shop" ownerId={shop.id} onDecision={loadStats} />
+            <DeliveryApplicationsPanel
+              ownerType="shop"
+              ownerId={shop.id}
+              onDecision={loadStats}
+              defaultLocation={`${shop.pickupAddress || shop.addressLine}, ${shop.parish}`}
+            />
           )}
           {activeTab === 'packing' && <PackingQueuePanel shopId={shop.id} shop={shop} />}
           {activeTab === 'profile' && (

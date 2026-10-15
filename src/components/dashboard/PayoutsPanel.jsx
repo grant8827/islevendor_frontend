@@ -3,6 +3,8 @@ import { Wallet, History, Banknote } from 'lucide-react';
 import { apiRequest } from '../../api/client.js';
 import { useToast } from '../../context/ToastContext.jsx';
 import PayoutHistoryPanel from './PayoutHistoryPanel.jsx';
+import PayoutDetailsCard from './PayoutDetailsCard.jsx';
+import { describePayoutTime, expectedArrival, formatArrivalDate } from '../../lib/payoutTiming.js';
 
 const escrowLabelOf = (t) => (t.escrowState === 'HELD_IN_ESCROW' ? 'Pending' : 'Available');
 
@@ -27,21 +29,26 @@ const SUBTABS = [
  * ApplicationsPage: "Payout" shows the current balance and every ledger leg
  * not yet withdrawn, with a Withdraw button; "Payout History" (see
  * PayoutHistoryPanel.jsx) lists past withdrawals, filterable by month/year.
- * Only the Available balance can be withdrawn — Pending is still in escrow
- * until the order is delivered. Withdrawing records a payout *request*; no
- * real bank/Lynk disbursement is wired up yet (see ledger.service.ts's
- * withdrawBalance).
+ * Pending is what customers have paid (confirmed by WiPay) for orders not
+ * yet delivered; it becomes Available on delivery. Withdrawing Available
+ * creates a payout request that IsleVendor sends to the owner's bank by
+ * hand, with the expected arrival date shown before and after.
  */
 export default function PayoutsPanel() {
   const [subTab, setSubTab] = useState('payout');
   const [accounts, setAccounts] = useState(null);
   const [transactions, setTransactions] = useState(null);
   const [withdrawing, setWithdrawing] = useState(false);
+  const [confirming, setConfirming] = useState(false);
+  const [timing, setTiming] = useState(null);
   const { notify } = useToast();
 
   function load() {
     apiRequest('/ledger/accounts/me').then(setAccounts);
     apiRequest('/ledger/transactions/me').then(setTransactions);
+    apiRequest('/ledger/payout-timing')
+      .then(setTiming)
+      .catch(() => setTiming(null));
   }
 
   useEffect(load, []);
@@ -57,8 +64,13 @@ export default function PayoutsPanel() {
   async function withdraw() {
     setWithdrawing(true);
     try {
-      await apiRequest('/ledger/withdraw', { method: 'POST' });
-      notify('Withdrawal requested — see Payout History.');
+      const [payout] = await apiRequest('/ledger/withdraw', { method: 'POST' });
+      notify(
+        payout?.expectedBy
+          ? `Withdrawal requested — it should be in your account by ${formatArrivalDate(payout.expectedBy)}.`
+          : 'Withdrawal requested — see Payout History.',
+      );
+      setConfirming(false);
       load();
     } catch (err) {
       notify(err.message);
@@ -91,21 +103,48 @@ export default function PayoutsPanel() {
 
       {subTab === 'payout' && (
         <div>
+          <PayoutDetailsCard />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-lg mb-4">
             <div className="bg-white border border-slate-200 shadow-sm rounded-xl p-5">
-              <p className="text-xs text-slate-500">Pending (in escrow)</p>
+              <p className="text-xs text-slate-500">Pending</p>
               <p className="text-2xl font-bold text-amber-600 mt-1">J${totals.pending.toLocaleString()}</p>
+              <p className="text-[11px] text-slate-500 mt-1">Paid for by the customer. Becomes available once the order is delivered.</p>
             </div>
             <div className="bg-white border border-slate-200 shadow-sm rounded-xl p-5">
               <p className="text-xs text-slate-500">Available</p>
               <p className="text-2xl font-bold text-primary-dark mt-1">J${totals.available.toLocaleString()}</p>
+              <p className="text-[11px] text-slate-500 mt-1">Delivered and ready to withdraw to your bank.</p>
             </div>
           </div>
 
+          {timing && (
+            <p className="text-xs text-slate-600 mb-3">
+              Withdrawals usually reach your bank account in {describePayoutTime(timing)}.
+            </p>
+          )}
+
+          {confirming && (
+            <div className="max-w-lg bg-white border border-primary/40 rounded-xl p-4 mb-4 text-sm" role="dialog" aria-label="Confirm withdrawal">
+              <p className="font-bold text-slate-900">Withdraw J${totals.available.toLocaleString()} to your bank?</p>
+              <p className="text-xs text-slate-600 mt-1">
+                It goes to the bank or Lynk account you gave when you signed up
+                {timing && <>, and should arrive by <strong>{formatArrivalDate(expectedArrival(timing.maxBusinessDays))}</strong> ({describePayoutTime(timing)})</>}.
+              </p>
+              <div className="flex gap-2 mt-3">
+                <button type="button" onClick={withdraw} disabled={withdrawing} className="btn-primary text-xs font-bold px-4 py-2 rounded-lg disabled:opacity-40">
+                  {withdrawing ? 'Requesting…' : 'Yes, withdraw'}
+                </button>
+                <button type="button" onClick={() => setConfirming(false)} className="text-xs font-bold px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-surface">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+
           <button
             type="button"
-            onClick={withdraw}
-            disabled={totals.available <= 0 || withdrawing}
+            onClick={() => setConfirming(true)}
+            disabled={totals.available <= 0 || withdrawing || confirming}
             className="flex items-center gap-2 btn-primary text-xs font-bold px-4 py-2.5 rounded-lg transition disabled:opacity-40 mb-8"
           >
             <Banknote className="w-4 h-4" />

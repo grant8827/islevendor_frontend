@@ -1,4 +1,5 @@
 import { Phone, Circle, Undo2 } from 'lucide-react';
+import { itemsSummary } from '../../lib/orderItems.js';
 
 const STATUS_STYLES = {
   AWAITING_PAYMENT: 'bg-slate-100 text-slate-600 border-slate-200',
@@ -11,7 +12,7 @@ const STATUS_STYLES = {
 };
 
 const orderNumberOf = (o) => o.id.slice(0, 8);
-const itemTitleOf = (o) => o.storeListing?.masterProduct?.title ?? o.shopProduct?.title ?? 'Item';
+const itemTitleOf = (o) => itemsSummary(o);
 
 /**
  * Per-order delivery timeline — what a warehouse/shop/reseller reads when a

@@ -3,6 +3,7 @@ import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { PackageCheck, MapPin, Phone, TriangleAlert } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { apiRequest } from '../../api/client.js';
+import { itemsList } from '../../lib/orderItems.js';
 
 // Where the QR code printed on a shipping label (see printLabel.js) points
 // — a driver's phone camera opens this URL, which (once they're logged in
@@ -46,7 +47,7 @@ export default function ScanPickupPage() {
     );
   }
 
-  const itemTitle = state.order?.storeListing?.masterProduct?.title ?? state.order?.shopProduct?.title ?? 'Item';
+  const itemTitle = state.order ? itemsList(state.order) : 'Item';
 
   return (
     <div className="min-h-screen bg-surface flex items-center justify-center p-6">

@@ -28,6 +28,13 @@ function ProductSection({ id, title, subtitle, listings, onAddToCart }) {
   );
 }
 
+const SORTS = [
+  { key: 'newest', label: 'Newest', compare: (a, b) => new Date(b.masterProduct.createdAt || 0) - new Date(a.masterProduct.createdAt || 0) },
+  { key: 'price-asc', label: 'Price: low to high', compare: (a, b) => Number(a.retailPriceJmd) - Number(b.retailPriceJmd) },
+  { key: 'price-desc', label: 'Price: high to low', compare: (a, b) => Number(b.retailPriceJmd) - Number(a.retailPriceJmd) },
+  { key: 'discount', label: 'Biggest discount', compare: (a, b) => b.discountPercent - a.discountPercent },
+];
+
 export default function HomePage() {
   const { addItem } = useCart();
   const { notify } = useToast();
@@ -43,6 +50,11 @@ export default function HomePage() {
   // passed down from whatever page it happens to be mounted on.
   const searchQuery = searchParams.get('q') || '';
   const selectedCategory = searchParams.get('category') || 'All';
+  // Plain `/` is the landing view (hero + curated sections). Any category —
+  // including "All Products" (?category=All) — or a search switches to the
+  // full browse grid of every matching product instead.
+  const isBrowsing = searchParams.has('category') || Boolean(searchQuery);
+  const [sortKey, setSortKey] = useState('newest');
 
   useEffect(() => {
     apiRequest('/commerce/listings', { auth: false })
@@ -74,6 +86,17 @@ export default function HomePage() {
     };
   }, [filtered]);
 
+  const browseListings = useMemo(() => {
+    const compare = SORTS.find((s) => s.key === sortKey).compare;
+    return [...filtered].sort(compare);
+  }, [filtered, sortKey]);
+
+  const browseTitle = searchQuery
+    ? `Results for “${searchQuery}”${selectedCategory !== 'All' ? ` in ${selectedCategory}` : ''}`
+    : selectedCategory === 'All'
+      ? 'All Products'
+      : selectedCategory;
+
   function handleAddToCart(listing) {
     addItem(listing);
     notify(`Added ${listing.masterProduct.title} to your cart!`);
@@ -85,7 +108,7 @@ export default function HomePage() {
 
       {/* HERO — only on the unfiltered landing view; picking a category
           jumps straight to that category's products. */}
-      {selectedCategory === 'All' && (
+      {!isBrowsing && (
         <section className="relative overflow-hidden bg-linear-to-br from-white via-slate-50 to-teal-50 text-ink">
           <div className="absolute -right-24 -top-32 h-96 w-96 rounded-full bg-secondary/10" />
           <div className="absolute left-[38%] top-14 h-48 w-48 rounded-full bg-sky-100/50" />
@@ -110,13 +133,13 @@ export default function HomePage() {
               </p>
 
               <div className="mt-7 flex flex-wrap gap-3">
-                <a
-                  href="#marketplace-items"
+                <Link
+                  to="/?category=All"
                   className="btn-primary inline-flex items-center gap-2 px-5 py-3 shadow-lg shadow-primary/20"
                 >
                   Shop marketplace
                   <ArrowRight className="h-4 w-4" />
-                </a>
+                </Link>
                 <a
                   href="#sales"
                   className="inline-flex items-center gap-2 rounded-lg border border-navy/20 bg-white px-5 py-3 font-bold text-navy shadow-sm transition hover:border-secondary hover:text-secondary-dark"
@@ -171,7 +194,39 @@ export default function HomePage() {
           <p className="text-sm text-ink/70">No products match your search yet.</p>
         )}
 
-        {!loading && !error && (
+        {!loading && !error && isBrowsing && filtered.length > 0 && (
+          <section className="space-y-5">
+            <div className="flex flex-wrap items-end justify-between gap-3 border-b border-slate-200 pb-3">
+              <div>
+                <h2 className="text-xl font-bold text-navy">{browseTitle}</h2>
+                <p className="text-xs text-ink/70 mt-1">
+                  {filtered.length} item{filtered.length === 1 ? '' : 's'}
+                </p>
+              </div>
+              <label className="flex items-center gap-2 text-xs text-slate-500">
+                Sort by
+                <select
+                  value={sortKey}
+                  onChange={(e) => setSortKey(e.target.value)}
+                  className="bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-secondary"
+                >
+                  {SORTS.map((s) => (
+                    <option key={s.key} value={s.key}>
+                      {s.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5">
+              {browseListings.map((listing) => (
+                <ProductCard key={listing.id} listing={listing} onAddToCart={handleAddToCart} showMetadata={false} />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {!loading && !error && !isBrowsing && (
           <>
             <ProductSection
               id="new-items"

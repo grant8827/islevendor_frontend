@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { MapPin, Search, ShoppingCart, Menu, Headset, LogIn, UserPlus, LayoutDashboard, Store, Truck } from 'lucide-react';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { MapPin, Search, ShoppingCart, Menu, Home, Headset, LogIn, UserPlus, LayoutDashboard, Store, Truck } from 'lucide-react';
 import { apiRequest } from '../../api/client.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useCart } from '../../context/CartContext.jsx';
@@ -20,12 +20,15 @@ import islevendorIcon from '../../assets/islevendor-icon.png';
  * (`?q=`/`?category=` on `/`), not local state, so this component works
  * identically no matter which page it's rendered on: submitting a search
  * or picking a category always takes you to the (filtered) home marketplace.
+ * Plain `/` is the landing view (hero + curated sections); `?category=All`
+ * is the full "All Products" grid, distinct from it.
  */
 export default function Navbar() {
   const { user } = useAuth();
   const { items } = useCart();
   const { notify } = useToast();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const [searchParams] = useSearchParams();
 
   const [categories, setCategories] = useState([]);
@@ -39,12 +42,15 @@ export default function Navbar() {
       .catch(() => {});
   }, []);
 
-  const selectedCategory = searchParams.get('category') || 'All';
+  // Raw param: null on the landing view, 'All' on the All Products view.
+  const categoryParam = searchParams.get('category');
+  const selectedCategory = categoryParam || 'All';
+  const onHome = pathname === '/' && !categoryParam && !searchParams.get('q');
 
   function goToHomeWith(next) {
     const params = new URLSearchParams(searchParams);
     Object.entries(next).forEach(([key, value]) => {
-      if (value && value !== 'All') params.set(key, value);
+      if (value) params.set(key, value);
       else params.delete(key);
     });
     navigate(`/${params.toString() ? `?${params.toString()}` : ''}`);
@@ -168,10 +174,14 @@ export default function Navbar() {
       {categories.length > 0 && (
         <div className="bg-navy text-xs px-4 py-2 text-slate-200 border-t border-white/10">
           <div className="max-w-7xl mx-auto flex items-center gap-6 overflow-x-auto whitespace-nowrap">
+            <Link to="/" className={`flex items-center gap-1 ${onHome ? 'text-primary font-bold' : 'hover:text-secondary'}`}>
+              <Home className="w-4 h-4" />
+              <span>Home</span>
+            </Link>
             <button
               type="button"
               onClick={() => goToHomeWith({ category: 'All' })}
-              className={`flex items-center gap-1 ${selectedCategory === 'All' ? 'text-primary font-bold' : 'hover:text-secondary'}`}
+              className={`flex items-center gap-1 ${categoryParam === 'All' ? 'text-primary font-bold' : 'hover:text-secondary'}`}
             >
               <Menu className="w-4 h-4" />
               <span>All Products</span>
@@ -181,7 +191,7 @@ export default function Navbar() {
                 key={c}
                 type="button"
                 onClick={() => goToHomeWith({ category: c })}
-                className={selectedCategory === c ? 'text-primary font-bold' : 'hover:text-secondary'}
+                className={categoryParam === c ? 'text-primary font-bold' : 'hover:text-secondary'}
               >
                 {c}
               </button>

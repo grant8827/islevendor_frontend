@@ -1,5 +1,6 @@
 import QRCode from 'qrcode';
 import { apiRequest } from '../api/client.js';
+import { itemsOf } from './orderItems.js';
 
 // Opens a small popup with a printable shipping label and immediately
 // triggers the browser print dialog — used by the warehouse/shop Packing
@@ -27,16 +28,20 @@ export async function printOrderLabel({ order, seller }) {
   w.document.write('<p style="font-family:sans-serif;padding:20px;color:#64748b">Generating label…</p>');
 
   let qrDataUrl = '';
-  try {
-    // The order id alone can't claim a package — the QR carries a signed,
-    // expiring pickup token minted for this label (see backend-node's
-    // lib/pickupToken.ts). Printing again invalidates the previous label.
-    const { token } = await apiRequest(`/dispatch/orders/${order.id}/pickup-token`, { method: 'POST' });
-    const scanUrl = `${window.location.origin}/isledash/scan/${order.id}?t=${encodeURIComponent(token)}`;
-    qrDataUrl = await QRCode.toDataURL(scanUrl, { width: 180, margin: 1 });
-  } catch {
-    // Label still prints fine without it — the order # is there as a
-    // fallback for a manual pickup confirmation.
+  // Only IsleDash orders are collected by a driver, so only they get a
+  // driver pickup code; a pickup or the seller's own delivery prints without one.
+  if (order.deliveryMethod === 'ISLEDASH' || !order.deliveryMethod) {
+    try {
+      // The order id alone can't claim a package — the QR carries a signed,
+      // expiring pickup token minted for this label (see backend-node's
+      // lib/pickupToken.ts). Printing again invalidates the previous label.
+      const { token } = await apiRequest(`/dispatch/orders/${order.id}/pickup-token`, { method: 'POST' });
+      const scanUrl = `${window.location.origin}/isledash/scan/${order.id}?t=${encodeURIComponent(token)}`;
+      qrDataUrl = await QRCode.toDataURL(scanUrl, { width: 180, margin: 1 });
+    } catch {
+      // Label still prints fine without it — the order # is there as a
+      // fallback for a manual pickup confirmation.
+    }
   }
 
   const orderNumber = order.id.slice(0, 8).toUpperCase();
@@ -74,6 +79,12 @@ export async function printOrderLabel({ order, seller }) {
     <div class="value">${escapeHtml(buyerName)}</div>
     <div>${escapeHtml(order.deliveryAddress)}</div>
     <div>${escapeHtml(buyerPhone)}</div>
+  </div>
+  <div class="row">
+    <div class="label">Contents</div>
+    ${itemsOf(order)
+      .map((item) => `<div>${escapeHtml(item.quantity)} × ${escapeHtml(item.title)}</div>`)
+      .join('')}
   </div>
   <div class="order-no">#${orderNumber}</div>
   ${

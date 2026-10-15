@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { LayoutDashboard, ClipboardCheck, Users, ListOrdered, ScrollText, UserRound } from 'lucide-react';
+import { LayoutDashboard, ClipboardCheck, Users, ListOrdered, ScrollText, Settings, UserRound, Wallet } from 'lucide-react';
 import { apiRequest } from '../../api/client.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import DashboardTopBar from '../../components/dashboard/DashboardTopBar.jsx';
@@ -11,6 +11,8 @@ import ApplicantsPanel from './ApplicantsPanel.jsx';
 import UsersPanel from './UsersPanel.jsx';
 import AdminOrdersPanel from './AdminOrdersPanel.jsx';
 import AuditLogPanel from './AuditLogPanel.jsx';
+import SettingsPanel from './SettingsPanel.jsx';
+import IsleVendorPay from './pay/IsleVendorPay.jsx';
 
 // Mounted at the protected /admin route (see App.jsx). This check only
 // decides what to *show* — every /api/admin route independently confirms the
@@ -55,7 +57,9 @@ export default function AdminApp() {
     { key: 'applicants', label: 'Applicants', icon: ClipboardCheck, badge: pendingTotal },
     { key: 'users', label: 'Users', icon: Users },
     { key: 'orders', label: 'Orders', icon: ListOrdered },
+    { key: 'pay', label: 'IsleVendor Pay', icon: Wallet },
     { key: 'audit', label: 'Audit Log', icon: ScrollText },
+    { key: 'settings', label: 'Settings', icon: Settings },
     { key: 'profile', label: 'Profile', icon: UserRound, bottom: true },
   ];
 
@@ -69,7 +73,9 @@ export default function AdminApp() {
           {activeTab === 'applicants' && <ApplicantsPanel onDecision={loadOverview} />}
           {activeTab === 'users' && <UsersPanel />}
           {activeTab === 'orders' && <AdminOrdersPanel />}
+          {activeTab === 'pay' && <IsleVendorPay />}
           {activeTab === 'audit' && <AuditLogPanel />}
+          {activeTab === 'settings' && <SettingsPanel />}
           {activeTab === 'profile' && <ProfilePanel />}
         </main>
       </div>

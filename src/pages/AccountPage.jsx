@@ -60,78 +60,53 @@ function AccountPanel() {
   );
 }
 
-function OrderRow({ order, onRated }) {
+// One item in an order, with its own rating once the order is delivered —
+// an order can hold several items and each is rated separately.
+function OrderItemRow({ order, item, onRated }) {
   const { notify } = useToast();
-  const [rating, setRating] = useState(null);
-  const [ratingOrderId, setRatingOrderId] = useState(null);
-  const [commentDraft, setCommentDraft] = useState('');
+  const [rating, setRating] = useState(item.myRating);
+  const [commentDraft, setCommentDraft] = useState(item.myComment || '');
   const [savingComment, setSavingComment] = useState(false);
+  const rateable = order.status === 'DELIVERED' && item.listingId;
 
-  useEffect(() => {
-    if (order.status !== 'DELIVERED' || !order.listingId) return;
-    apiRequest(`/ratings/mine?listingId=${order.listingId}`)
-      .then((data) => {
-        // /ratings/mine returns the most recent qualifying order for this
-        // listing, which may not be *this* order if the customer bought the
-        // same item more than once — only wire up rating for this exact row.
-        if (data.eligible && data.orderId === order.id) {
-          setRatingOrderId(order.id);
-          setRating(data.myRating);
-          setCommentDraft(data.myComment || '');
-        }
-      })
-      .catch(() => {});
-  }, [order.id, order.listingId, order.status]);
-
-  async function submitRating(stars) {
-    setRating(stars);
+  async function save(body, thanks) {
     try {
-      await apiRequest('/ratings', { method: 'POST', body: { orderId: order.id, rating: stars } });
-      notify('Thanks for rating this item!');
+      await apiRequest('/ratings', { method: 'POST', body: { orderId: order.id, listingId: item.listingId, ...body } });
+      notify(thanks);
       onRated?.();
     } catch (err) {
       notify(err.message);
     }
+  }
+
+  async function submitRating(stars) {
+    setRating(stars);
+    await save({ rating: stars }, 'Thanks for rating this item!');
   }
 
   async function submitComment(e) {
     e.preventDefault();
     setSavingComment(true);
-    try {
-      await apiRequest('/ratings', { method: 'POST', body: { orderId: order.id, rating, comment: commentDraft } });
-      notify('Feedback saved — thanks!');
-      onRated?.();
-    } catch (err) {
-      notify(err.message);
-    } finally {
-      setSavingComment(false);
-    }
+    await save({ rating, comment: commentDraft }, 'Feedback saved — thanks!');
+    setSavingComment(false);
   }
 
   return (
-    <div className="flex items-start gap-4 p-5">
-      <div className="h-16 w-16 shrink-0 bg-slate-100 rounded-lg flex items-center justify-center overflow-hidden">
-        {order.itemImageUrl ? (
-          <img src={order.itemImageUrl} alt={order.itemTitle} className="max-h-full max-w-full object-contain" />
-        ) : (
-          <ImageOff className="w-5 h-5 text-slate-300" />
-        )}
+    <div className="flex items-start gap-3">
+      <div className="h-14 w-14 shrink-0 bg-slate-100 rounded-lg flex items-center justify-center overflow-hidden">
+        {item.imageUrl ? <img src={item.imageUrl} alt={item.title} className="max-h-full max-w-full object-contain" /> : <ImageOff className="w-5 h-5 text-slate-300" />}
       </div>
-
       <div className="flex-1 min-w-0">
-        {order.listingId ? (
-          <Link to={`/product/${order.listingId}`} className="text-sm font-bold text-slate-900 hover:text-secondary transition">
-            {order.itemTitle}
+        {item.listingId ? (
+          <Link to={`/product/${item.listingId}`} className="text-sm font-bold text-slate-900 hover:text-secondary transition">
+            {item.title}
           </Link>
         ) : (
-          <p className="text-sm font-bold text-slate-900">{order.itemTitle}</p>
+          <p className="text-sm font-bold text-slate-900">{item.title}</p>
         )}
-        {order.sellerName && <p className="text-xs text-slate-500 mt-0.5">Sold by {order.sellerName}</p>}
-        <p className="text-xs text-slate-500 mt-0.5">
-          Qty {order.quantity} · {new Date(order.createdAt).toLocaleDateString('en-JM', { year: 'numeric', month: 'short', day: 'numeric' })}
-        </p>
+        <p className="text-xs text-slate-500 mt-0.5">Qty {item.quantity}</p>
 
-        {ratingOrderId && (
+        {rateable && (
           <div className="mt-2">
             <div className="flex items-center gap-2">
               <span className="text-xs text-slate-500">{rating ? 'Your rating:' : 'Rate this item:'}</span>
@@ -145,6 +120,7 @@ function OrderRow({ order, onRated }) {
                   onChange={(e) => setCommentDraft(e.target.value)}
                   placeholder="Add a comment (optional)…"
                   maxLength={1000}
+                  aria-label={`Comment on ${item.title}`}
                   className="flex-1 text-xs border border-slate-300 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-secondary"
                 />
                 <button type="submit" disabled={savingComment} className="btn-secondary disabled:opacity-60 text-[11px] px-3 py-1.5 shrink-0">
@@ -155,12 +131,39 @@ function OrderRow({ order, onRated }) {
           </div>
         )}
       </div>
+    </div>
+  );
+}
 
-      <div className="text-right shrink-0">
-        <span className={`inline-block text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded ${STATUS_COLORS[order.status] || 'bg-slate-100 text-slate-600'}`}>
-          {STATUS_LABELS[order.status] || order.status}
-        </span>
-        <p className="text-sm font-black text-slate-900 mt-1.5">J${Number(order.totalPaidJmd).toLocaleString()}</p>
+const DELIVERY_LABELS = { ISLEDASH: 'IsleDash delivery', SELLER_DELIVERY: 'Delivered by the seller', PICKUP: 'Pick up' };
+
+function OrderRow({ order, onRated }) {
+  return (
+    <div className="p-5">
+      <div className="flex items-start justify-between gap-4 mb-3">
+        <div className="min-w-0">
+          {order.sellerName && <p className="text-xs font-bold text-slate-700">From {order.sellerName}</p>}
+          <p className="text-xs text-slate-500 mt-0.5">
+            #{order.id.slice(0, 8)} · {new Date(order.createdAt).toLocaleDateString('en-JM', { year: 'numeric', month: 'short', day: 'numeric' })}
+            {order.deliveryMethod && <> · {DELIVERY_LABELS[order.deliveryMethod]}</>}
+          </p>
+        </div>
+        <div className="text-right shrink-0">
+          <span className={`inline-block text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded ${STATUS_COLORS[order.status] || 'bg-slate-100 text-slate-600'}`}>
+            {STATUS_LABELS[order.status] || order.status}
+          </span>
+          <p className="text-sm font-black text-slate-900 mt-1.5">J${Number(order.totalPaidJmd).toLocaleString()}</p>
+          {order.status === 'AWAITING_PAYMENT' && order.checkoutPaymentId && (
+            <Link to={`/payment/${order.checkoutPaymentId}`} className="inline-block mt-2 btn-primary text-[11px] font-bold px-3 py-1.5 rounded-lg">
+              Pay now
+            </Link>
+          )}
+        </div>
+      </div>
+      <div className="space-y-3">
+        {order.items.map((item) => (
+          <OrderItemRow key={item.id} order={order} item={item} onRated={onRated} />
+        ))}
       </div>
     </div>
   );

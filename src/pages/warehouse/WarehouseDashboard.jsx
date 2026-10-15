@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { LayoutDashboard, Warehouse as WarehouseIcon, Package, Briefcase, ClipboardList, UserRound, UsersRound, ListOrdered, MessageSquare, Wallet, X } from 'lucide-react';
+import { LayoutDashboard, Warehouse as WarehouseIcon, Package, Briefcase, ClipboardList, UserRound, UsersRound, ListOrdered, MessageSquare, Wallet, Truck, Store, X } from 'lucide-react';
 import { apiRequest } from '../../api/client.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import DashboardTopBar from '../../components/dashboard/DashboardTopBar.jsx';
 import DashboardSidebar from '../../components/dashboard/DashboardSidebar.jsx';
+import ApprovalBanner from '../../components/dashboard/ApprovalBanner.jsx';
+import DeliveryOptionsCard from '../../components/dashboard/DeliveryOptionsCard.jsx';
 import OrdersPanel from '../../components/dashboard/OrdersPanel.jsx';
 import FeedbackPanel from '../../components/dashboard/FeedbackPanel.jsx';
 import PayoutsPanel from '../../components/dashboard/PayoutsPanel.jsx';
@@ -13,6 +15,7 @@ import WarehouseSetupForm from './WarehouseSetupForm.jsx';
 import OverviewPanel from './OverviewPanel.jsx';
 import ProductsPanel from './ProductsPanel.jsx';
 import ApplicationsPage from './ApplicationsPage.jsx';
+import HouseStorePanel from './HouseStorePanel.jsx';
 import PackingQueuePanel from './PackingQueuePanel.jsx';
 import ApprovedResellersSection from './ApprovedResellersSection.jsx';
 import ApprovedDriversSection from './ApprovedDriversSection.jsx';
@@ -169,6 +172,8 @@ export default function WarehouseDashboard() {
         { key: 'warehouse', label: 'My Warehouse', icon: WarehouseIcon },
         { key: 'products', label: 'Products', icon: Package, badge: stats.productCount },
         { key: 'orders', label: 'Orders', icon: ListOrdered },
+        { key: 'store', label: 'My Store', icon: Store },
+        { key: 'shipping', label: 'Shipping', icon: Truck },
         ...(isOwner ? [{ key: 'payouts', label: 'Payouts', icon: Wallet }] : []),
         { key: 'feedback', label: 'Feedback', icon: MessageSquare },
         { key: 'applications', label: 'Applications', icon: Briefcase, badge: stats.pendingApplications + stats.pendingDeliveryApplications },
@@ -195,6 +200,7 @@ export default function WarehouseDashboard() {
       <div className="flex flex-1">
         <DashboardSidebar items={items} active={tab} onSelect={setActiveTab} />
         <main className="flex-1 p-8 text-ink">
+          <ApprovalBanner status={warehouse.applicantStatus} />
           {tab === 'overview' && <OverviewPanel warehouse={warehouse} stats={stats} />}
           {tab === 'warehouse' && (
             <div>
@@ -212,6 +218,23 @@ export default function WarehouseDashboard() {
               <div className="mt-8">
                 <h3 className="font-bold text-navy text-base mb-4">Products in {warehouse.name}</h3>
                 <ProductsPanel warehouseId={warehouse.id} warehouses={warehouses} />
+              </div>
+            </div>
+          )}
+          {tab === 'store' && <HouseStorePanel key={warehouse.id} warehouse={warehouse} />}
+          {tab === 'shipping' && (
+            <div>
+              <h2 className="font-bold text-navy text-lg mb-1">Shipping</h2>
+              <p className="text-xs text-slate-500 mb-4">How customers get what they buy from {warehouse.name}, including everything your resellers sell from it.</p>
+              <div className="max-w-xl">
+                <DeliveryOptionsCard
+                  key={warehouse.id}
+                  business={warehouse}
+                  endpoint={`/warehouse/${warehouse.id}/delivery-options`}
+                  pickupLocation={`${warehouse.addressLine}, ${warehouse.parish}`}
+                  readOnly={isStaff}
+                  onSaved={() => loadWarehouses(warehouse.id)}
+                />
               </div>
             </div>
           )}

@@ -10,7 +10,7 @@ const PLATFORM_COMMISSION_RATE = 0.05;
 // checkout), so a reseller can see what they'll earn before adding an item.
 // The reseller no longer sets a price: the warehouse's (post-discount)
 // wholesale price plus the warehouse's own reseller commission % plus the
-// platform's flat 5% are what the customer pays.
+// platform's commission (set in IsleVendor Pay) are what the customer pays.
 function pricingFor(product) {
   const wholesale = Number(product.wholesalePriceJmd);
   const discountMultiplier = 1 - product.discountPercent / 100;

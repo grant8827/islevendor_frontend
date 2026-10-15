@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { History } from 'lucide-react';
 import { apiRequest } from '../../api/client.js';
+import { formatArrivalDate } from '../../lib/payoutTiming.js';
 
 const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -13,6 +14,17 @@ const MONTHS = [
  * warehouse/store/reseller/driver can still tell which delivered package(s)
  * a given withdrawal came from. Filterable by month and/or year.
  */
+// Where each withdrawal is: waiting for IsleVendor to send it, sent, or
+// failed (the money went back into the available balance).
+const PAYOUT_STATUS = {
+  REQUESTED: { label: 'Processing', style: 'bg-amber-100 text-amber-700 border-amber-300' },
+  APPROVED: { label: 'Approved', style: 'bg-sky-100 text-sky-700 border-sky-300' },
+  SUBMITTED: { label: 'Sending to your bank', style: 'bg-sky-100 text-sky-700 border-sky-300' },
+  PROCESSING: { label: 'Sending to your bank', style: 'bg-sky-100 text-sky-700 border-sky-300' },
+  PAID: { label: 'Paid', style: 'bg-primary/10 text-primary-dark border-primary/30' },
+  FAILED: { label: 'Failed', style: 'bg-red-100 text-red-700 border-red-300' },
+};
+
 export default function PayoutHistoryPanel() {
   const [payouts, setPayouts] = useState(null);
   const [availableYears, setAvailableYears] = useState([]);
@@ -83,6 +95,7 @@ export default function PayoutHistoryPanel() {
                 <th className="px-5 py-3">Date</th>
                 <th className="px-5 py-3">Amount</th>
                 <th className="px-5 py-3">Orders</th>
+                <th className="px-5 py-3">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -90,7 +103,17 @@ export default function PayoutHistoryPanel() {
                 <tr key={p.id} className="hover:bg-surface transition">
                   <td className="px-5 py-3 text-slate-500">{new Date(p.createdAt).toLocaleDateString()}</td>
                   <td className="px-5 py-3 font-bold text-slate-900">J${Number(p.amountJmd).toLocaleString()}</td>
-                  <td className="px-5 py-3 font-mono text-slate-500">{p.legs.map((l) => `#${l.order.id.slice(0, 8)}`).join(', ')}</td>
+                  <td className="px-5 py-3 font-mono text-slate-500">{p.legs.map((l) => `#${l.order.id.slice(0, 8)}`).join(', ') || '—'}</td>
+                  <td className="px-5 py-3">
+                    <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded border ${PAYOUT_STATUS[p.status]?.style ?? PAYOUT_STATUS.REQUESTED.style}`}>
+                      {PAYOUT_STATUS[p.status]?.label ?? p.status}
+                    </span>
+                    {['REQUESTED', 'APPROVED', 'SUBMITTED', 'PROCESSING'].includes(p.status) && p.expectedBy && (
+                      <span className="block mt-1 text-[11px] text-slate-500">Expected by {formatArrivalDate(p.expectedBy)}</span>
+                    )}
+                    {p.status === 'PAID' && p.reference && <span className="block mt-1 text-[11px] text-slate-500">Ref {p.reference}</span>}
+                    {p.status === 'FAILED' && <span className="block mt-1 text-[11px] text-slate-500">Returned to your balance{p.note ? ` — ${p.note}` : ''}</span>}
+                  </td>
                 </tr>
               ))}
             </tbody>
