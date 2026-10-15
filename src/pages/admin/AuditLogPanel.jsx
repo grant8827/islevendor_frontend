@@ -19,6 +19,12 @@ const ACTIONS = {
   'payout.sent_to_wipay': 'Payout sent to WiPay',
   'payout.checked_with_wipay': 'Payout checked with WiPay',
   'payout_account.updated': 'Payout details changed',
+  'settings.gateways_changed': 'Payment gateways switched',
+  'settings.card_fee_changed': 'Card fee setting changed',
+  'settings.commission_changed': 'Commission changed',
+  'payment.refunded': 'Payment marked refunded',
+  'pay.connection_tested': 'WiPay connection tested',
+  'pay.report_exported': 'Financial report exported',
 };
 
 function detailOf(event) {
@@ -26,6 +32,15 @@ function detailOf(event) {
   if (event.action === 'applicant.decision') return `${metadata.decision}${metadata.reason ? ` — ${metadata.reason}` : ''}`;
   if (event.action.startsWith('kyc_document.')) return metadata.kind;
   if (event.action === 'user.sessions_revoked') return metadata.reason;
+  if (event.action === 'settings.commission_changed') return `${metadata.beforePercent}% → ${metadata.afterPercent}%`;
+  if (event.action === 'settings.card_fee_changed') return `${metadata.before} → ${metadata.after}`;
+  if (event.action === 'settings.gateways_changed') {
+    const on = (v) => (v ? 'on' : 'paused');
+    return `Card payments ${on(metadata.after.paymentsEnabled)} · automatic payouts ${on(metadata.after.automatedPayoutsEnabled)}`;
+  }
+  if (event.action === 'payment.refunded') return `J$${Number(metadata.amountJmd).toLocaleString()} · ref ${metadata.reference}`;
+  if (event.action === 'pay.report_exported') return `${event.targetId}: ${metadata.rows} rows`;
+  if (event.action === 'pay.connection_tested') return metadata.results.map((r) => `${r.name}: ${r.ok ? 'OK' : 'failed'}`).join(' · ');
   if (event.action === 'payout_account.updated') return [metadata.method, metadata.bankName, metadata.accountNumber].filter(Boolean).join(' · ');
   if (event.action === 'payout.checked_with_wipay') return `${metadata.status}${metadata.wipayStatus !== undefined ? ` (WiPay ${metadata.wipayStatus})` : ''}`;
   if (event.action === 'settings.payout_timing_changed') {
@@ -47,7 +62,8 @@ function detailOf(event) {
 
 // The append-only record of privileged actions — who did what, to which
 // record, when and from where.
-export default function AuditLogPanel() {
+// `category="finance"` narrows it to money-related actions (IsleVendor Pay's Audit Logs).
+export default function AuditLogPanel({ category }) {
   const [filters, setFilters] = useState({ action: '', page: 1 });
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
@@ -57,17 +73,18 @@ export default function AuditLogPanel() {
     setError(null);
     const params = new URLSearchParams({ page: filters.page });
     if (filters.action) params.set('action', filters.action);
+    if (category) params.set('category', category);
     apiRequest(`/admin/audit-events?${params}`)
       .then(setResult)
       .catch((err) => setError(err.message));
-  }, [filters]);
+  }, [filters, category]);
 
   useEffect(load, [load]);
 
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-        <h2 className="font-bold text-navy text-lg">Audit Log</h2>
+        <h2 className="font-bold text-navy text-lg">{category === 'finance' ? 'Financial audit log' : 'Audit Log'}</h2>
         <select aria-label="Action" className={inputClass} value={filters.action} onChange={(e) => setFilters({ action: e.target.value, page: 1 })}>
           <option value="">All actions</option>
           {Object.entries(ACTIONS).map(([value, label]) => (

@@ -177,7 +177,7 @@ export default function HouseStorePanel({ warehouse }) {
 
       <section>
         <h3 className="font-bold text-navy text-sm mb-1">Add from {warehouse.name}</h3>
-        <p className="text-xs text-slate-500 mb-3">Customer price is your wholesale price plus your reseller commission and IsleVendor's 5% — the same as on a reseller's store.</p>
+        <p className="text-xs text-slate-500 mb-3">Customer price is your wholesale price plus your reseller commission and IsleVendor's commission — the same as on a reseller's store.</p>
         {available.length === 0 && <p className="text-sm text-slate-500">Every active product is already on your store.</p>}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {available.map((product) => (

@@ -125,7 +125,9 @@ function SettleModal({ payout, outcome, onClose, onDone }) {
 // IsleVendor's own balance (commission, held in escrow until delivery) and
 // the queue of payout requests from every seller and driver — paid outside
 // the platform, then recorded here.
-export default function AdminPayoutsPanel() {
+// `show`: 'platform' for IsleVendor's own balance only, 'queue' for the
+// payout requests only, or both.
+export default function AdminPayoutsPanel({ show = 'all' }) {
   const { notify } = useToast();
   const [platform, setPlatform] = useState(null);
   const [platformError, setPlatformError] = useState(null);
@@ -185,6 +187,7 @@ export default function AdminPayoutsPanel() {
 
   return (
     <div className="space-y-10 max-w-6xl">
+      {show !== 'queue' && (
       <section>
         <h2 className="font-bold text-navy text-lg mb-1 flex items-center gap-2">
           <Landmark className="w-5 h-5 text-primary" /> IsleVendor balance
@@ -243,7 +246,9 @@ export default function AdminPayoutsPanel() {
           </>
         )}
       </section>
+      )}
 
+      {show !== 'platform' && (
       <section>
         <h2 className="font-bold text-navy text-lg mb-1 flex items-center gap-2">
           <Banknote className="w-5 h-5 text-primary" /> Payout requests
@@ -356,6 +361,7 @@ export default function AdminPayoutsPanel() {
           </>
         )}
       </section>
+      )}
 
       {settling && (
         <SettleModal
