@@ -4,6 +4,7 @@ import { PackageCheck, MapPin, Phone, TriangleAlert } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { apiRequest } from '../../api/client.js';
 import { itemsList } from '../../lib/orderItems.js';
+import OpenInMaps from '../../components/OpenInMaps.jsx';
 
 // Where the QR code printed on a shipping label (see printLabel.js) points
 // — a driver's phone camera opens this URL, which (once they're logged in
@@ -77,6 +78,7 @@ export default function ScanPickupPage() {
               <p className="flex items-center gap-1.5 text-slate-500 text-xs">
                 <MapPin className="w-3.5 h-3.5 shrink-0" /> {state.order.deliveryAddress}
               </p>
+              <OpenInMaps order={state.order} className="text-xs" />
               <p className="flex items-center gap-1.5 text-slate-500 text-xs">
                 <Phone className="w-3.5 h-3.5 shrink-0" /> {state.order.customer?.phoneNumber}
               </p>

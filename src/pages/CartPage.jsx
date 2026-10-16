@@ -5,6 +5,8 @@ import { useCart } from '../context/CartContext.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
 import { apiRequest } from '../api/client.js';
+import DeliveryAddressInput from '../components/DeliveryAddressInput.jsx';
+import { useDeliveryAddress } from '../hooks/useDeliveryAddress.js';
 import Navbar from '../components/marketplace/Navbar.jsx';
 
 const formatJmd = (value) => `J$${Number(value).toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
@@ -15,7 +17,7 @@ export default function CartPage() {
   const { user } = useAuth();
   const { notify } = useToast();
   const navigate = useNavigate();
-  const [deliveryAddress, setDeliveryAddress] = useState('');
+  const delivery = useDeliveryAddress(user);
   const [placing, setPlacing] = useState(false);
   const [error, setError] = useState(null);
   // The server's view of the cart (POST /orders/quote): live prices, stock,
@@ -81,7 +83,7 @@ export default function CartPage() {
       navigate('/login');
       return;
     }
-    if (needsAddress && !deliveryAddress.trim()) {
+    if (needsAddress && !delivery.text.trim()) {
       setError('Enter a delivery address.');
       return;
     }
@@ -95,7 +97,7 @@ export default function CartPage() {
         body: {
           items: items.map(({ kind, storeId, masterProductId, quantity }) => ({ kind, storeId, masterProductId, quantity })),
           deliveryMethods: Object.fromEntries(groups.map((g) => [g.seller.key, g.option.method])),
-          ...(needsAddress ? { deliveryAddress: deliveryAddress.trim() } : {}),
+          ...delivery.payload(needsAddress),
         },
       });
       clear();
@@ -271,21 +273,7 @@ export default function CartPage() {
                 </div>
               </dl>
 
-              {needsAddress && (
-                <div>
-                  <label htmlFor="delivery-address" className="block text-xs text-slate-600 mb-1">
-                    Delivery address
-                  </label>
-                  <input
-                    id="delivery-address"
-                    type="text"
-                    placeholder="Where should we deliver this?"
-                    value={deliveryAddress}
-                    onChange={(e) => setDeliveryAddress(e.target.value)}
-                    className="w-full text-sm border border-slate-300 rounded-lg px-3 py-2"
-                  />
-                </div>
-              )}
+              {needsAddress && <DeliveryAddressInput delivery={delivery} />}
 
               {error && <p className="text-xs text-red-600" role="alert">{error}</p>}
               {!user && <p className="text-xs text-slate-500">You'll need to log in to check out.</p>}

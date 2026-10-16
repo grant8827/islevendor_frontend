@@ -7,6 +7,8 @@ import { useCart } from '../context/CartContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
 import ProductCard from '../components/marketplace/ProductCard.jsx';
 import Navbar from '../components/marketplace/Navbar.jsx';
+import DeliveryAddressInput from '../components/DeliveryAddressInput.jsx';
+import { useDeliveryAddress } from '../hooks/useDeliveryAddress.js';
 import StarRating from '../components/marketplace/StarRating.jsx';
 
 export default function ProductDetailPage() {
@@ -20,7 +22,7 @@ export default function ProductDetailPage() {
   const [error, setError] = useState(null);
   const [activeImage, setActiveImage] = useState(0);
   const [buyNowOpen, setBuyNowOpen] = useState(false);
-  const [deliveryAddress, setDeliveryAddress] = useState('');
+  const delivery = useDeliveryAddress(user);
   const [placing, setPlacing] = useState(false);
   const [buyNowError, setBuyNowError] = useState(null);
   // Rating eligibility: only set once we know — undefined means "haven't
@@ -139,7 +141,7 @@ export default function ProductDetailPage() {
 
   async function handleBuyNow(e) {
     e.preventDefault();
-    if (!deliveryAddress.trim()) {
+    if (!delivery.text.trim()) {
       setBuyNowError('Enter a delivery address.');
       return;
     }
@@ -149,18 +151,24 @@ export default function ProductDetailPage() {
       // Buy Now is deliberately independent of the cart — it places this one
       // item straight away without touching whatever's already sitting in
       // the customer's cart.
-      await apiRequest('/orders', {
+      const order = await apiRequest('/orders', {
         method: 'POST',
         body: {
           kind: listing.kind,
           storeId: listing.storeId,
           masterProductId: listing.masterProductId,
           quantity: 1,
-          deliveryAddress,
+          ...delivery.payload(true),
         },
       });
-      notify('Order placed — awaiting payment confirmation.');
-      navigate('/dashboard');
+      // Off to WiPay's card page, like the cart; it brings them back to the
+      // payment's status page.
+      if (order.checkoutUrl) {
+        window.location.assign(order.checkoutUrl);
+        return;
+      }
+      notify('Order placed. You can pay for it from your account.');
+      navigate(order.paymentId ? `/payment/${order.paymentId}` : '/account?tab=orders');
     } catch (err) {
       setBuyNowError(err.message);
     } finally {
@@ -315,13 +323,7 @@ export default function ProductDetailPage() {
             {buyNowOpen && (
               <form onSubmit={handleBuyNow} className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-3">
                 <p className="text-xs font-bold text-slate-700">Deliver this one item now</p>
-                <input
-                  type="text"
-                  placeholder="Delivery address"
-                  value={deliveryAddress}
-                  onChange={(e) => setDeliveryAddress(e.target.value)}
-                  className="w-full text-sm border border-slate-300 rounded-lg px-3 py-2"
-                />
+                <DeliveryAddressInput delivery={delivery} id="buy-now-address" />
                 {buyNowError && <p className="text-xs text-red-600" role="alert">{buyNowError}</p>}
                 <div className="flex gap-2">
                   <button

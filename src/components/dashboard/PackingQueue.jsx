@@ -4,6 +4,7 @@ import { apiRequest } from '../../api/client.js';
 import { useToast } from '../../context/ToastContext.jsx';
 import { printOrderLabel } from '../../lib/printLabel.js';
 import { itemsOf } from '../../lib/orderItems.js';
+import OpenInMaps from '../OpenInMaps.jsx';
 
 const METHOD = {
   ISLEDASH: { label: 'IsleDash', icon: Truck, ready: 'Mark Boxed & Ready for Pickup' },
@@ -99,6 +100,7 @@ export default function PackingQueue({ ordersEndpoint, seller, shareOf, showRese
               <p className="text-xs text-slate-500">
                 {order.deliveryMethod === 'PICKUP' ? order.deliveryAddress : `Deliver to: ${order.deliveryAddress}`}
               </p>
+              <OpenInMaps order={order} className="text-xs" />
               {order.customer && (
                 <p className="text-xs text-slate-500">
                   Customer: {order.customer.fullName} · {order.customer.phoneNumber}

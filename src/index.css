@@ -175,7 +175,9 @@ body {
   gap: 12px;
 }
 
-.simple-page input, .simple-page select {
+.simple-page input,
+.simple-page select,
+.simple-page textarea {
   font: inherit;
   padding: 9px 12px;
   border: 1px solid #cbd5e1;
@@ -184,7 +186,9 @@ body {
   color: var(--text);
 }
 
-.simple-page input:focus, .simple-page select:focus {
+.simple-page input:focus,
+.simple-page select:focus,
+.simple-page textarea:focus {
   outline: none;
   border-color: var(--secondary);
   box-shadow: 0 0 0 3px rgba(17, 168, 181, 0.15);

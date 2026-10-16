@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { MapPin, MessageSquarePlus, Package, Phone, Wifi, WifiOff } from 'lucide-react';
 import { getDeliveries } from '../../api/drivers.js';
 import { getSocket, disconnectSocket } from '../../lib/socket.js';
+import OpenInMaps from '../../components/OpenInMaps.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
 import JobOfferModal from './JobOfferModal.jsx';
 import MarkDeliveredModal from './MarkDeliveredModal.jsx';
@@ -180,6 +181,7 @@ export default function DeliveryPanel() {
               <p className="text-xs text-slate-500 flex items-center gap-1 mt-1">
                 <MapPin className="w-3 h-3 shrink-0" /> {o.deliveryAddress}
               </p>
+              <OpenInMaps order={o} className="text-xs mt-0.5" />
               <p className="text-xs text-slate-500 flex items-center gap-1">
                 <Phone className="w-3 h-3 shrink-0" /> {o.buyerName} · {o.buyerPhone}
               </p>
