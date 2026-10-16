@@ -5,7 +5,7 @@ import { useCart } from '../context/CartContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
 import ProductCard from '../components/marketplace/ProductCard.jsx';
 import Navbar from '../components/marketplace/Navbar.jsx';
-import HeroCarousel from '../components/marketplace/HeroCarousel.jsx';
+import HeroCards from '../components/marketplace/HeroCards.jsx';
 import islevendorIcon from '../assets/islevendor-icon.png';
 
 function ProductSection({ id, title, subtitle, listings, onAddToCart }) {
@@ -108,7 +108,7 @@ export default function HomePage() {
 
       {/* HERO — only on the unfiltered landing view; picking a category
           jumps straight to that category's products. */}
-      {!isBrowsing && <HeroCarousel />}
+      {!isBrowsing && <HeroCards />}
 
       {/* PRODUCT SECTIONS */}
       <main id="marketplace-items" className="max-w-7xl mx-auto px-4 py-8 space-y-12 scroll-mt-4">
