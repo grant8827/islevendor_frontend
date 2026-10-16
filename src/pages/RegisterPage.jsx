@@ -1,26 +1,22 @@
 import { useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 
-// value = backend UserRole enum (unchanged internally); label = what the
-// user sees.
-const ROLES = [
-  { value: 'CUSTOMER', label: 'Customer' },
-  { value: 'RESELLER', label: 'Reseller' },
-  { value: 'STORE', label: 'Store' },
-  { value: 'DRIVER', label: 'Driver' },
-  { value: 'WAREHOUSE', label: 'Warehouse' },
+// Businesses don't sign up here: each has its own application, reviewed by
+// IsleVendor before it can sell or deliver (the backend's /auth/register
+// accepts customers only).
+const BUSINESS_SIGNUPS = [
+  { to: '/join/warehouse', label: 'Register a warehouse' },
+  { to: '/join/reseller', label: 'Become a reseller' },
+  { to: '/join/vendor', label: 'Open a store' },
+  { to: '/join/driver', label: 'Drive with IsleDash' },
 ];
 
+// Customer sign-up: the "Sign up" link beside "Log in" on every page.
 export default function RegisterPage() {
   const { register } = useAuth();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  // Coming from an "Apply" button on an opportunity page (?role=RESELLER) —
-  // preselect it, but only if it's a real role, not whatever's in the URL.
-  const requestedRole = searchParams.get('role');
-  const initialRole = ROLES.some((r) => r.value === requestedRole) ? requestedRole : 'CUSTOMER';
-  const [form, setForm] = useState({ email: '', password: '', fullName: '', phoneNumber: '', role: initialRole });
+  const [form, setForm] = useState({ email: '', password: '', fullName: '', phoneNumber: '' });
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -33,8 +29,8 @@ export default function RegisterPage() {
     setError(null);
     setSubmitting(true);
     try {
-      await register(form);
-      navigate('/dashboard');
+      await register({ ...form, role: 'CUSTOMER' });
+      navigate('/', { replace: true });
     } catch (err) {
       setError(err.message);
     } finally {
@@ -44,31 +40,41 @@ export default function RegisterPage() {
 
   return (
     <section>
-      <h2>Create an account</h2>
+      <h2>Create your account</h2>
+      <p className="text-sm text-slate-500 mb-4">Shop from stores and resellers across Jamaica.</p>
       <form onSubmit={handleSubmit}>
-        <input placeholder="Full name" value={form.fullName} onChange={update('fullName')} required />
-        <input type="email" placeholder="Email" value={form.email} onChange={update('email')} required />
-        <input placeholder="Phone number" value={form.phoneNumber} onChange={update('phoneNumber')} required />
+        <input placeholder="Full name" autoComplete="name" value={form.fullName} onChange={update('fullName')} required />
+        <input type="email" placeholder="Email" autoComplete="email" value={form.email} onChange={update('email')} required />
+        <input placeholder="Phone number" autoComplete="tel" value={form.phoneNumber} onChange={update('phoneNumber')} required />
         <input
           type="password"
           placeholder="Password (min 8 characters)"
+          autoComplete="new-password"
           value={form.password}
           onChange={update('password')}
           required
           minLength={8}
         />
-        <select value={form.role} onChange={update('role')}>
-          {ROLES.map(({ value, label }) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </select>
         <button type="submit" disabled={submitting}>
           {submitting ? 'Creating account…' : 'Sign up'}
         </button>
         {error && <p role="alert">{error}</p>}
       </form>
+
+      <p className="text-sm text-slate-600 mt-4">
+        Already have an account? <Link to="/login">Log in</Link>
+      </p>
+
+      <div className="mt-6 pt-4 border-t border-slate-200">
+        <p className="text-sm font-bold text-slate-700 mb-2">Signing up a business?</p>
+        <ul className="space-y-1 text-sm">
+          {BUSINESS_SIGNUPS.map(({ to, label }) => (
+            <li key={to}>
+              <Link to={to}>{label}</Link>
+            </li>
+          ))}
+        </ul>
+      </div>
     </section>
   );
 }

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 
 export default function LoginPage() {
@@ -41,6 +41,9 @@ export default function LoginPage() {
         </button>
         {error && <p role="alert">{error}</p>}
       </form>
+      <p className="text-sm text-slate-600 mt-4">
+        New to IsleVendor? <Link to="/register">Sign up</Link>
+      </p>
     </section>
   );
 }
