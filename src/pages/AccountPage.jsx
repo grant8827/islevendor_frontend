@@ -1,11 +1,112 @@
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { User, Package, ImageOff, LogOut } from 'lucide-react';
+import { User, Package, ImageOff, LogOut, MapPin } from 'lucide-react';
 import { apiRequest } from '../api/client.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
 import Navbar from '../components/marketplace/Navbar.jsx';
 import StarRating from '../components/marketplace/StarRating.jsx';
+import AddressFields from '../components/AddressFields.jsx';
+import { addressPayload, mapsLink, toAddressForm } from '../lib/address.js';
+
+const fieldClass =
+  'w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-secondary/20 focus:border-secondary';
+
+// The saved delivery address: shown, and editable. Checkout fills it in.
+function DeliveryAddressPanel() {
+  const { notify } = useToast();
+  const [saved, setSaved] = useState(undefined);
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(toAddressForm(null));
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    apiRequest('/auth/address')
+      .then(({ address }) => setSaved(address))
+      .catch(() => setSaved(null));
+  }, []);
+
+  function startEditing() {
+    setDraft(toAddressForm(saved));
+    setError(null);
+    setEditing(true);
+  }
+
+  async function save(e) {
+    e.preventDefault();
+    setSaving(true);
+    setError(null);
+    try {
+      const { address } = await apiRequest('/auth/address', { method: 'PUT', body: addressPayload(draft) });
+      setSaved(address);
+      setEditing(false);
+      notify('Delivery address saved.');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (saved === undefined) return null;
+
+  return (
+    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 max-w-lg mt-6">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="font-bold text-slate-900 text-lg flex items-center gap-2">
+          <MapPin className="w-5 h-5 text-primary" /> Delivery address
+        </h2>
+        {!editing && (
+          <button type="button" onClick={startEditing} className="text-sm font-bold text-navy hover:underline">
+            {saved ? 'Change' : 'Add address'}
+          </button>
+        )}
+      </div>
+
+      {editing ? (
+        <form onSubmit={save} className="space-y-3">
+          <AddressFields value={draft} onChange={setDraft} inputClassName={fieldClass} />
+          {error && (
+            <p className="text-xs text-red-600" role="alert">
+              {error}
+            </p>
+          )}
+          <div className="flex gap-2">
+            <button type="submit" disabled={saving} className="btn-primary text-sm font-bold px-4 py-2 rounded-lg disabled:opacity-40">
+              {saving ? 'Saving…' : 'Save address'}
+            </button>
+            <button type="button" onClick={() => setEditing(false)} className="text-sm font-bold text-slate-600 px-4 py-2">
+              Cancel
+            </button>
+          </div>
+        </form>
+      ) : saved ? (
+        <div className="text-sm text-slate-700 space-y-1">
+          <p className="font-semibold text-slate-900">
+            {[saved.addressLine1, saved.addressLine2].filter(Boolean).join(', ')}
+          </p>
+          <p>
+            {saved.town}, {saved.parish}
+          </p>
+          {saved.landmark && <p className="text-slate-500">Landmark: {saved.landmark}</p>}
+          {saved.deliveryInstructions && <p className="text-slate-500">Note: {saved.deliveryInstructions}</p>}
+          <p className="text-xs pt-1">
+            {saved.location ? (
+              <a href={mapsLink(saved.location)} target="_blank" rel="noreferrer" className="text-secondary-dark font-bold hover:underline">
+                Location pinned: view on map
+              </a>
+            ) : (
+              <span className="text-slate-500">No map pin yet. Add one so drivers can find you exactly.</span>
+            )}
+          </p>
+        </div>
+      ) : (
+        <p className="text-sm text-slate-500">No delivery address saved yet. Add one and checkout fills it in for you.</p>
+      )}
+    </div>
+  );
+}
 
 const STATUS_LABELS = {
   AWAITING_PAYMENT: 'Awaiting payment',
@@ -239,7 +340,12 @@ export default function AccountPage() {
           ))}
         </div>
 
-        {activeTab === 'account' && <AccountPanel />}
+        {activeTab === 'account' && (
+          <>
+            <AccountPanel />
+            <DeliveryAddressPanel />
+          </>
+        )}
         {activeTab === 'orders' && <OrdersPanel />}
       </main>
     </div>
