@@ -2,17 +2,9 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 
-// Businesses don't sign up here: each has its own application, reviewed by
-// IsleVendor before it can sell or deliver (the backend's /auth/register
-// accepts customers only).
-const BUSINESS_SIGNUPS = [
-  { to: '/join/warehouse', label: 'Register a warehouse' },
-  { to: '/join/reseller', label: 'Become a reseller' },
-  { to: '/join/vendor', label: 'Open a store' },
-  { to: '/join/driver', label: 'Drive with IsleDash' },
-];
-
 // Customer sign-up: the "Sign up" link beside "Log in" on every page.
+// Businesses apply through their own pages (/join/*) instead; the backend's
+// /auth/register accepts customers only.
 export default function RegisterPage() {
   const { register } = useAuth();
   const navigate = useNavigate();
@@ -64,17 +56,6 @@ export default function RegisterPage() {
       <p className="text-sm text-slate-600 mt-4">
         Already have an account? <Link to="/login">Log in</Link>
       </p>
-
-      <div className="mt-6 pt-4 border-t border-slate-200">
-        <p className="text-sm font-bold text-slate-700 mb-2">Signing up a business?</p>
-        <ul className="space-y-1 text-sm">
-          {BUSINESS_SIGNUPS.map(({ to, label }) => (
-            <li key={to}>
-              <Link to={to}>{label}</Link>
-            </li>
-          ))}
-        </ul>
-      </div>
     </section>
   );
 }
