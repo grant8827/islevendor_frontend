@@ -6,7 +6,7 @@ import islevendorIcon from '../../assets/islevendor-icon.png';
 // default isle vendor icon+wordmark — used only by DriverDashboard.jsx
 // (IsleDash), every other dashboard renders the default.
 export default function DashboardTopBar({ title, logo }) {
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuth();
 
   return (
     <header className="bg-navy text-white px-6 py-3 flex items-center justify-between">
@@ -32,7 +32,7 @@ export default function DashboardTopBar({ title, logo }) {
         <span className="text-slate-300">
           {user?.fullName} <span className="text-slate-400">({user?.role})</span>
         </span>
-        <button type="button" onClick={logout} className="text-primary hover:text-primary-dark hover:underline">
+        <button type="button" onClick={signOut} className="text-primary hover:text-primary-dark hover:underline">
           Log out
         </button>
       </div>

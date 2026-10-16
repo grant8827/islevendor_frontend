@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { User, Package, ImageOff } from 'lucide-react';
+import { User, Package, ImageOff, LogOut } from 'lucide-react';
 import { apiRequest } from '../api/client.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
@@ -207,6 +207,7 @@ const TABS = [
 ];
 
 export default function AccountPage() {
+  const { signOut } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = TABS.some((t) => t.key === searchParams.get('tab')) ? searchParams.get('tab') : 'account';
 
@@ -215,7 +216,12 @@ export default function AccountPage() {
       <Navbar />
 
       <main className="max-w-4xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-black text-slate-900 mb-6">My Account</h1>
+        <div className="flex items-center justify-between gap-4 mb-6">
+          <h1 className="text-2xl font-black text-slate-900">My Account</h1>
+          <button type="button" onClick={signOut} className="flex items-center gap-1.5 text-sm font-bold text-slate-600 hover:text-red-700">
+            <LogOut className="w-4 h-4" /> Log out
+          </button>
+        </div>
 
         <div className="flex gap-1 border-b border-slate-200 mb-6">
           {TABS.map(({ key, label, icon: Icon }) => (

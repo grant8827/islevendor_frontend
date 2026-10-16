@@ -16,7 +16,7 @@ export default function UsersPanel() {
   const [filters, setFilters] = useState({ q: '', role: '', page: 1 });
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
-  const { user: me, logout } = useAuth();
+  const { user: me, signOut } = useAuth();
   const { notify } = useToast();
 
   async function signOutEverywhere(target) {
@@ -25,7 +25,7 @@ export default function UsersPanel() {
     try {
       await apiRequest(`/admin/users/${target.id}/revoke-sessions`, { method: 'POST', body: { reason: reason.trim() } });
       // Doing it to your own account ends this session too.
-      if (target.id === me.id) logout();
+      if (target.id === me.id) signOut();
       else notify(`${target.fullName} has been signed out everywhere.`);
     } catch (err) {
       notify(err.message);

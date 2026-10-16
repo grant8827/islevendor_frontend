@@ -1,9 +1,11 @@
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { apiRequest, getToken, setToken } from '../api/client.js';
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -54,8 +56,16 @@ export function AuthProvider({ children }) {
     setUser(null);
   }, []);
 
+  // What a "Log out" button does: sign out and land on the home page,
+  // wherever the user was. (logout alone is for ending a session without
+  // leaving the page, e.g. the admin login refusing a non-admin account.)
+  const signOut = useCallback(() => {
+    logout();
+    navigate('/', { replace: true });
+  }, [logout, navigate]);
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, refreshUser }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, signOut, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );
