@@ -1,6 +1,11 @@
+import islevendorIcon from '../../assets/islevendor-icon.png';
+
 // A Jamaican coastline, drawn (no photo): deep blue sky, distant islands, a
-// turquoise sea with shallow reefs and palms in the corner. Fills its
+// turquoise sea with shallow reefs, a little island carrying the IsleVendor
+// bag, and palms in the corner. Fills its
 // parent; the left side is darkened so white text reads well over it.
+// `fit` is the SVG preserveAspectRatio: a tall card shows the right-hand
+// side (palms and sand) with "xMaxYMax slice".
 
 // One palm frond: a curved leaf from the crown, pointing right before rotation.
 const FROND = 'M0 0 C 40 -26 92 -24 132 6 C 96 -6 46 -6 0 0 Z';
@@ -21,12 +26,12 @@ function Palm({ x, y, scale = 1, lean = 0 }) {
   );
 }
 
-export default function OceanScene() {
+export default function OceanScene({ fit = 'xMidYMid slice' }) {
   return (
     <svg
       className="absolute inset-0 h-full w-full"
       viewBox="0 0 1440 480"
-      preserveAspectRatio="xMidYMid slice"
+      preserveAspectRatio={fit}
       aria-hidden="true"
       focusable="false"
     >
@@ -87,12 +92,18 @@ export default function OceanScene() {
         <path d="M1150 290 q 30 -8 60 0 t 60 0" />
       </g>
 
+      {/* A little island in the bay, with the IsleVendor bag standing on it */}
+      <ellipse cx="1130" cy="322" rx="118" ry="14" fill="#8ff0e4" opacity="0.5" filter="url(#ocean-soft)" />
+      <ellipse cx="1130" cy="318" rx="104" ry="15" fill="#e9d3a1" />
+      <path d="M1046 316 C 1074 288 1186 288 1214 316 Z" fill="#2f7d3a" />
+      <path d="M1066 312 C 1090 296 1170 296 1194 312 Z" fill="#3f9a45" />
+      <image href={islevendorIcon} x="1088" y="214" width="84" height="84" />
+
       {/* Sand and palms in the corner */}
       <path d="M1040 480 C 1150 420 1300 400 1440 395 L 1440 480 Z" fill="#e9d3a1" />
       <path d="M1080 480 C 1180 440 1310 425 1440 422 L 1440 480 Z" fill="#d9bd84" />
-      <Palm x={1300} y={470} scale={0.95} lean={-8} />
-      <Palm x={1385} y={480} scale={0.75} lean={10} />
-      <Palm x={1200} y={485} scale={0.6} lean={-14} />
+      <Palm x={1352} y={474} scale={0.78} lean={-6} />
+      <Palm x={1418} y={484} scale={0.62} lean={10} />
 
       {/* Darken the left side for the headline */}
       <rect width="1440" height="480" fill="url(#ocean-shade)" />
