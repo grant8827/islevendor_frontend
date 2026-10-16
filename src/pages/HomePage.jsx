@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { ArrowRight, BadgePercent, MapPin, PackageCheck, ShieldCheck, ShoppingBag, Truck } from 'lucide-react';
 import { apiRequest } from '../api/client.js';
 import { useCart } from '../context/CartContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
 import ProductCard from '../components/marketplace/ProductCard.jsx';
 import Navbar from '../components/marketplace/Navbar.jsx';
+import HeroCarousel from '../components/marketplace/HeroCarousel.jsx';
 import islevendorIcon from '../assets/islevendor-icon.png';
 
 function ProductSection({ id, title, subtitle, listings, onAddToCart }) {
@@ -108,83 +108,7 @@ export default function HomePage() {
 
       {/* HERO — only on the unfiltered landing view; picking a category
           jumps straight to that category's products. */}
-      {!isBrowsing && (
-        <section className="relative overflow-hidden bg-linear-to-br from-white via-slate-50 to-teal-50 text-ink">
-          <div className="absolute -right-24 -top-32 h-96 w-96 rounded-full bg-secondary/10" />
-          <div className="absolute left-[38%] top-14 h-48 w-48 rounded-full bg-sky-100/50" />
-          <div className="absolute -bottom-56 -left-16 h-80 w-[70%] -rotate-3 rounded-[50%] bg-secondary/10" />
-          <div className="absolute -bottom-64 -left-24 h-80 w-[60%] rotate-2 rounded-[50%] bg-primary/15" />
-
-          <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-4 py-12 sm:py-16 lg:grid-cols-[1.12fr_0.88fr] lg:py-20">
-            <div className="max-w-2xl">
-              <span className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-primary-dark">
-                <MapPin className="h-3.5 w-3.5" />
-                Made for shoppers across Jamaica
-              </span>
-
-              <h1 className="mt-5 text-4xl font-black leading-[1.08] tracking-tight text-navy sm:text-5xl lg:text-6xl">
-                Everything you need,
-                <span className="block text-primary">closer to home.</span>
-              </h1>
-
-              <p className="mt-5 max-w-xl text-base leading-7 text-ink sm:text-lg">
-                Browse great products, compare local offers, and order from Jamaican businesses.
-                IsleVendor makes shopping across the island simple.
-              </p>
-
-              <div className="mt-7 flex flex-wrap gap-3">
-                <Link
-                  to="/?category=All"
-                  className="btn-primary inline-flex items-center gap-2 px-5 py-3 shadow-lg shadow-primary/20"
-                >
-                  Shop marketplace
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-                <a
-                  href="#sales"
-                  className="inline-flex items-center gap-2 rounded-lg border border-navy/20 bg-white px-5 py-3 font-bold text-navy shadow-sm transition hover:border-secondary hover:text-secondary-dark"
-                >
-                  <BadgePercent className="h-4 w-4" />
-                  Browse deals
-                </a>
-              </div>
-
-              <div className="mt-8 flex flex-wrap gap-x-6 gap-y-3 text-sm text-slate-600">
-                <span className="flex items-center gap-2"><PackageCheck className="h-4 w-4 text-primary" /> New items every day</span>
-                <span className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-primary" /> Shop with confidence</span>
-                <span className="flex items-center gap-2"><Truck className="h-4 w-4 text-primary" /> Convenient delivery</span>
-              </div>
-            </div>
-
-            <div className="relative mx-auto w-full max-w-lg lg:mx-0 lg:justify-self-end">
-              <div className="rounded-3xl border border-white bg-white/75 p-5 shadow-2xl shadow-navy/10 backdrop-blur-sm sm:p-7">
-                <div className="mb-6 flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-bold uppercase tracking-widest text-secondary">Your local marketplace</p>
-                    <h2 className="mt-1 text-xl font-black text-navy">More ways to shop</h2>
-                  </div>
-                  <img src={islevendorIcon} alt="" className="h-12 w-12 rounded-xl bg-white p-1" />
-                </div>
-
-                <div className="space-y-3">
-                  <div className="flex items-center gap-4 rounded-2xl bg-white p-4 text-ink shadow-lg">
-                    <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary/15 text-primary-dark"><ShoppingBag className="h-5 w-5" /></span>
-                    <div><p className="font-bold text-navy">Find something new</p><p className="text-xs text-slate-500">Fresh products from businesses across Jamaica</p></div>
-                  </div>
-                  <div className="flex items-center gap-4 rounded-2xl bg-white p-4 text-ink shadow-lg">
-                    <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-secondary/15 text-secondary-dark"><BadgePercent className="h-5 w-5" /></span>
-                    <div><p className="font-bold text-navy">Save on local deals</p><p className="text-xs text-slate-500">See discounted prices clearly while you browse</p></div>
-                  </div>
-                  <div className="flex items-center gap-4 rounded-2xl bg-white p-4 text-ink shadow-lg">
-                    <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-navy/10 text-navy"><Truck className="h-5 w-5" /></span>
-                    <div><p className="font-bold text-navy">Get it where you need it</p><p className="text-xs text-slate-500">Convenient fulfillment based on seller location</p></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
+      {!isBrowsing && <HeroCarousel />}
 
       {/* PRODUCT SECTIONS */}
       <main id="marketplace-items" className="max-w-7xl mx-auto px-4 py-8 space-y-12 scroll-mt-4">

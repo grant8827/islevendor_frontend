@@ -124,7 +124,7 @@ export default function Navbar() {
           </div>
         </div>
 
-        <form onSubmit={handleSearchSubmit} className="flex-1 max-w-2xl flex items-center">
+        <form onSubmit={handleSearchSubmit} className="flex-1 min-w-0 max-w-2xl flex items-center">
           <div className="relative flex-1 flex rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-secondary">
             <select
               value={selectedCategory}
