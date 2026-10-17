@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { MapPin, MessageSquarePlus, Package, Phone, Wifi, WifiOff } from 'lucide-react';
+import { MapPin, MessageSquarePlus, Package, Phone, ScanLine, Wifi, WifiOff } from 'lucide-react';
 import { getDeliveries } from '../../api/drivers.js';
 import { getSocket, disconnectSocket } from '../../lib/socket.js';
 import OpenInMaps from '../../components/OpenInMaps.jsx';
@@ -49,7 +49,7 @@ export default function DeliveryPanel() {
     const onJobOffer = ({ orderId, expiresInSeconds }) => setOffer({ orderId, expiresInSeconds });
     const onJobAssigned = ({ orderId }) => {
       setOffer((current) => (current?.orderId === orderId ? null : current));
-      notify('Delivery accepted!');
+      notify('Job accepted — go to the seller and scan the package label to pick it up.');
       load();
     };
     const onJobOfferExpired = ({ orderId }) => {
@@ -176,7 +176,22 @@ export default function DeliveryPanel() {
         {rows.map((o) => (
           <div key={o.id} className="bg-white border border-slate-200 shadow-sm p-4 rounded-xl flex flex-col sm:flex-row sm:items-center gap-4">
             <div className="flex-1 min-w-0">
+              {subTab === 'delivery' && (
+                <span
+                  className={`inline-block text-[9px] font-black tracking-wide px-1.5 py-0.5 rounded mb-1 ${
+                    o.status === 'READY_FOR_PICKUP' ? 'bg-amber-100 text-amber-700' : 'bg-sky-100 text-sky-700'
+                  }`}
+                >
+                  {o.status === 'READY_FOR_PICKUP' ? 'TO COLLECT' : 'ON THE WAY'}
+                </span>
+              )}
               <p className="font-bold text-slate-900 text-sm truncate">{o.itemTitle}</p>
+              {o.status === 'READY_FOR_PICKUP' && o.pickupFrom && (
+                <p className="text-xs font-bold text-navy">
+                  Collect from {o.pickupFrom}
+                  {o.pickupAddress ? ` · ${o.pickupAddress}` : ''}
+                </p>
+              )}
               <p className="text-xs text-slate-500">{o.sellerName}</p>
               <p className="text-xs text-slate-500 flex items-center gap-1 mt-1">
                 <MapPin className="w-3 h-3 shrink-0" /> {o.deliveryAddress}
@@ -196,24 +211,38 @@ export default function DeliveryPanel() {
                   <MessageSquarePlus className="w-4 h-4" />
                   Post Update
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setDeliveringOrderId(o.id)}
-                  className="btn-primary text-xs font-bold px-4 py-2.5 rounded-lg transition"
-                >
-                  Mark Delivered
-                </button>
+                {o.status === 'READY_FOR_PICKUP' ? (
+                  // Picking up happens by scanning the label's QR code with
+                  // the phone's camera (it opens ScanPickupPage), not here.
+                  <p className="flex items-center gap-1.5 text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 px-3 py-2.5 rounded-lg max-w-[16rem]">
+                    <ScanLine className="w-4 h-4 shrink-0" /> Scan the package label with your phone camera to pick it up
+                  </p>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setDeliveringOrderId(o.id)}
+                    className="btn-primary text-xs font-bold px-4 py-2.5 rounded-lg transition"
+                  >
+                    Mark Delivered
+                  </button>
+                )}
               </div>
             ) : (
-              o.proofOfDeliveryImageUrl && (
-                <a href={o.proofOfDeliveryImageUrl} target="_blank" rel="noreferrer" className="shrink-0">
-                  <img
-                    src={o.proofOfDeliveryImageUrl}
-                    alt="Proof of delivery"
-                    className="w-16 h-16 object-cover rounded-lg border border-slate-200"
-                  />
-                </a>
-              )
+              <div className="flex items-center gap-3 shrink-0">
+                {o.proofOfDeliveryImageUrl && (
+                  <a href={o.proofOfDeliveryImageUrl} target="_blank" rel="noreferrer">
+                    <img
+                      src={o.proofOfDeliveryImageUrl}
+                      alt="Proof of delivery"
+                      className="w-16 h-16 object-cover rounded-lg border border-slate-200"
+                    />
+                  </a>
+                )}
+                <div className="text-xs text-slate-500">
+                  {o.proofOfDeliveryType && <p>Photo: {o.proofOfDeliveryType === 'PACKAGE_WITH_ID' ? 'package + ID' : 'package + recipient'}</p>}
+                  {o.proofOfDeliveryCheck === 'FLAGGED' && <p className="font-bold text-amber-700">Photo flagged for a check</p>}
+                </div>
+              </div>
             )}
           </div>
         ))}
