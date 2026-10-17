@@ -26,8 +26,8 @@ function formatValue(key, value) {
   if (typeof value === 'boolean') return value ? 'Yes' : 'No';
   if (Array.isArray(value)) return value.join(', ');
   if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T/.test(value)) {
-    // Expiry dates are calendar dates; everything else is a moment in time.
-    return /Expiry$/.test(key) ? new Date(value).toLocaleDateString(undefined, { timeZone: 'UTC' }) : formatDateTime(value);
+    // Expiry and issue dates are calendar dates; everything else is a moment in time.
+    return /Expiry$|IssuedOn$/.test(key) ? new Date(value).toLocaleDateString(undefined, { timeZone: 'UTC' }) : formatDateTime(value);
   }
   if (typeof value === 'string' && /^[A-Z_]+$/.test(value)) return humanize(value);
   return String(value);

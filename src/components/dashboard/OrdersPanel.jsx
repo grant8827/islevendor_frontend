@@ -148,12 +148,18 @@ export default function OrdersPanel({ endpoint, showSeller = false, refundEndpoi
                       <td className="px-5 py-3 text-slate-900">J${Number(o.totalPaidJmd).toLocaleString()}</td>
                       <td className="px-5 py-3">
                         {o.proofOfDeliveryImageUrl ? (
-                          <a href={o.proofOfDeliveryImageUrl} target="_blank" rel="noreferrer">
+                          <a href={o.proofOfDeliveryImageUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2">
                             <img
                               src={o.proofOfDeliveryImageUrl}
                               alt="Proof of delivery"
                               className="w-9 h-9 object-cover rounded-md border border-slate-200"
                             />
+                            {/* The automatic check couldn't see the person or ID the driver said the photo shows. */}
+                            {o.proofOfDeliveryCheck === 'FLAGGED' && (
+                              <span title={o.proofOfDeliveryNote ?? ''} className="text-[10px] font-bold uppercase text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded">
+                                Check photo
+                              </span>
+                            )}
                           </a>
                         ) : (
                           <span className="text-slate-400">—</span>

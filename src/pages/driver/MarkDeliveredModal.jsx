@@ -6,13 +6,32 @@ import { useToast } from '../../context/ToastContext.jsx';
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const MAX_SIZE_BYTES = 5 * 1024 * 1024;
 
+const PROOF_OPTIONS = [
+  {
+    type: 'PACKAGE_WITH_ID',
+    title: 'Package + their ID',
+    hint: "Photograph the package next to the recipient's ID card.",
+    confirm: "The package and the recipient's ID are both clearly visible in this photo.",
+  },
+  {
+    type: 'PACKAGE_WITH_RECIPIENT',
+    title: 'Package + the person',
+    hint: 'Photograph the recipient holding the package.',
+    confirm: 'The package and the person receiving it are both clearly visible in this photo.',
+  },
+];
+
 // Proof-of-delivery capture, opened from a row in DeliveryPanel's Delivery
-// tab. One photo of the buyer receiving the package — uploaded via the
-// existing generic /uploads/image endpoint, then attached to the order via
-// POST /dispatch/orders/:id/delivered, which flips it to DELIVERED and
-// pushes a live ORDER_DELIVERED notification to the warehouse/shop that
-// owns it (see backend-node's dispatch.routes.ts).
+// tab: pick what the photo will show (the package with the recipient's ID,
+// or with the recipient), take it, check it and confirm. Uploaded via the
+// generic /uploads/image endpoint, then attached to the order via POST
+// /dispatch/orders/:id/delivered, which has the photo checked automatically
+// (a flagged one still counts as delivered), flips the order to DELIVERED
+// and tells the warehouse/shop that owns it (see backend-node's
+// dispatch.routes.ts).
 export default function MarkDeliveredModal({ orderId, onClose, onDelivered }) {
+  const [proofType, setProofType] = useState(null);
+  const [confirmed, setConfirmed] = useState(false);
   const [file, setFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [submitting, setSubmitting] = useState(false);
@@ -35,16 +54,27 @@ export default function MarkDeliveredModal({ orderId, onClose, onDelivered }) {
     }
     setFile(f);
     setPreviewUrl(URL.createObjectURL(f));
+    // A new photo needs a fresh look before it's confirmed.
+    setConfirmed(false);
   }
 
+  const option = PROOF_OPTIONS.find((o) => o.type === proofType);
+
   async function submit() {
-    if (!file) return;
+    if (!file || !proofType || !confirmed) return;
     setSubmitting(true);
     setError(null);
     try {
       const proofOfDeliveryImageUrl = await uploadImage(file);
-      await apiRequest(`/dispatch/orders/${orderId}/delivered`, { method: 'POST', body: { proofOfDeliveryImageUrl } });
-      notify('Delivery confirmed!');
+      const order = await apiRequest(`/dispatch/orders/${orderId}/delivered`, {
+        method: 'POST',
+        body: { proofOfDeliveryImageUrl, proofType, confirmed: true },
+      });
+      notify(
+        order.proofOfDeliveryCheck === 'FLAGGED'
+          ? `Delivered. The photo was flagged for the seller to check: ${order.proofOfDeliveryNote ?? 'it needs a look'}.`
+          : 'Delivery confirmed!',
+      );
       onDelivered();
     } catch (err) {
       setError(err.message);
@@ -65,20 +95,61 @@ export default function MarkDeliveredModal({ orderId, onClose, onDelivered }) {
         </div>
 
         <div className="px-6 py-5 space-y-4">
-          <p className="text-xs text-slate-500">Take a photo of the buyer receiving the package as proof of delivery.</p>
+          <fieldset>
+            <legend className="text-xs font-bold text-slate-900 mb-2">1. What will the photo show?</legend>
+            <div className="space-y-2">
+              {PROOF_OPTIONS.map((o) => (
+                <label
+                  key={o.type}
+                  className={`block rounded-lg border p-3 cursor-pointer transition ${proofType === o.type ? 'border-primary bg-primary/5' : 'border-slate-200 hover:border-slate-300'}`}
+                >
+                  <input
+                    type="radio"
+                    name="proof-type"
+                    className="sr-only"
+                    checked={proofType === o.type}
+                    onChange={() => {
+                      setProofType(o.type);
+                      setConfirmed(false);
+                    }}
+                    disabled={submitting}
+                  />
+                  <span className="block text-sm font-bold text-slate-900">{o.title}</span>
+                  <span className="block text-xs text-slate-500">{o.hint}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
 
-          <label
-            className={`flex flex-col items-center justify-center gap-2 border-2 border-dashed rounded-lg py-6 cursor-pointer transition ${
-              previewUrl ? 'border-emerald-400 bg-emerald-50' : 'border-slate-300 hover:border-navy bg-slate-50'
-            }`}
-          >
-            {previewUrl ? (
-              <img src={previewUrl} alt="Delivery proof preview" className="w-24 h-24 object-cover rounded-lg" />
-            ) : (
-              <Camera className="w-8 h-8 text-slate-400" />
-            )}
-            <span className="text-xs text-slate-600">{previewUrl ? 'Retake photo' : 'Tap to take a photo'}</span>
-            <input type="file" accept="image/*" capture="environment" onChange={handleFile} className="sr-only" disabled={submitting} />
+          <div>
+            <p className={`text-xs font-bold mb-2 ${proofType ? 'text-slate-900' : 'text-slate-400'}`}>2. Take the photo</p>
+            <label
+              className={`flex flex-col items-center justify-center gap-2 border-2 border-dashed rounded-lg py-6 transition ${
+                !proofType ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'
+              } ${previewUrl ? 'border-emerald-400 bg-emerald-50' : 'border-slate-300 hover:border-navy bg-slate-50'}`}
+            >
+              {previewUrl ? (
+                <img src={previewUrl} alt="Delivery proof preview" className="w-full max-h-56 object-contain rounded-lg" />
+              ) : (
+                <Camera className="w-8 h-8 text-slate-400" />
+              )}
+              <span className="text-xs text-slate-600">{previewUrl ? 'Retake photo' : 'Tap to take a photo'}</span>
+              <input type="file" accept="image/*" capture="environment" onChange={handleFile} className="sr-only" disabled={submitting || !proofType} />
+            </label>
+          </div>
+
+          <label className={`flex items-start gap-2 rounded-lg bg-slate-50 p-3 text-xs text-slate-700 ${file ? 'cursor-pointer' : 'opacity-40'}`}>
+            <input
+              type="checkbox"
+              className="mt-0.5 accent-[var(--primary)]"
+              checked={confirmed}
+              onChange={(e) => setConfirmed(e.target.checked)}
+              disabled={!file || submitting}
+            />
+            <span>
+              <span className="block font-bold text-slate-900 mb-0.5">3. Check it</span>
+              {option?.confirm ?? 'The photo clearly shows the package and the recipient or their ID.'}
+            </span>
           </label>
 
           {error && <p className="text-xs text-red-600">{error}</p>}
@@ -88,7 +159,7 @@ export default function MarkDeliveredModal({ orderId, onClose, onDelivered }) {
           <button
             type="button"
             onClick={submit}
-            disabled={!file || submitting}
+            disabled={!file || !proofType || !confirmed || submitting}
             className="w-full btn-primary text-xs font-bold py-2.5 rounded-lg transition disabled:opacity-40"
           >
             {submitting ? 'Confirming…' : 'Confirm Delivered'}
