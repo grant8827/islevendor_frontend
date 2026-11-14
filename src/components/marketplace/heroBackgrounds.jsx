@@ -10,6 +10,21 @@ export const HERO_BACKGROUNDS = [
   { key: 'white', label: 'White', swatch: 'bg-white border border-slate-300', card: 'bg-white text-navy border border-slate-200' },
 ];
 
+// The red sale tag on a hero card whose item is discounted (same red as the
+// product cards' discount badge).
+export function SaleTag({ percent, small = false }) {
+  if (!(percent > 0)) return null;
+  return (
+    <span
+      className={`absolute z-10 rounded-full bg-red-600 font-black uppercase text-white shadow-sm ${
+        small ? 'right-1 top-1 px-1.5 py-0.5 text-[8px]' : 'right-4 top-4 px-3 py-1 text-xs tracking-wide'
+      }`}
+    >
+      Sale -{percent}%
+    </span>
+  );
+}
+
 export function heroBackground(key) {
   return HERO_BACKGROUNDS.find((b) => b.key === key) ?? HERO_BACKGROUNDS[0];
 }

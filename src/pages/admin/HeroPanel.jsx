@@ -2,14 +2,15 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, ArrowDown, ArrowUp, Check, Eye, EyeOff, ImageOff, Palette, Plus, Search, Trash2 } from 'lucide-react';
 import { apiRequest } from '../../api/client.js';
 import { useToast } from '../../context/ToastContext.jsx';
-import { HERO_BACKGROUNDS, heroBackground } from '../../components/marketplace/heroBackgrounds.js';
+import { HERO_BACKGROUNDS, heroBackground, SaleTag } from '../../components/marketplace/heroBackgrounds.jsx';
 import { inputClass } from './adminFormat.js';
 import { ListState } from './adminShared.jsx';
 
 // A small version of the card exactly as the home page draws it.
 function CardPreview({ item, background, small = false }) {
   return (
-    <div className={`flex flex-col overflow-hidden rounded-2xl ${heroBackground(background).card} ${small ? 'h-28 w-24 shrink-0 p-2' : 'h-64 w-56 p-4'}`}>
+    <div className={`relative flex flex-col overflow-hidden rounded-2xl ${heroBackground(background).card} ${small ? 'h-28 w-24 shrink-0 p-2' : 'h-64 w-56 p-4'}`}>
+      <SaleTag percent={item?.discountPercent} small={small} />
       <div className="flex min-h-0 flex-1 items-center justify-center">
         {item?.imageUrl ? <img src={item.imageUrl} alt="" className="max-h-full max-w-full object-contain" /> : <ImageOff className={`${small ? 'h-6 w-6' : 'h-12 w-12'} opacity-40`} />}
       </div>
@@ -63,7 +64,7 @@ function AddCardForm({ takenIds, onSaved, onCancel }) {
     return listings.filter((l) => !q || l.masterProduct.title.toLowerCase().includes(q) || l.store?.storeName?.toLowerCase().includes(q)).slice(0, 60);
   }, [listings, query]);
 
-  const pickedItem = picked && { id: picked.id, title: picked.masterProduct.title, imageUrl: picked.masterProduct.imageUrl };
+  const pickedItem = picked && { id: picked.id, title: picked.masterProduct.title, imageUrl: picked.masterProduct.imageUrl, discountPercent: picked.discountPercent };
 
   async function save() {
     setError(null);
