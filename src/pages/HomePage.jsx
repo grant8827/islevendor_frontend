@@ -19,9 +19,9 @@ function ProductSection({ id, title, subtitle, listings, onAddToCart }) {
         </div>
         <span className="text-xs text-ink/60 font-mono">{listings.length} items</span>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-5">
         {listings.map((listing) => (
-          <ProductCard key={listing.id} listing={listing} onAddToCart={onAddToCart} showMetadata={false} />
+          <ProductCard key={listing.id} listing={listing} onAddToCart={onAddToCart} showMetadata={false} flat />
         ))}
       </div>
     </section>
@@ -111,7 +111,7 @@ export default function HomePage() {
       {!isBrowsing && <HeroCards />}
 
       {/* PRODUCT SECTIONS */}
-      <main id="marketplace-items" className="max-w-7xl mx-auto px-4 py-8 space-y-12 scroll-mt-4">
+      <main id="marketplace-items" className="w-full px-4 sm:px-6 py-8 space-y-12 scroll-mt-4">
         {loading && <p className="text-sm text-ink/70">Loading products…</p>}
         {error && <p className="text-sm text-red-600" role="alert">{error}</p>}
         {!loading && !error && filtered.length === 0 && (
@@ -142,9 +142,9 @@ export default function HomePage() {
                 </select>
               </label>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-5">
               {browseListings.map((listing) => (
-                <ProductCard key={listing.id} listing={listing} onAddToCart={handleAddToCart} showMetadata={false} />
+                <ProductCard key={listing.id} listing={listing} onAddToCart={handleAddToCart} showMetadata={false} flat />
               ))}
             </div>
           </section>
@@ -187,7 +187,7 @@ export default function HomePage() {
           Back to top
         </button>
 
-        <div className="max-w-7xl mx-auto px-4 pt-10">
+        <div className="w-full px-4 sm:px-6 pt-10">
           <div className="flex items-center gap-2">
             <img src={islevendorIcon} alt="" className="h-7 w-7" />
             <span className="text-lg font-black tracking-tight text-white">
@@ -196,7 +196,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 pt-8 pb-12 grid grid-cols-1 md:grid-cols-4 gap-8 border-b border-white/10">
+        <div className="w-full px-4 sm:px-6 pt-8 pb-12 grid grid-cols-1 md:grid-cols-4 gap-8 border-b border-white/10">
           <div className="space-y-2">
             <h4 className="font-bold text-white text-sm">Get to Know Us</h4>
             <p className="text-slate-400">

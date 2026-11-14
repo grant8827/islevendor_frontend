@@ -5,6 +5,7 @@ import {
   BadgePercent,
   ChevronLeft,
   ChevronRight,
+  ImageOff,
   MapPin,
   PackageCheck,
   ShieldCheck,
@@ -12,10 +13,12 @@ import {
 } from 'lucide-react';
 import OceanScene from './OceanScene.jsx';
 import isledashLogo from '../../assets/isledash-logo.png';
+import { apiRequest } from '../../api/client.js';
+import { heroBackground } from './heroBackgrounds.js';
 
 // Every card: the same size, side by side in a row you scroll sideways.
 const CARD =
-  'relative flex h-[380px] w-[85%] shrink-0 snap-start flex-col overflow-hidden rounded-2xl p-6 shadow-sm sm:w-[340px] lg:w-[360px]';
+  'relative flex h-[380px] w-[85%] shrink-0 snap-start flex-col overflow-hidden rounded-2xl p-6 sm:w-[340px] lg:w-[360px]';
 const HEADLINE = 'text-[28px] font-black leading-[1.08] tracking-tight';
 const PRIMARY = 'btn-primary inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm shadow-md';
 
@@ -115,6 +118,24 @@ function DealsCard() {
 
 const CARDS = [ShopLocalCard, MarketplaceCard, IsleDashCard, DealsCard];
 
+// A listed item an admin picked (Admin Console → Home Hero): its own image
+// and name on a site colour, opening its product page.
+function ItemCard({ slide }) {
+  const { item } = slide;
+  return (
+    <Link to={`/product/${item.id}`} className={`${CARD} ${heroBackground(slide.background).card} transition hover:brightness-105`}>
+      <div className="relative flex min-h-0 flex-1 items-center justify-center">
+        {item.imageUrl ? (
+          <img src={item.imageUrl} alt="" className="max-h-full max-w-full object-contain" />
+        ) : (
+          <ImageOff className="h-16 w-16 opacity-40" />
+        )}
+      </div>
+      <h2 className={`${HEADLINE} relative mt-4 line-clamp-2`}>{item.title}</h2>
+    </Link>
+  );
+}
+
 /**
  * The home page's featured cards: a row that scrolls sideways (swipe,
  * trackpad or the arrows), several cards in view at once. No autoplay.
@@ -124,6 +145,15 @@ export default function HeroCards() {
   const row = useRef(null);
   const [canBack, setCanBack] = useState(false);
   const [canForward, setCanForward] = useState(false);
+  // null while loading. Admin-picked items replace the built-in ones; with
+  // none added (or if the request fails) the built-in cards show.
+  const [slides, setSlides] = useState(null);
+
+  useEffect(() => {
+    apiRequest('/hero-slides', { auth: false })
+      .then(setSlides)
+      .catch(() => setSlides([]));
+  }, []);
 
   const update = useCallback(() => {
     const el = row.current;
@@ -142,7 +172,7 @@ export default function HeroCards() {
       el.removeEventListener('scroll', update);
       window.removeEventListener('resize', update);
     };
-  }, [update]);
+  }, [update, slides]);
 
   // One card's width (plus the gap) per click.
   function scrollByCard(direction) {
@@ -153,14 +183,16 @@ export default function HeroCards() {
   }
 
   return (
-    <section aria-label="Featured" className="relative mx-auto max-w-7xl px-4 pt-6">
+    <section aria-label="Featured" className="relative w-full px-4 sm:px-6 pt-6">
       <div
         ref={row}
-        className="flex snap-x snap-mandatory scroll-px-4 gap-4 overflow-x-auto overscroll-x-contain scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="flex min-h-[388px] snap-x snap-mandatory scroll-px-4 sm:scroll-px-6 gap-4 overflow-x-auto overscroll-x-contain scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
-        {CARDS.map((Card, i) => (
-          <Card key={i} />
-        ))}
+        {slides === null
+          ? null
+          : slides.length > 0
+            ? slides.map((slide) => <ItemCard key={slide.id} slide={slide} />)
+            : CARDS.map((Card, i) => <Card key={i} />)}
       </div>
 
       {canBack && (
@@ -168,7 +200,7 @@ export default function HeroCards() {
           type="button"
           onClick={() => scrollByCard(-1)}
           aria-label="Scroll back"
-          className="absolute left-4 top-1/2 hidden h-24 w-11 -translate-y-1/2 items-center justify-center rounded-r-xl border border-slate-200 bg-white/95 text-navy shadow-md transition hover:bg-white sm:flex"
+          className="absolute left-4 sm:left-6 top-1/2 hidden h-24 w-11 -translate-y-1/2 items-center justify-center rounded-r-xl border border-slate-200 bg-white/95 text-navy shadow-md transition hover:bg-white sm:flex"
         >
           <ChevronLeft className="h-7 w-7" />
         </button>
@@ -178,7 +210,7 @@ export default function HeroCards() {
           type="button"
           onClick={() => scrollByCard(1)}
           aria-label="Scroll forward"
-          className="absolute right-4 top-1/2 hidden h-24 w-11 -translate-y-1/2 items-center justify-center rounded-l-xl border border-slate-200 bg-white/95 text-navy shadow-md transition hover:bg-white sm:flex"
+          className="absolute right-4 sm:right-6 top-1/2 hidden h-24 w-11 -translate-y-1/2 items-center justify-center rounded-l-xl border border-slate-200 bg-white/95 text-navy shadow-md transition hover:bg-white sm:flex"
         >
           <ChevronRight className="h-7 w-7" />
         </button>
