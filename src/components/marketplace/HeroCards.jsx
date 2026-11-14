@@ -14,7 +14,7 @@ import {
 import OceanScene from './OceanScene.jsx';
 import isledashLogo from '../../assets/isledash-logo.png';
 import { apiRequest } from '../../api/client.js';
-import { heroBackground } from './heroBackgrounds.js';
+import { heroBackground, SaleTag } from './heroBackgrounds.jsx';
 
 // Every card: the same size, side by side in a row you scroll sideways.
 const CARD =
@@ -124,6 +124,7 @@ function ItemCard({ slide }) {
   const { item } = slide;
   return (
     <Link to={`/product/${item.id}`} className={`${CARD} ${heroBackground(slide.background).card} transition hover:brightness-105`}>
+      <SaleTag percent={item.discountPercent} />
       <div className="relative flex min-h-0 flex-1 items-center justify-center">
         {item.imageUrl ? (
           <img src={item.imageUrl} alt="" className="max-h-full max-w-full object-contain" />
