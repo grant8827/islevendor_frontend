@@ -53,12 +53,32 @@ function detailOf(event) {
       .join(' · ');
   }
   if (event.action === 'settings.isledash_rate_changed') {
-    const rate = (r) => `J$${Number(r.baseFeeJmd).toLocaleString()} + ${r.extraItemPercent}% per extra item`;
-    return `${rate(metadata.before)} → ${rate(metadata.after)}`;
+    // Only what changed: "Per mile J$0 → J$60; Max fee none → J$2,500".
+    const changes = Object.entries(ISLEDASH_FIELD_LABELS)
+      .filter(([key]) => key in (metadata.after ?? {}) && sameValue(metadata.before?.[key]) !== sameValue(metadata.after[key]))
+      .map(([key, [label, show]]) => `${label} ${show(metadata.before?.[key])} → ${show(metadata.after[key])}`);
+    return changes.length ? changes.join('; ') : 'No change';
   }
   if (event.action === 'admin.created') return `${metadata.email} (by ${metadata.provisionedBy})`;
   return JSON.stringify(metadata);
 }
+
+// "300", "300.00" and 300 are the same value; null and missing are "none".
+const sameValue = (v) => (v === null || v === undefined ? 'none' : String(Number(v)));
+const jmd = (v) => (v === null || v === undefined ? 'none' : `J$${Number(v).toLocaleString()}`);
+const miles = (v) => (v === null || v === undefined ? 'none' : `${Number(v)} mi`);
+const pct = (v) => (v === null || v === undefined ? '—' : `${v}%`);
+const ISLEDASH_FIELD_LABELS = {
+  baseFeeJmd: ['Base fee', jmd],
+  includedMiles: ['Included miles', miles],
+  perMileJmd: ['Per mile', jmd],
+  minFeeJmd: ['Min fee', jmd],
+  maxFeeJmd: ['Max fee', jmd],
+  maxMiles: ['Furthest delivery', miles],
+  extraItemPercent: ['Extra item', pct],
+  fallbackFeeJmd: ['Fallback fee', jmd],
+  roadAdjustPercent: ['Road adjustment', pct],
+};
 
 // The append-only record of privileged actions — who did what, to which
 // record, when and from where.

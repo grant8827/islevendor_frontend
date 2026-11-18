@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Truck } from 'lucide-react';
 import { apiRequest } from '../../api/client.js';
 import { useToast } from '../../context/ToastContext.jsx';
+import { describePricing } from '../../lib/isleDashPricing.js';
 
 const inputClass = 'w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-secondary disabled:bg-slate-50';
 
@@ -100,7 +101,12 @@ export default function DeliveryOptionsCard({ business, endpoint, pickupLocation
         alwaysShowChildren
         description="One of your accepted IsleDash drivers collects and delivers it. The customer pays IsleVendor's IsleDash fee."
       >
-        {isleDashRate && <p className="text-xs text-slate-500">IsleDash pricing: {describeRate(isleDashRate.baseFeeJmd, isleDashRate.extraItemPercent)}.</p>}
+        {isleDashRate && (
+          <p className="text-xs text-slate-500">
+            IsleDash pricing, by distance from your store location to the customer: {describePricing(isleDashRate)}. Each extra item costs {isleDashRate.extraItemPercent}% of the fee.
+            {isleDashRate.maxMiles != null && ` Not offered further than ${isleDashRate.maxMiles} mi.`} Without a map pin: {money(isleDashRate.fallbackFeeJmd ?? isleDashRate.baseFeeJmd)}.
+          </p>
+        )}
       </Toggle>
 
       <Toggle

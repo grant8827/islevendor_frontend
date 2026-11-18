@@ -5,6 +5,7 @@ import DashboardTopBar from '../../components/dashboard/DashboardTopBar.jsx';
 import DashboardSidebar from '../../components/dashboard/DashboardSidebar.jsx';
 import ApprovalBanner from '../../components/dashboard/ApprovalBanner.jsx';
 import DeliveryOptionsCard from '../../components/dashboard/DeliveryOptionsCard.jsx';
+import StoreLocationCard from '../../components/dashboard/StoreLocationCard.jsx';
 import DeliveryApplicationsPanel from '../../components/dashboard/DeliveryApplicationsPanel.jsx';
 import OrdersPanel from '../../components/dashboard/OrdersPanel.jsx';
 import FeedbackPanel from '../../components/dashboard/FeedbackPanel.jsx';
@@ -158,7 +159,8 @@ export default function ShopDashboard() {
             <div>
               <h2 className="font-bold text-navy text-lg mb-1">Shipping</h2>
               <p className="text-xs text-slate-500 mb-4">How customers get what they buy from {shop.shopName}.</p>
-              <div className="max-w-xl">
+              <div className="max-w-xl space-y-4">
+                <StoreLocationCard key={`location-${shop.id}`} business={shop} endpoint={`/shop/${shop.id}/location`} onSaved={() => loadShops(shop.id)} />
                 <DeliveryOptionsCard
                   key={shop.id}
                   business={shop}

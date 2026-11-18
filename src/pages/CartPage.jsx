@@ -28,6 +28,11 @@ export default function CartPage() {
   const [choices, setChoices] = useState({});
   const requestId = useRef(0);
 
+  // IsleDash is priced by distance to the delivery map pin, so the quote is
+  // re-asked whenever the pin changes — checkout sends the same pin.
+  const pinLatitude = delivery.pin?.latitude ?? null;
+  const pinLongitude = delivery.pin?.longitude ?? null;
+
   const loadQuote = useCallback(() => {
     if (items.length === 0) return;
     const id = ++requestId.current;
@@ -35,7 +40,10 @@ export default function CartPage() {
     apiRequest('/orders/quote', {
       method: 'POST',
       auth: false,
-      body: { items: items.map(({ kind, storeId, masterProductId, quantity }) => ({ kind, storeId, masterProductId, quantity })) },
+      body: {
+        items: items.map(({ kind, storeId, masterProductId, quantity }) => ({ kind, storeId, masterProductId, quantity })),
+        deliveryLocation: pinLatitude !== null && pinLongitude !== null ? { latitude: pinLatitude, longitude: pinLongitude } : null,
+      },
     })
       .then((data) => {
         if (id !== requestId.current) return;
@@ -53,7 +61,7 @@ export default function CartPage() {
       .catch((err) => {
         if (id === requestId.current) setQuoteError(err.message);
       });
-  }, [items]);
+  }, [items, pinLatitude, pinLongitude]);
 
   useEffect(loadQuote, [loadQuote]);
 
@@ -241,6 +249,9 @@ export default function CartPage() {
                         </label>
                       ))}
                     </div>
+                    {group.seller.isleDashUnavailable && (
+                      <p className="text-[11px] text-amber-800 mt-2">{group.seller.isleDashUnavailable}.</p>
+                    )}
                     {group.seller.units > 1 && group.option && Number(group.option.feeJmd) > 0 && (
                       <p className="text-[11px] text-slate-500 mt-2">
                         {formatJmd(group.option.firstItemFeeJmd)} for the first item, {formatJmd(group.option.extraItemFeeJmd)} for each of the other {group.seller.units - 1}.
