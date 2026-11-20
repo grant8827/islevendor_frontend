@@ -68,6 +68,7 @@ const sameValue = (v) => (v === null || v === undefined ? 'none' : String(Number
 const jmd = (v) => (v === null || v === undefined ? 'none' : `J$${Number(v).toLocaleString()}`);
 const miles = (v) => (v === null || v === undefined ? 'none' : `${Number(v)} mi`);
 const pct = (v) => (v === null || v === undefined ? '—' : `${v}%`);
+const pounds = (v) => (v === null || v === undefined ? 'none' : `${Number(v)} lb`);
 const ISLEDASH_FIELD_LABELS = {
   baseFeeJmd: ['Base fee', jmd],
   includedMiles: ['Included miles', miles],
@@ -78,6 +79,9 @@ const ISLEDASH_FIELD_LABELS = {
   extraItemPercent: ['Extra item', pct],
   fallbackFeeJmd: ['Fallback fee', jmd],
   roadAdjustPercent: ['Road adjustment', pct],
+  includedWeightLb: ['Included weight', pounds],
+  perPoundJmd: ['Per pound', jmd],
+  maxWeightLb: ['Max weight', pounds],
 };
 
 // The append-only record of privileged actions — who did what, to which

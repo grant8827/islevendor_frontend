@@ -13,6 +13,7 @@ const EMPTY_FORM = {
   condition: 'NEW',
   productDetails: '',
   stockQuantity: '',
+  weightLb: '',
   images: [''],
 };
 
@@ -78,6 +79,7 @@ export default function ProductsPanel({ warehouseId, warehouses = [] }) {
       condition: product.condition || 'NEW',
       productDetails: product.productDetails || '',
       stockQuantity: String(product.stockQuantity),
+      weightLb: product.weightLb === null || product.weightLb === undefined ? '' : String(Number(product.weightLb)),
       images: product.images?.length ? product.images : product.imageUrl ? [product.imageUrl] : [''],
     });
     setError(null);
@@ -114,6 +116,7 @@ export default function ProductsPanel({ warehouseId, warehouses = [] }) {
             condition: form.condition,
             productDetails: form.productDetails || null,
             stockQuantity: Number(form.stockQuantity) || 0,
+            weightLb: form.weightLb === '' ? null : Number(form.weightLb),
             images,
           },
         });
@@ -131,6 +134,7 @@ export default function ProductsPanel({ warehouseId, warehouses = [] }) {
             condition: form.condition,
             productDetails: form.productDetails || undefined,
             stockQuantity: Number(form.stockQuantity) || 0,
+            weightLb: form.weightLb === '' ? null : Number(form.weightLb),
             images,
           },
         });
@@ -223,6 +227,11 @@ export default function ProductsPanel({ warehouseId, warehouses = [] }) {
           <div>
             <label className="block text-xs text-slate-500 mb-1">Stock quantity</label>
             <input type="number" min="0" value={form.stockQuantity} onChange={update('stockQuantity')} className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-secondary" />
+          </div>
+          <div>
+            <label className="block text-xs text-slate-500 mb-1">Weight per item (lb)</label>
+            <input type="number" min="0" step="0.1" placeholder="e.g. 2.5" value={form.weightLb} onChange={update('weightLb')} className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-secondary" />
+            <p className="text-[11px] text-slate-400 mt-1">Used to price IsleDash delivery for heavy orders.</p>
           </div>
           <div>
             <label className="block text-xs text-slate-500 mb-1">Condition</label>
