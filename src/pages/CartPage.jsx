@@ -252,7 +252,7 @@ export default function CartPage() {
                     {group.seller.isleDashUnavailable && (
                       <p className="text-[11px] text-amber-800 mt-2">{group.seller.isleDashUnavailable}.</p>
                     )}
-                    {group.seller.units > 1 && group.option && Number(group.option.feeJmd) > 0 && (
+                    {group.seller.units > 1 && group.option && Number(group.option.extraItemFeeJmd) > 0 && (
                       <p className="text-[11px] text-slate-500 mt-2">
                         {formatJmd(group.option.firstItemFeeJmd)} for the first item, {formatJmd(group.option.extraItemFeeJmd)} for each of the other {group.seller.units - 1}.
                       </p>

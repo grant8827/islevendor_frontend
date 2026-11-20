@@ -4,7 +4,7 @@ import { apiRequest } from '../../api/client.js';
 import { useToast } from '../../context/ToastContext.jsx';
 import MultiImageInput from '../../components/dashboard/MultiImageInput.jsx';
 
-const EMPTY_FORM = { title: '', category: '', description: '', priceJmd: '', discountPercent: '0', isFeatured: false, stockQuantity: '', images: [''] };
+const EMPTY_FORM = { title: '', category: '', description: '', priceJmd: '', discountPercent: '0', isFeatured: false, stockQuantity: '', weightLb: '', images: [''] };
 
 export default function ProductsPanel({ shopId }) {
   const [products, setProducts] = useState([]);
@@ -46,6 +46,7 @@ export default function ProductsPanel({ shopId }) {
       discountPercent: String(product.discountPercent || 0),
       isFeatured: Boolean(product.isFeatured),
       stockQuantity: String(product.stockQuantity),
+      weightLb: product.weightLb === null || product.weightLb === undefined ? '' : String(Number(product.weightLb)),
       images: product.images?.length ? product.images : product.imageUrl ? [product.imageUrl] : [''],
     });
     setError(null);
@@ -81,6 +82,7 @@ export default function ProductsPanel({ shopId }) {
             discountPercent: Number(form.discountPercent) || 0,
             isFeatured: form.isFeatured,
             stockQuantity: Number(form.stockQuantity) || 0,
+            weightLb: form.weightLb === '' ? null : Number(form.weightLb),
             images,
           },
         });
@@ -97,6 +99,7 @@ export default function ProductsPanel({ shopId }) {
             discountPercent: Number(form.discountPercent) || 0,
             isFeatured: form.isFeatured,
             stockQuantity: Number(form.stockQuantity) || 0,
+            weightLb: form.weightLb === '' ? null : Number(form.weightLb),
             images,
           },
         });
@@ -166,6 +169,11 @@ export default function ProductsPanel({ shopId }) {
           <div>
             <label className="block text-xs text-slate-500 mb-1">Stock quantity</label>
             <input type="number" min="0" value={form.stockQuantity} onChange={update('stockQuantity')} className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-secondary" />
+          </div>
+          <div>
+            <label className="block text-xs text-slate-500 mb-1">Weight per item (lb)</label>
+            <input type="number" min="0" step="0.1" placeholder="e.g. 2.5" value={form.weightLb} onChange={update('weightLb')} className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-secondary" />
+            <p className="text-[11px] text-slate-400 mt-1">Used to price IsleDash delivery for heavy orders.</p>
           </div>
           <div>
             <label className="block text-xs text-slate-500 mb-1">Discount (%)</label>

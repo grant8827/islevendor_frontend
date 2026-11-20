@@ -30,6 +30,28 @@ export function extraItemFee(p, fee) {
   return Math.round(fee * (num(p.extraItemPercent) ?? 0)) / 100;
 }
 
+/** What `weightLb` pounds add to the fee (whole delivery from one seller). */
+export function weightFee(p, weightLb) {
+  return Math.round(Math.max(weightLb - (num(p.includedWeightLb) ?? 0), 0) * (num(p.perPoundJmd) ?? 0));
+}
+
+/** Whether weight pricing is on — it then replaces the extra-item charge. */
+export const chargesByWeight = (p) => (num(p.perPoundJmd) ?? 0) > 0;
+
+/** Whether `weightLb` is heavier than IsleDash takes. */
+export function overWeightLimit(p, weightLb) {
+  return num(p.maxWeightLb) !== null && weightLb > num(p.maxWeightLb);
+}
+
+/** "Over 10 lb, J$50 a pound (up to 100 lb)", or null when weight isn't charged or limited. */
+export function describeWeight(p) {
+  if (!p) return null;
+  const parts = [];
+  if (chargesByWeight(p)) parts.push(`over ${num(p.includedWeightLb) ?? 0} lb, ${money(p.perPoundJmd)} a pound`);
+  if (num(p.maxWeightLb) !== null) parts.push(`up to ${num(p.maxWeightLb)} lb per delivery`);
+  return parts.length ? parts.join('; ') : null;
+}
+
 /** A one-line summary for sellers: "J$300 covers the first 3 mi, then J$60 a mile (J$300–J$2,500)". */
 export function describePricing(p) {
   if (!p) return null;
